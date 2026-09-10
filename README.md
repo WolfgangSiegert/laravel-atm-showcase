@@ -15,22 +15,14 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 
 **Noch nicht implementiert:** Tageslimits, Scheinannahme, Audit fehlgeschlagener Versuche und geschützte Automatenverwaltung. Einzahlungen sind weiterhin reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
 
-## Auf diesem Mac starten
+## Lokal starten
 
 ```sh
-cd /Users/Wolfgang/developer/projects/LaravelCashMashine
-export PATH="/opt/homebrew/opt/php@8.4/bin:$PATH"
-nvm use
-composer dev
+git clone https://github.com/WolfgangSiegert/laravel-atm-showcase.git
+cd laravel-atm-showcase
 ```
 
-Falls nvm nicht geladen ist, statt `nvm use`:
-
-```sh
-export PATH="/Users/Wolfgang/.nvm/versions/node/v24.20.0/bin:$PATH"
-```
-
-Öffne **http://127.0.0.1:8000**. `composer dev` startet Laravel und Vite; Strg+C beendet beide. Auf diesem Mac wurden Abhängigkeiten, Schlüssel, SQLite-Datei, Migrationen, Demo-Daten und Build bereits eingerichtet. Die globale PHP-/Node-Auswahl wurde nicht verändert.
+Führe anschließend die Schritte unter [Neue Installation](#neue-installation) aus und öffne **http://127.0.0.1:8000**. `composer dev` startet Laravel und Vite; Strg+C beendet beide.
 
 ## Demo-Zugangsdaten
 
@@ -43,7 +35,7 @@ Diese PINs sind absichtlich öffentlich bekannte Lernzugänge. Niemals persönli
 
 Nach fünf falschen PINs wird die Karte 15 Minuten gesperrt; danach kann wieder versucht werden. Zusätzlich höchstens zehn Anmeldeversuche je IP in einer Minute. Die Sitzung läuft nach fünf Minuten ohne serverseitige Aktivität ab. Eine Mausbewegung verlängert sie nicht. Werte stehen in `config/atm.php`. Diese Regeln sind vorläufige Lernprojekt-Entscheidungen, keine Sicherheitszusage für Banking.
 
-## Geldbewegungen in v0.4
+## Geldbewegungen in v0.5
 
 Nach der PIN-Anmeldung einen Eurobetrag eingeben, zum Beispiel `25,50`. Komma oder Punkt als Dezimaltrennzeichen sind erlaubt, höchstens zwei Nachkommastellen; keine Tausendertrennzeichen. Bereich: 0,01 € bis 10.000,00 € pro Buchung. Das gesamte Demo-Guthaben ist auf 10.000.000,00 € begrenzt. Die Grenzen stehen in `config/atm.php`.
 
