@@ -89,6 +89,16 @@ class AtmSessionController extends Controller
     {
         $card = $request->attributes->get('atm_card');
         $atm = Atm::with('cashInventories')->where('code', config('atm.code'))->first();
+        $type = in_array($request->query('type'), ['deposit', 'withdrawal', 'opening'], true) ? $request->query('type') : null;
+        $sort = in_array($request->query('sort'), ['date', 'amount'], true) ? $request->query('sort') : 'date';
+        $direction = in_array($request->query('direction'), ['asc', 'desc'], true) ? $request->query('direction') : 'desc';
+        $sortColumn = $sort === 'amount' ? 'amount_minor' : 'created_at';
+        $transactions = Transaction::where('account_id', $card->account_id)
+            ->when($type, fn ($query) => $query->where('type', $type))
+            ->orderBy($sortColumn, $direction)
+            ->orderBy('id', $direction)
+            ->paginate(10, ['id', 'receipt_reference', 'type', 'purpose', 'amount_minor', 'balance_after_minor', 'cash_breakdown', 'currency', 'created_at'])
+            ->withQueryString();
 
         return Inertia::render('Atm/Session', [
             'balanceMinor' => $card->account->balance_minor,
@@ -100,7 +110,12 @@ class AtmSessionController extends Controller
             'maxWithdrawalMinor' => config('atm.max_withdrawal_minor'),
             'denominationsMinor' => $atm?->cashInventories->where('quantity', '>', 0)->sortBy('denomination_minor')->pluck('denomination_minor')->values() ?? [],
             'atmAvailable' => $atm?->status === 'active',
-            'transactions' => Transaction::where('account_id', $card->account_id)->orderByDesc('id')->paginate(10, ['id', 'receipt_reference', 'type', 'amount_minor', 'balance_after_minor', 'cash_breakdown', 'currency', 'created_at']),
+            'transactions' => $transactions,
+            'historyFilters' => [
+                'type' => $type ?? '',
+                'sort' => $sort,
+                'direction' => $direction,
+            ],
             'customerName' => $card->account->customer->display_name,
             'cardReference' => $card->demo_reference,
             'accountReference' => $card->account->reference,

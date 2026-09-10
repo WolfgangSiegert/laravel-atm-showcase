@@ -40,6 +40,15 @@ it('dispenses available notes and debits the account atomically', function () {
         ->and(CashInventory::where('atm_id', $this->atm->id)->where('denomination_minor', 1000)->value('quantity'))->toBe($before[1000] - 1);
 });
 
+it('stores the optional purpose on a withdrawal and its receipt', function () {
+    $this->post('/atm/withdrawals', [...$this->payload, 'purpose' => '  Reisekasse  '])->assertSessionHasNoErrors();
+    $booking = Transaction::firstOrFail();
+
+    expect($booking->purpose)->toBe('Reisekasse');
+    $this->get(route('atm.receipt', $booking->receipt_reference))->assertInertia(fn (Assert $page) => $page
+        ->where('receipt.purpose', 'Reisekasse'));
+});
+
 it('returns the same withdrawal for a repeated request', function () {
     $this->post('/atm/withdrawals', $this->payload)->assertSessionHasNoErrors();
     $inventory = CashInventory::where('atm_id', $this->atm->id)->pluck('quantity', 'denomination_minor')->all();
@@ -57,6 +66,16 @@ it('rejects reusing a request key for a different withdrawal', function () {
         ->assertSessionHasErrors('withdrawal_amount');
 
     expect(Transaction::count())->toBe(1)
+        ->and($this->card->account->fresh()->balance_minor)->toBe(87000);
+});
+
+it('rejects reusing a withdrawal key for a different purpose', function () {
+    $this->post('/atm/withdrawals', [...$this->payload, 'purpose' => 'Erster Zweck']);
+    $this->post('/atm/withdrawals', [...$this->payload, 'purpose' => 'Anderer Zweck'])
+        ->assertSessionHasErrors('withdrawal_amount');
+
+    expect(Transaction::count())->toBe(1)
+        ->and(Transaction::firstOrFail()->purpose)->toBe('Erster Zweck')
         ->and($this->card->account->fresh()->balance_minor)->toBe(87000);
 });
 

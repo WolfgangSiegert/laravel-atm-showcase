@@ -37,6 +37,23 @@ it('accepts supported decimal formats without floating point arithmetic', functi
     expect($this->card->account->fresh()->balance_minor)->toBe($expected);
 })->with([['0,01', 1], ['0.10', 10], ['1,2', 120], ['10', 1000], ['10000,00', 1000000]]);
 
+it('stores a normalized optional purpose and exposes it in history', function () {
+    $this->post('/atm/deposits', [...$this->payload, 'purpose' => '  Demo   Rücklage  '])->assertSessionHasNoErrors();
+
+    expect(Transaction::firstOrFail()->purpose)->toBe('Demo Rücklage');
+    $this->get('/atm/session')->assertInertia(fn (Assert $page) => $page
+        ->where('transactions.data.0.purpose', 'Demo Rücklage'));
+});
+
+it('rejects invalid purposes without creating a booking', function (string $purpose) {
+    $this->post('/atm/deposits', [...$this->payload, 'purpose' => $purpose])->assertSessionHasErrors('purpose');
+
+    expect(Transaction::count())->toBe(0);
+})->with([
+    'too long' => str_repeat('a', 141),
+    'control character' => "Zeile\nUmbruch",
+]);
+
 it('rejects invalid or out of range amounts without changing the account', function (mixed $amount) {
     $this->post('/atm/deposits', [...$this->payload, 'amount' => $amount])->assertSessionHasErrors('amount');
     expect(Transaction::count())->toBe(0)->and($this->card->account->fresh()->balance_minor)->toBe(0);
@@ -52,6 +69,15 @@ it('rejects reusing a request key for a different amount', function () {
     $this->post('/atm/deposits', $this->payload);
     $this->post('/atm/deposits', [...$this->payload, 'amount' => '30'])->assertSessionHasErrors('amount');
     expect(Transaction::count())->toBe(1)->and($this->card->account->fresh()->balance_minor)->toBe(2550);
+});
+
+it('rejects reusing a request key for a different purpose', function () {
+    $this->post('/atm/deposits', [...$this->payload, 'purpose' => 'Erster Zweck']);
+    $this->post('/atm/deposits', [...$this->payload, 'purpose' => 'Anderer Zweck'])->assertSessionHasErrors('amount');
+
+    expect(Transaction::count())->toBe(1)
+        ->and(Transaction::firstOrFail()->purpose)->toBe('Erster Zweck')
+        ->and($this->card->account->fresh()->balance_minor)->toBe(2550);
 });
 
 it('ignores submitted account IDs and scopes history to the authenticated card', function () {

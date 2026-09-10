@@ -13,6 +13,7 @@ class DepositController extends Controller
         $transaction = $deposit->execute(
             $request->attributes->get('atm_card'),
             $request->amountMinor(),
+            $request->purpose(),
             $request->validated('idempotency_key'),
         );
 

@@ -10,8 +10,8 @@ Ein Besucher kann eine Demo-Karte wählen, sich mit einer veröffentlichten Demo
 
 | Version | Ziel | Abnahmekriterium |
 | --- | --- | --- |
-| v0.5 | Beleg und Abschluss | Jede neue Geldbewegung erhält eine stabile Referenz, eine kontogebundene Ansicht und eine druckfreundliche Darstellung. |
-| v0.6 | Buchungsdetails und Übersicht | Ein- und Auszahlungen akzeptieren einen optionalen Verwendungszweck. Die Transaktionsübersicht filtert nach Typ und sortiert serverseitig nach Datum oder Betrag. |
+| v0.5 ✓ | Beleg und Abschluss | Jede neue Geldbewegung erhält eine stabile Referenz, eine kontogebundene Ansicht und eine druckfreundliche Darstellung. |
+| v0.6 ✓ | Buchungsdetails und Übersicht | Ein- und Auszahlungen akzeptieren einen optionalen Verwendungszweck. Die Transaktionsübersicht filtert nach Typ und sortiert serverseitig nach Datum oder Betrag. |
 | v0.7 | Audit und Betreiberbereich | Relevante Ereignisse werden datensparsam gespeichert. Authentifizierte Betreiber können Bestand und Automatenstatus verwalten; jede Änderung wird protokolliert. |
 | v0.8 | PostgreSQL und Nebenläufigkeit | Migrationen und parallele Auszahlungen sind auf PostgreSQL geprüft; Doppelbelastung und negativer Bestand werden verhindert. |
 | v0.9 | Qualität und Härtung | Der Hauptablauf ist im Browser automatisiert, per Tastatur bedienbar und für typische Fehlerzustände verständlich. Produktionswerte und Security-Header sind geprüft. |

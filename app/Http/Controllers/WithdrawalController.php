@@ -13,6 +13,7 @@ class WithdrawalController extends Controller
         $transaction = $withdraw->execute(
             $request->attributes->get('atm_card'),
             $request->amountMinor(),
+            $request->purpose(),
             $request->validated('idempotency_key'),
         );
 

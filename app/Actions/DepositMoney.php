@@ -10,13 +10,13 @@ use Illuminate\Validation\ValidationException;
 
 class DepositMoney
 {
-    public function execute(Card $sessionCard, int $amount, string $key): Transaction
+    public function execute(Card $sessionCard, int $amount, ?string $purpose, string $key): Transaction
     {
         if ($amount < 1 || $amount > config('atm.max_deposit_minor')) {
             throw ValidationException::withMessages(['amount' => 'Der Betrag liegt außerhalb des erlaubten Einzahlungsbereichs.']);
         }
 
-        return DB::transaction(function () use ($sessionCard, $amount, $key) {
+        return DB::transaction(function () use ($sessionCard, $amount, $purpose, $key) {
             $account = Account::lockForUpdate()->findOrFail($sessionCard->account_id);
             $card = Card::lockForUpdate()->findOrFail($sessionCard->id);
             $card->setRelation('account', $account);
@@ -25,7 +25,7 @@ class DepositMoney
             }
             $existing = Transaction::where('account_id', $account->id)->where('idempotency_key', $key)->first();
             if ($existing) {
-                if ($existing->amount_minor !== $amount || $existing->card_id !== $card->id || $existing->type !== 'deposit') {
+                if ($existing->amount_minor !== $amount || $existing->purpose !== $purpose || $existing->card_id !== $card->id || $existing->type !== 'deposit') {
                     throw ValidationException::withMessages(['amount' => 'Diese Anfrage wurde bereits mit anderen Daten verwendet. Bitte lade die Seite neu.']);
                 }
 
@@ -41,6 +41,7 @@ class DepositMoney
                 'account_id' => $account->id,
                 'card_id' => $card->id,
                 'type' => 'deposit',
+                'purpose' => $purpose,
                 'amount_minor' => $amount,
                 'currency' => 'EUR',
                 'balance_after_minor' => $account->balance_minor,

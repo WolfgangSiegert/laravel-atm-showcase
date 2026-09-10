@@ -11,7 +11,7 @@ class Transaction extends Model
 {
     public const UPDATED_AT = null;
 
-    protected $fillable = ['account_id', 'card_id', 'atm_id', 'type', 'amount_minor', 'currency', 'balance_after_minor', 'cash_breakdown', 'idempotency_key'];
+    protected $fillable = ['account_id', 'card_id', 'atm_id', 'type', 'purpose', 'amount_minor', 'currency', 'balance_after_minor', 'cash_breakdown', 'idempotency_key'];
 
     protected $hidden = ['idempotency_key'];
 

@@ -104,3 +104,13 @@ Die verbindliche Reihenfolge steht in [roadmap.md](roadmap.md). Als nächster Me
 - Die Transaktionsübersicht wird serverseitig nach Typ filterbar sowie nach Datum und Betrag in beide Richtungen sortierbar. Query-Parameter bleiben bei Pagination erhalten; eine umfangreiche freie Suche gehört nicht zum Pflichtumfang.
 - Das Projekt war bis zu diesem Zeitpunkt noch kein lokales Git-Repository. GitHub ist für Repository und CI vorgesehen; GitHub Pages kann das Laravel-Backend nicht ausführen.
 - Vorläufig empfohlen sind Koyeb Free für den Webdienst und Neon Free für PostgreSQL. Render Free plus Neon bleibt die einfachere, aber wegen des längeren beziehungsweise häufigeren Kaltstarts schlechtere Alternative. Details und aktuelle Tarifgrenzen stehen in [hosting.md](hosting.md).
+
+## v0.6: Verwendungszweck und Transaktionsübersicht
+
+- Der optionale Verwendungszweck ist auf 140 Unicode-Zeichen begrenzt. Außenliegende und mehrfache Leerzeichen werden normalisiert; Steuerzeichen werden abgewiesen. Leere Eingaben werden als `null` gespeichert.
+- Der Verwendungszweck ist Teil der idempotenten Buchungsabsicht. Derselbe Anfrageschlüssel mit geändertem Text wird abgewiesen, auch wenn Betrag und Karte gleich bleiben.
+- Zweck, Typ und Betrag werden ausschließlich serverseitig aus der kontogebundenen Transaction gelesen. Der Text erscheint HTML-escaped in Historie und Beleg.
+- Die Historie filtert serverseitig nach `deposit`, `withdrawal` oder `opening`. Sie sortiert nach `created_at` oder `amount_minor`, jeweils auf- oder absteigend. Die technische ID dient als deterministischer Tie-Breaker.
+- Nicht unterstützte Query-Werte fallen auf alle Typen, Datum und absteigende Reihenfolge zurück. Query-Parameter werden in Pagination-Links übernommen.
+
+Im lokalen Browserlauf wurden eine Einzahlung über 4,50 EUR mit „Browserprüfung v0.6“ und eine Auszahlung über 10,00 EUR mit „Testabhebung v0.6“ gebucht. DEMO-002 steht danach bei 0,00 EUR. Diese Testdaten werden nicht mit Git veröffentlicht.

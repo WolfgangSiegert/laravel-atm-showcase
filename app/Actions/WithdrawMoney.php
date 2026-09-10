@@ -15,13 +15,13 @@ class WithdrawMoney
 {
     public function __construct(private CashCombination $cashCombination) {}
 
-    public function execute(Card $sessionCard, int $amount, string $key): Transaction
+    public function execute(Card $sessionCard, int $amount, ?string $purpose, string $key): Transaction
     {
         if ($amount < config('atm.min_withdrawal_minor') || $amount > config('atm.max_withdrawal_minor')) {
             throw ValidationException::withMessages(['withdrawal_amount' => 'Der Betrag liegt außerhalb des erlaubten Auszahlungsbereichs.']);
         }
 
-        return DB::transaction(function () use ($sessionCard, $amount, $key) {
+        return DB::transaction(function () use ($sessionCard, $amount, $purpose, $key) {
             $account = Account::lockForUpdate()->findOrFail($sessionCard->account_id);
             $card = Card::lockForUpdate()->findOrFail($sessionCard->id);
             $atm = Atm::where('code', config('atm.code'))->lockForUpdate()->first();
@@ -36,6 +36,7 @@ class WithdrawMoney
 
             if ($existing) {
                 if ($existing->amount_minor !== $amount
+                    || $existing->purpose !== $purpose
                     || $existing->card_id !== $card->id
                     || $existing->atm_id !== $atm->id
                     || $existing->type !== 'withdrawal') {
@@ -81,6 +82,7 @@ class WithdrawMoney
                 'card_id' => $card->id,
                 'atm_id' => $atm->id,
                 'type' => 'withdrawal',
+                'purpose' => $purpose,
                 'amount_minor' => $amount,
                 'currency' => $account->currency,
                 'balance_after_minor' => $account->balance_minor,

@@ -1,4 +1,4 @@
-# Cash Machine — v0.5
+# Cash Machine — v0.6
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -10,6 +10,7 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - Simulierte Ein- und Auszahlungen und eine kontobezogene Buchungshistorie mit zehn Einträgen pro Seite.
 - Ein Demo-Automat mit bestandsgeführtem Bargeld und nachvollziehbarer Scheinverteilung.
 - Stabile Belegreferenzen, kontogebundene Belegansicht und druckfreundliche Darstellung.
+- Optionaler Verwendungszweck sowie nach Typ filter- und nach Datum oder Betrag sortierbare Historie.
 - PIN-Sperre, Anfragelimit, Ablauf nach Inaktivität und Abmeldung.
 - Customer, Account, Card, Transaction, ATM und CashInventory als einfache Eloquent-Modelle mit Migrationen und lokalem Demo-Seeding.
 
@@ -35,15 +36,17 @@ Diese PINs sind absichtlich öffentlich bekannte Lernzugänge. Niemals persönli
 
 Nach fünf falschen PINs wird die Karte 15 Minuten gesperrt; danach kann wieder versucht werden. Zusätzlich höchstens zehn Anmeldeversuche je IP in einer Minute. Die Sitzung läuft nach fünf Minuten ohne serverseitige Aktivität ab. Eine Mausbewegung verlängert sie nicht. Werte stehen in `config/atm.php`. Diese Regeln sind vorläufige Lernprojekt-Entscheidungen, keine Sicherheitszusage für Banking.
 
-## Geldbewegungen in v0.5
+## Geldbewegungen in v0.6
 
 Nach der PIN-Anmeldung einen Eurobetrag eingeben, zum Beispiel `25,50`. Komma oder Punkt als Dezimaltrennzeichen sind erlaubt, höchstens zwei Nachkommastellen; keine Tausendertrennzeichen. Bereich: 0,01 € bis 10.000,00 € pro Buchung. Das gesamte Demo-Guthaben ist auf 10.000.000,00 € begrenzt. Die Grenzen stehen in `config/atm.php`.
+
+Ein optionaler Verwendungszweck mit höchstens 140 Zeichen kann bei Ein- und Auszahlung ergänzt werden. Außenliegende und mehrfache Leerzeichen werden normalisiert; Steuerzeichen werden abgewiesen. Der Text wird unveränderlich mit der Buchung gespeichert und erscheint in Historie und Beleg. Bei einem wiederholten Request zählt ein geänderter Verwendungszweck als Konflikt.
 
 Saldo und Buchung werden atomar gespeichert. Ein Anfrageschlüssel verhindert Doppelbuchungen bei Wiederholungen; derselbe Schlüssel mit einem anderen Betrag wird abgewiesen. Es gibt keine Bearbeitungs- oder Löschfunktion für Buchungen. Der Anwendungsschutz ersetzt keine Datenbank-Revisionssicherheit.
 
 Auszahlungen sind in ganzen Euro zwischen 10,00 € und 1.000,00 € möglich. Der Automat gibt 10-, 20-, 50- und 100-Euro-Scheine aus. Eine Buchung gelingt nur, wenn Guthaben und eine exakte Kombination aus dem aktuellen Scheinbestand ausreichen. Saldo, Bargeldbestand und Buchung werden gemeinsam gespeichert; bei einem Fehler bleibt alles unverändert. Der Wiederholungsschutz entspricht dem der Einzahlung.
 
-Bei der Browserprüfung wurde DEMO-002 zunächst um **25,50 €** erhöht und später um **20,00 €** belastet. Der lokale Saldo beträgt deshalb **5,50 €**; beide nachvollziehbaren Testbuchungen bleiben bestehen. Neue Installationen erhalten sie nicht automatisch. Fortlaufende Datenbank-IDs können durch zurückgerollte Vorgänge Lücken enthalten und sind keine lückenlosen Belegnummern.
+Bei früheren Browserprüfungen wurde DEMO-002 zunächst um **25,50 €** erhöht und später um **20,00 €** belastet. In v0.6 folgten eine Einzahlung über **4,50 €** und eine Auszahlung über **10,00 €**, jeweils mit Verwendungszweck. Der lokale Saldo beträgt deshalb jetzt **0,00 €**. Diese nachvollziehbaren Testbuchungen bleiben bestehen; neue Installationen erhalten sie nicht automatisch. Fortlaufende Datenbank-IDs können durch zurückgerollte Vorgänge Lücken enthalten und sind keine lückenlosen Belegnummern.
 
 Seit v0.5 erhält jede Buchung eine eindeutige, stabile `ATM-…`-Belegreferenz. Nach einer Geldbewegung folgt eine Abschlussansicht; ältere Belege lassen sich aus der Historie öffnen. Konto und Karte erscheinen dort maskiert. Die Druckfunktion verwendet den Browser-Druckdialog. Bei der Browserprüfung von v0.5 wurde DEMO-001 in drei Vorgängen insgesamt um **1,02 €** erhöht; sein lokaler Saldo beträgt nun **26,52 €**.
 
@@ -79,7 +82,7 @@ composer validate --strict
 composer check-platform-reqs
 ```
 
-Der Build enthält die strikte TypeScript-Prüfung. Die Testbasis prüft zusätzlich zu HTTP/Inertia/Migrationen PIN-Schutz und Sitzungen sowie Cent-Genauigkeit, Betragsgrenzen, Doppelanfragen, Kontozuordnung, Rollback, Historienseiten, Anfangsbestände und begrenzte Scheinkombinationen. Details und Grenzen stehen im [Prüfprotokoll](docs/verification.md).
+Der Build enthält die strikte TypeScript-Prüfung. Die Testbasis prüft zusätzlich zu HTTP/Inertia/Migrationen PIN-Schutz und Sitzungen sowie Cent-Genauigkeit, Betragsgrenzen, Doppelanfragen, Verwendungszwecke, Filter, Sortierung, Kontozuordnung, Rollback, Historienseiten, Anfangsbestände und begrenzte Scheinkombinationen. Details und Grenzen stehen im [Prüfprotokoll](docs/verification.md).
 
 ## Struktur und Routing
 
@@ -116,6 +119,6 @@ Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kei
 
 ## Weiterentwicklung
 
-Als Nächstes folgt v0.6 mit optionalem Verwendungszweck sowie filter- und sortierbarer Transaktionsübersicht. Wegen der geplanten öffentlichen Showcase-Instanz sind PostgreSQL, ein authentifizierter Betreiberbereich, HTTPS, Demo-Reset, CI und Produktionshärtung Teil des verbindlichen Wegs zu v1.0. Siehe [Roadmap](docs/roadmap.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
+Als Nächstes folgt v0.7 mit datensparsamem Audit und einem authentifizierten Betreiberbereich. Wegen der geplanten öffentlichen Showcase-Instanz sind PostgreSQL, HTTPS, Demo-Reset, CI und Produktionshärtung Teil des verbindlichen Wegs zu v1.0. Siehe [Roadmap](docs/roadmap.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
 
 Offizielle Referenzen: [Laravel 13](https://laravel.com/framework/docs/releases), [Inertia-Setup](https://inertiajs.com/docs/v3/installation/server-side-setup), [Laravel Rate Limiting](https://github.com/laravel/docs/blob/13.x/rate-limiting.md), [Inertia History Encryption](https://inertiajs.com/docs/v3/security/history-encryption).

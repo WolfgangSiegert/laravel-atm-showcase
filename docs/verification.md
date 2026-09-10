@@ -1,4 +1,20 @@
-# Prüfprotokoll — v0.5
+# Prüfprotokoll — v0.6
+
+Abgeschlossen am 10. September 2026. Keine neuen Paketabhängigkeiten.
+
+- **92 Tests, 564 Assertions erfolgreich** unter PHP 8.4.25.
+- Produktionsbuild einschließlich strikter TypeScript-Prüfung erfolgreich.
+- Pint erfolgreich; lokale Migration der optionalen `purpose`-Spalte ausgeführt.
+
+Die neuen Tests prüfen Normalisierung, Länge und Steuerzeichen des Verwendungszwecks, Speicherung in beiden Buchungsarten, Anzeige auf Beleg und Historie sowie Konflikte bei Wiederverwendung eines Idempotenzschlüssels. Für die Übersicht werden Typfilter, Betrags- und Datumssortierung in beide Richtungen, deterministische Gleichstände, sichere Fallbacks und erhaltene Query-Parameter in Pagination-URLs geprüft.
+
+Im Browser wurden auf DEMO-002 eine Einzahlung über 4,50 EUR und eine Auszahlung über 10,00 EUR mit unterschiedlichen Verwendungszwecken ausgeführt. Beide Texte erschienen in Beleg und Historie. Der Filter `deposit` blendete Auszahlungen aus; die Sortierung `amount desc` zeigte 25,50 EUR vor 4,50 EUR. Die URL enthielt die gewählten Filterwerte. Bei 375 Pixeln Breite entsprach die Dokumentbreite exakt der Viewportbreite; keine Browserwarnungen oder JavaScript-Fehler wurden protokolliert. Der lokale Saldo von DEMO-002 beträgt danach 0,00 EUR.
+
+Grenzen: Es gibt noch keine freie Textsuche, Zeitraumfilterung oder Exportfunktion. Das ist für den vereinbarten v1.0-Umfang nicht erforderlich. Datenbankverhalten unter PostgreSQL und parallele Abfragen bleiben für v0.8 vorgesehen.
+
+---
+
+# Historisches Prüfprotokoll — v0.5
 
 Abgeschlossen am 10. September 2026. Keine neuen Paketabhängigkeiten.
 

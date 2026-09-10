@@ -5,6 +5,7 @@ import AppShell from '../../layouts/AppShell.vue';
 type Receipt = {
     reference: string;
     type: 'deposit' | 'opening' | 'withdrawal';
+    purpose: string | null;
     amountMinor: number;
     balanceAfterMinor: number;
     currency: string;
@@ -44,6 +45,7 @@ const printReceipt = () => window.print();
                 <dl class="mt-5 space-y-4 text-sm">
                     <div><dt class="text-stone-600">Belegreferenz</dt><dd class="mt-1 break-all font-mono font-semibold">{{ props.receipt.reference }}</dd></div>
                     <div><dt class="text-stone-600">Zeitpunkt</dt><dd class="mt-1 font-semibold">{{ date(props.receipt.createdAt) }}</dd></div>
+                    <div v-if="props.receipt.purpose"><dt class="text-stone-600">Verwendungszweck</dt><dd class="mt-1 whitespace-pre-wrap break-words font-semibold">{{ props.receipt.purpose }}</dd></div>
                     <div><dt class="text-stone-600">Konto</dt><dd class="mt-1 font-semibold">{{ props.receipt.accountReference }}</dd></div>
                     <div v-if="props.receipt.cardReference"><dt class="text-stone-600">Karte</dt><dd class="mt-1 font-semibold">{{ props.receipt.cardReference }}</dd></div>
                     <div v-if="props.receipt.atmLabel"><dt class="text-stone-600">Automat</dt><dd class="mt-1 font-semibold">{{ props.receipt.atmLabel }}</dd></div>

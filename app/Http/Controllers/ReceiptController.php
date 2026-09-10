@@ -21,6 +21,7 @@ class ReceiptController extends Controller
             'receipt' => [
                 'reference' => $transaction->receipt_reference,
                 'type' => $transaction->type,
+                'purpose' => $transaction->purpose,
                 'amountMinor' => $transaction->amount_minor,
                 'balanceAfterMinor' => $transaction->balance_after_minor,
                 'currency' => $transaction->currency,

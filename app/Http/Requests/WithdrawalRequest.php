@@ -15,6 +15,7 @@ class WithdrawalRequest extends FormRequest
     {
         return [
             'withdrawal_amount' => ['required', 'string', 'regex:/\A[0-9]{1,4}\z/'],
+            'purpose' => ['nullable', 'string', 'max:140', 'regex:/\A[^\p{C}]*\z/u'],
             'idempotency_key' => ['required', 'uuid'],
         ];
     }
@@ -23,6 +24,7 @@ class WithdrawalRequest extends FormRequest
     {
         return [
             'withdrawal_amount.*' => 'Bitte einen ganzen Eurobetrag ohne Trennzeichen eingeben.',
+            'purpose.*' => 'Der Verwendungszweck darf höchstens 140 Zeichen enthalten und keine Steuerzeichen verwenden.',
             'idempotency_key.*' => 'Bitte lade die Seite neu und versuche es erneut.',
         ];
     }
@@ -30,5 +32,17 @@ class WithdrawalRequest extends FormRequest
     public function amountMinor(): int
     {
         return ((int) $this->validated('withdrawal_amount')) * 100;
+    }
+
+    public function purpose(): ?string
+    {
+        $value = $this->validated('purpose');
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $normalized = preg_replace('/\s+/u', ' ', trim($value)) ?? '';
+
+        return $normalized === '' ? null : $normalized;
     }
 }

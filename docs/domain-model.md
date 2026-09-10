@@ -1,8 +1,8 @@
 # Fachmodell
 
-**Status v0.5: Customer, Account, Card, Transaction, ATM und CashInventory sind implementiert.**
+**Status v0.6: Customer, Account, Card, Transaction, ATM und CashInventory sind implementiert.**
 
-v0.5 verwendet `deposit`, `withdrawal` und bei übernommenen positiven Salden `opening`. Anfangsbuchungen haben keine Karte und keinen Automaten. Einzahlungen haben keine ATM-Zuordnung, weil keine Scheinannahme simuliert wird. Auszahlungen speichern den verwendeten Automaten und die ausgegebene Scheinverteilung. Jede Buchung besitzt eine stabile Belegreferenz; Zugriffe auf Belege werden über das aktive Sitzungskonto begrenzt. Das Modell bildet weiterhin keine vollständige Bankbuchhaltung ab; die Anwendung bleibt eine Simulation mit erfundenen Daten.
+v0.6 verwendet `deposit`, `withdrawal` und bei übernommenen positiven Salden `opening`. Anfangsbuchungen haben keine Karte und keinen Automaten. Einzahlungen haben keine ATM-Zuordnung, weil keine Scheinannahme simuliert wird. Auszahlungen speichern den verwendeten Automaten und die ausgegebene Scheinverteilung. Jede Buchung besitzt eine stabile Belegreferenz und optional einen auf 140 Zeichen begrenzten Verwendungszweck; Zugriffe auf Belege und Historie werden über das aktive Sitzungskonto begrenzt. Das Modell bildet weiterhin keine vollständige Bankbuchhaltung ab; die Anwendung bleibt eine Simulation mit erfundenen Daten.
 
 ## Beziehungen
 
@@ -27,7 +27,7 @@ Präzisierung: Jedes Account gehört zunächst genau einem Customer. Jede Card g
 | Customer | Fiktiver Kontoinhaber | `id`, `display_name`, Zeitstempel | Keine echten personenbezogenen Daten. Noch offen, ob zusätzlich eine Web-Anmeldung nötig ist. |
 | Account | EUR-Konto und verfügbarer Saldo | `id`, `customer_id`, `reference` (eindeutig), `currency`, `balance_minor`, `status` | Beträge als Integer-Centwerte; kein Float. Zunächst kein Dispo, nur aktive Konten buchbar. Ein gespeicherter Saldo muss mit Buchungen atomar konsistent bleiben. |
 | Card | Zugang zu genau einem Account | `id`, `account_id`, `demo_reference` (eindeutig), `pin_hash`, `status`, `failed_attempts`, `locked_until`, optional `expires_at` | Keine echte PAN/CVV. PIN als Zeichenfolge behandeln (führende Nullen), nur gehasht speichern, nie als Inertia-Prop oder Log ausgeben. Sperrpolitik noch offen. |
-| Transaction | Nachvollziehbare erfolgreich gebuchte Geldbewegung | `id`, `receipt_reference` (eindeutig), `account_id`, optional `card_id`, optional `atm_id`, `type`, `amount_minor`, `currency`, `balance_after_minor`, `idempotency_key` (eindeutig je Konto), optional `cash_breakdown`, `created_at` | Positiver Betrag; Vorzeichenwirkung ergibt sich aus `withdrawal`/`deposit`. Erfolgreiche Buchungen unveränderlich; Korrekturen später als Gegenbuchung. Abgelehnte Versuche zunächst keine Buchung; Audit-Konzept offen. |
+| Transaction | Nachvollziehbare erfolgreich gebuchte Geldbewegung | `id`, `receipt_reference` (eindeutig), `account_id`, optional `card_id`, optional `atm_id`, `type`, optional `purpose`, `amount_minor`, `currency`, `balance_after_minor`, `idempotency_key` (eindeutig je Konto), optional `cash_breakdown`, `created_at` | Positiver Betrag; Vorzeichenwirkung ergibt sich aus `withdrawal`/`deposit`. Verwendungszweck maximal 140 Zeichen. Erfolgreiche Buchungen unveränderlich; Korrekturen später als Gegenbuchung. Abgelehnte Versuche zunächst keine Buchung; Audit-Konzept offen. |
 | ATM | Simulierter Automat | `id`, `code` (eindeutig), `label`, `status`, `currency` | Zunächst ein Demo-Automat; Status muss vor Geldbewegungen geprüft werden. Limits und Einzahlungsfähigkeit noch offen. |
 | CashInventory | Scheine je Automat und Stückelung | `id`, `atm_id`, `denomination_minor`, `quantity` | Unique auf `(atm_id, denomination_minor)`. Stückelung positiv, Anzahl ganzzahlig und ≥ 0. Geldbestand = Summe aus Stückelung × Anzahl. |
 
