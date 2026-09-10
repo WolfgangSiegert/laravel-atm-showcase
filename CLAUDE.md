@@ -1,0 +1,1 @@
+Projektkonventionen: siehe AGENTS.md.

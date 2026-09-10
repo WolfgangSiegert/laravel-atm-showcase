@@ -1,0 +1,106 @@
+# Entscheidungen, Annahmen und offene Fragen
+
+Stand: v0.5, 10. September 2026. Der Abschnitt v0.1 beschreibt die ursprüngliche Ausgangslage.
+
+## In v0.1 festgelegt
+
+| Entscheidung | Grund / Konsequenz |
+| --- | --- |
+| Lokales Laravel-Projekt in `/Users/Wolfgang/developer/projects/LaravelCashMashine` | Der Arbeitsbereich wurde während der Umsetzung gewechselt. Der zuvor erzeugte Stand im ChatGPT-Projektordner wurde kopiert; der hier liegende Stand ist maßgeblich. |
+| PHP 8.4.x, Node 24.x | Expliziter PHP-Wunsch; vorhandenes Node 18 wurde für den aktuellen Vite-Stack nicht verwendet. `.php-version`, `.nvmrc` und Paketanforderungen dokumentieren das. |
+| Composer-Plattform PHP 8.4.0 | Verhindert, dass eine Installation unter globalem PHP 8.5 Abhängigkeiten auswählt, die mindestens 8.5 erfordern. Zusätzlich wurden die Prüfungen mit echtem PHP 8.4 ausgeführt. |
+| Laravel-Basisskelett plus manuelle Inertia-/Vue-Integration | Ein Auth-Starter-Kit würde mehr Anmeldefunktionen und Komponenten einführen als für v0.1 nötig. |
+| Inertia 3 auf Server und Client | Eine gemeinsame Hauptversion; beide konkreten Paketversionen stehen in den Lockfiles. Manuelle Vue-Initialisierung macht den Einstieg nachvollziehbar. |
+| Eine Landingpage `/atm`, `/` leitet dorthin | Kein zweiter Router oder unnötige Controller-Abstraktion. |
+| Tailwind 4, lokale Systemschrift, kleines eigenes SVG | Keine Schrift-CDNs oder externen Bilddienste nötig. |
+| Nur technische Laravel-Tabellen | `users`, Passwort-Reset-Tokens, Sessions, Cache und Jobs sind Grundgerüst. Keine Customer-/Account-/Card-/Transaction-/ATM-/CashInventory-Tabellen. Kein Login-Endpunkt, keine Benutzer-Seed-Daten. |
+| Dateibasierte Standardkonfiguration, SQLite lokal | Einfacher Start ohne Serverdienst. Sessions/Cache/Jobs behalten die Laravel-Datenbanktreiber; kein Queue-Worker nötig, da keine Jobs implementiert sind. |
+| Deutsch als Oberfläche, UTC im Backend | Zeitzonenformatierung und vollständige Übersetzungen erst mit zeitabhängigen Funktionen. |
+| Keine Veröffentlichung / kein Remote-Repository | Angefordert ist ein lokales Grundsetup. CI und Deployment sind spätere Entscheidungen. |
+
+## Vorläufige fachliche Annahmen
+
+EUR, Integer-Centbeträge, ein Demo-ATM, kein Dispo, genau ein Kontoinhaber je Konto und genau ein Konto je Karte. Diese Annahmen dienen dem dokumentierten Modell; sie werden in v0.1 nicht durch Geschäftslogik erzwungen. Die Oberfläche verwendet den Arbeitsnamen **Cash Machine**, keine festgelegte Markenidentität.
+
+Die Planung orientiert sich bewusst am kleinen Lernumfang. Das kann spätere Erweiterungen wie Gemeinschaftskonten, mehrere Währungen oder echte Ledger-Strukturen erschweren; deshalb werden diese Grenzen explizit festgehalten statt vermeintlich zukunftssicher abstrahiert.
+
+## Noch offen, vor den jeweiligen Features zu entscheiden
+
+| Thema | Entscheidungspunkt |
+| --- | --- |
+| Identität / Anmeldung | v0.2 verwendet eine unabhängige Card-/PIN-Sitzung. Zusätzlicher Customer-/User-Login bleibt außerhalb des Umfangs. |
+| PIN-Schutz | Vorläufige v0.2-Werte siehe unten. Administrativer Rücksetzweg bleibt offen. |
+| Karten und Konten | Kartengültigkeit, Sperrgründe, Seed-Konten und Anfangssalden. |
+| Buchungsmodell | Einfacher Saldo mit unveränderlicher Historie oder echtes Ledger; Behandlung des Anfangssaldos und Gegenbuchungen. |
+| Bargeld | Erlaubte Scheine, Auswahlalgorithmus, Höchstbetrag pro Vorgang/Tag und Verhalten bei knappem Bestand. |
+| Einzahlung | Freier Betrag oder konkrete Scheine? Werden eingezahlte Scheine unmittelbar auszahlbar? |
+| Datenbank | PostgreSQL für Showcase wahrscheinlich; noch kein verbindliches Deploymentziel. Nebenläufigkeit dort gesondert prüfen. |
+| Audit / Beleg | Fehlgeschlagene Versuche, Aufbewahrung und Belegformat. |
+| Qualität / Betrieb | Browser-Testautomatisierung, CI-Anbieter, Deployment, Lizenzentscheidung für eigene Projektanteile. |
+
+## Umgebung und Nebenwirkungen
+
+PHP 8.4.25 wurde über Homebrew separat installiert, ohne globale PHP-Verknüpfung oder Shell-Konfiguration umzuschalten. Homebrew führte dabei automatisch seine übliche Bereinigung alter Pakete/Caches aus; dies war keine für das Projekt notwendige Änderung. Node 24.20.0 war bereits installiert und wurde nur pro Prozess ausgewählt. Eine vorhandene npm-Konfigurationswarnung zu `//prefix` wurde nicht durch Änderungen an der globalen npm-Konfiguration behoben.
+
+Das offizielle Skelett brachte eine Aufforderung zur Boost-Installation mit. Nach der vom Nutzer ersetzten AGENTS-Anweisung wurde diese zusätzliche Integration wieder entfernt; v0.1 benötigt sie nicht. Die projektspezifische AGENTS.md dokumentiert nur die gewählten Laufzeiten, den Umfang und die Prüfungen.
+
+
+## v0.2: explizit gewählte Annahmen
+
+Mit der Fortsetzung nach v0.1 wurde der nächste angekündigte Meilenstein Demo-Karten/PIN-Sitzung begonnen. Mangels abweichender Vorgaben wurden folgende konfigurierbare Lernprojekt-Defaults verwendet:
+
+- Vierstellige ASCII-PIN als String, einschließlich führender Nullen. Hashing über Laravels `hashed`-Cast und Prüfung mit `Hash::check`.
+- Fünf falsche PINs sperren eine Karte 900 Sekunden. Fehlversuche persistieren in der Datenbank; nach Sperrablauf beginnt ein neuer Versuchszähler. Richtige Anmeldung setzt ihn zurück.
+- Zehn Anmeldeanfragen pro IP und Minute, einschließlich ungültiger Eingaben und erfolgreicher Anmeldungen. Das gemeinsame IP-Limit kann Nutzer hinter derselben Adresse betreffen.
+- 300 Sekunden ohne geschützte Serveranfrage beenden die Sitzung. Maßgeblich ist die Serverzeit; der Frontend-Timer dient nur der zeitnahen Darstellung und kann in Hintergrund-Tabs verzögert werden.
+- Erfolgreiche PIN-Prüfung erneuert die Session-ID. Abmeldung und ungültige/abgelaufene Sitzung invalidieren die Session und erneuern den CSRF-Token. PIN wird von Laravel-Fehlerweiterleitungen (`dontFlash`) ausgeschlossen.
+- Die öffentliche Auswahl enthält nur Karten-ID und Demo-Referenz. Geschützte Antworten wählen Felder explizit aus. Kein Kontostand in v0.2. Inertia-History wird verschlüsselt und bei An-/Abmeldung bereinigt; geschützte Antworten sind `no-store`.
+- Zwei fiktive Kunden/Konten/Karten, Anfangssaldo 0 EUR, keine festgelegte Kartengültigkeit (`expires_at = null` im Seed). Kartengültigkeit und Account-/Card-Status werden dennoch bei jedem geschützten Request geprüft.
+- Wiederholtes Seeding setzt keine PINs, Sperren oder Salden zurück. Demo-Seeding ist außerhalb `local`/`testing` blockiert.
+
+### Verbleibende Grenzen
+
+Die öffentlich bekannten Demo-PINs bieten keine reale Kontosicherheit. SQLite plus Transaktion/Retry ist keine bestätigte PostgreSQL-Nebenläufigkeitslösung: `lockForUpdate` muss mit der späteren Ziel-Datenbank gesondert getestet werden. Auch das cachegestützte IP-Limit ist keine verteilte Abuse-Abwehr. Geldbetrags-Constraints, Ledger, Tageslimits und Bargeldregeln werden erst mit den entsprechenden Features umgesetzt. Die History-Verschlüsselung benötigt einen sicheren Browserkontext (lokal Loopback; bei späterem Hosting HTTPS). Ein vollständiges Sicherheits- oder Accessibility-Audit ist nicht erfolgt.
+
+
+## v0.3: Kontoübersicht und simulierte Einzahlung
+
+- Zunächst einfacher Integer-Centsaldo plus anwendungsseitig unveränderliche Historie, kein Double-Entry-Ledger. Die Einzahlungs-Action ist die einzige neue Schreibstelle; sie schreibt Saldo und Transaction gemeinsam in einer Datenbanktransaktion.
+- Einzahlung als frei eingegebener Eurobetrag ohne Scheine: 0,01 bis 10.000,00 EUR, maximal 10.000.000,00 EUR Gesamtsaldo. Diese vorläufigen Demo-Grenzen sind konfigurierbar. Keine Float-Arithmetik für die Buchung; Zahlenformatierung im Browser dient nur der Anzeige.
+- Die Karte und das Konto werden aus der geprüften Sitzung abgeleitet und innerhalb der Buchung erneut geprüft. Übergebene Konto-/Karten-IDs können das Ziel nicht ändern.
+- UUID-Anfrageschlüssel, Unique-Constraint je Konto und Schlüssel. Wiederholungen mit identischer Karte und identischem Betrag liefern die vorhandene Buchung; abweichende Daten werden abgewiesen. Ein neuer Schlüssel ist eine neue Buchungsabsicht.
+- Historie ausschließlich für das Sitzungskonto, neueste Einträge zuerst, zehn pro Seite. Datumsanzeige Europe/Berlin, Speicherung nach Laravel-Konvention UTC.
+- Vorhandene positive Kontosalden werden beim Schema-Upgrade als `opening` dokumentiert. Neue Demo-Konten starten weiterhin bei null. Keine implizite Guthabenvergabe durch Seeding.
+- Modell-Events verhindern Bearbeiten/Löschen einer Transaction über die Eloquent-Instanz. Direkte SQL-/Query-Builder-Zugriffe können dies umgehen; es gibt keine entsprechende Web-Route. Vollständige Revisionssicherheit ist nicht implementiert.
+- Im Browser wurde DEMO-002 mit 25,50 EUR Demo-Guthaben bebucht. Der Eintrag bleibt als sichtbarer Testbeleg erhalten.
+
+Noch keine Aussage über physische Geldbewegungen, Bankbuchhaltung oder unter Parallelzugriff bewiesene PostgreSQL-Semantik. Die Datenbanktransaktion und Unique-Constraint schützen das lokale Modell; parallele Lasttests bleiben gesondert nötig.
+
+## v0.4: Bargeldbestand und simulierte Auszahlung
+
+- Ein aktiver EUR-Demo-Automat (`BER-DEMO-01`) wird mit 10-, 20-, 50- und 100-Euro-Scheinen angelegt. Der Anfangsbestand liegt in `config/atm.php`; wiederholtes Seeding setzt einen bereits veränderten Bestand nicht zurück.
+- Auszahlungen erlauben ausschließlich ganze Euro von 10,00 bis 1.000,00 EUR. Es gibt weiterhin kein Tageslimit. Der Sitzungskontext bestimmt Karte, Konto und den konfigurierten Automaten; vom Browser übermittelte Fremd-IDs werden ignoriert.
+- Der Auswahlalgorithmus berücksichtigt begrenzte Bestände und minimiert die Anzahl ausgegebener Scheine. Damit scheitert er nicht an den bekannten Greedy-Gegenbeispielen. Eine Produktregel für die bevorzugte Kombination bei gleicher Scheinzahl ist noch nicht festgelegt.
+- Account, ATM und Bestandszeilen werden innerhalb einer Datenbanktransaktion gesperrt. Saldo, Scheinmengen und Transaction werden atomar geändert. Die tatsächliche Wirkung von `lockForUpdate` unter PostgreSQL ist weiterhin separat zu prüfen; SQLite-Tests beweisen diese Semantik nicht.
+- Erfolgreiche Auszahlungen speichern ihre Scheinverteilung als JSON-Snapshot in der Transaction. Spätere Bestandsänderungen verändern dadurch die Historie nicht. Einzahlungen bleiben ohne Bargeldwirkung und ATM-Zuordnung.
+- Ein UUID-Anfrageschlüssel verhindert eine zweite Belastung bei identischer Wiederholung. Derselbe Schlüssel mit verändertem Betrag oder Kontext wird abgewiesen. Abgelehnte Versuche erhalten weiterhin keinen Audit-Eintrag.
+- Die im UI sichtbare Transaction-ID ist eine technische Kennung. Rollbacks können Lücken verursachen; sie ist daher keine lückenlose oder rechtliche Belegnummer.
+
+Nach v0.4 waren Belegformat, Audit fehlgeschlagener Versuche, Tageslimits, Scheinannahme, PostgreSQL-Paralleltests, CI und Deployment offen.
+
+## v0.5: Belege und verbindliches v1.0-Ziel
+
+- Jede Transaction erhält beim Erstellen eine eindeutige Referenz aus dem Präfix `ATM-` und einer ULID. Vorhandene lokale Buchungen werden bei der Migration nachträglich ergänzt. Die technische Datenbank-ID wird nicht mehr als Belegnummer angezeigt.
+- Ein erfolgreicher Vorgang führt auf eine eigene Belegseite. Ein idempotent wiederholter Request führt zum selben Beleg. Die Seite ist nur mit einer aktiven ATM-Sitzung und ausschließlich für das Sitzungskonto erreichbar.
+- Konto und Karte werden auf dem Beleg maskiert. Auszahlungen zeigen außerdem Automat und gespeicherten Schein-Snapshot. Die Druckansicht blendet Navigation und Bedienelemente aus; sie ist ein Demo-Artefakt und kein steuerlicher oder rechtlicher Beleg.
+- Das v1.0-Ziel umfasst eine lokale Vorführung und eine öffentlich erreichbare Showcase-Instanz. Damit werden PostgreSQL, geschützte Betreiber-Authentifizierung, HTTPS, sichere Produktionskonfiguration, CI und ein kontrollierter Demo-Reset verpflichtend.
+- Der Hosting-Anbieter ist noch nicht gewählt. Diese Unsicherheit beeinflusst Datenbankdienst, Deployment, Backups, Monitoring und Kosten; die Entscheidung ist vor v0.8 fällig.
+
+Die verbindliche Reihenfolge steht in [roadmap.md](roadmap.md). Als nächster Meilenstein folgt v0.6 mit Verwendungszweck sowie Filterung und Sortierung der Transaktionsübersicht; das Audit folgt in v0.7.
+
+## Nachtrag zum v1.0-Umfang
+
+- Ein- und Auszahlungen erhalten einen optionalen Verwendungszweck. Er gehört unveränderlich zur Transaction und erscheint auf Beleg und Übersicht.
+- Die Transaktionsübersicht wird serverseitig nach Typ filterbar sowie nach Datum und Betrag in beide Richtungen sortierbar. Query-Parameter bleiben bei Pagination erhalten; eine umfangreiche freie Suche gehört nicht zum Pflichtumfang.
+- Das Projekt war bis zu diesem Zeitpunkt noch kein lokales Git-Repository. GitHub ist für Repository und CI vorgesehen; GitHub Pages kann das Laravel-Backend nicht ausführen.
+- Vorläufig empfohlen sind Koyeb Free für den Webdienst und Neon Free für PostgreSQL. Render Free plus Neon bleibt die einfachere, aber wegen des längeren beziehungsweise häufigeren Kaltstarts schlechtere Alternative. Details und aktuelle Tarifgrenzen stehen in [hosting.md](hosting.md).

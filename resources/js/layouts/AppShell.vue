@@ -1,0 +1,30 @@
+<script setup lang="ts">
+import { Link, usePage } from '@inertiajs/vue3';
+const page = usePage<{ notice?: string | null }>();
+</script>
+
+<template>
+    <div class="min-h-screen">
+        <a href="#main" class="skip-link">Zum Inhalt</a>
+        <header class="border-b border-stone-300">
+            <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-6 py-6 sm:px-10">
+                <Link href="/atm" class="flex items-center gap-3 font-bold tracking-tight" aria-label="Cash Machine – Startseite">
+                    <span class="brand-symbol" aria-hidden="true">C<span>↗</span></span>
+                    <span>cash machine<span class="block text-xs font-normal tracking-widest text-stone-600">ATM LERNPROJEKT</span></span>
+                </Link>
+                <nav aria-label="Hauptnavigation" class="flex items-center gap-6 text-sm">
+                    <Link href="/atm" :aria-current="page.url === '/atm' ? 'page' : undefined" class="font-semibold underline decoration-lime-600 underline-offset-8">Automat</Link>
+                    <Link href="/atm#ausblick" class="text-stone-600 hover:text-stone-950">Ausblick ↗</Link>
+                </nav>
+            </div>
+        </header>
+        <main id="main" tabindex="-1" class="mx-auto max-w-6xl px-6 py-12 sm:px-10 sm:py-20">
+            <p v-if="page.props.notice" role="status" class="mb-8 rounded-lg border border-green-800 bg-green-50 p-4 text-green-950">{{ page.props.notice }}</p>
+            <slot />
+        </main>
+        <footer class="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 border-t border-stone-300 px-6 py-6 text-xs text-stone-600 sm:px-10">
+            <span>Zum Lernen gebaut.</span>
+            <span>Simulation · Keine echten Bankgeschäfte</span>
+        </footer>
+    </div>
+</template>
