@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Atm;
 use App\Models\Card;
 use App\Models\Transaction;
+use App\Support\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,11 +26,12 @@ class AtmSessionController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AuditLogger $audit): RedirectResponse
     {
         $request->session()->forget(['atm_card_id', 'atm_last_activity']);
         $key = 'atm-login:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, config('atm.requests_per_minute'))) {
+            RateLimiter::attempt($key.':audit', 1, fn () => $audit->record('atm_session.login', 'rejected', reasonCode: 'rate_limited'), 60);
             throw ValidationException::withMessages(['pin' => 'Zu viele Versuche. Bitte warte eine Minute.']);
         }
         RateLimiter::hit($key, 60);
@@ -70,6 +72,8 @@ class AtmSessionController extends Controller
         }, 3);
 
         if (! $card) {
+            $auditCard = Card::find($data['card_id']);
+            $audit->record('atm_session.login', 'rejected', card: $auditCard, reasonCode: 'invalid_credentials_or_card');
             // Throw outside the transaction so failed attempts remain persisted.
             throw ValidationException::withMessages([
                 'pin' => 'Anmeldung nicht möglich. Prüfe Karte und PIN. Eine gesperrte oder abgelaufene Karte kann nicht verwendet werden.',
@@ -81,6 +85,7 @@ class AtmSessionController extends Controller
             'atm_last_activity' => now()->timestamp,
         ]);
         Inertia::clearHistory();
+        $audit->record('atm_session.login', 'success', card: $card);
 
         return to_route('atm.session');
     }
@@ -124,8 +129,12 @@ class AtmSessionController extends Controller
         ]);
     }
 
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, AuditLogger $audit): RedirectResponse
     {
+        $card = Card::find($request->session()->get('atm_card_id'));
+        if ($card) {
+            $audit->record('atm_session.logout', 'success', card: $card);
+        }
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         Inertia::clearHistory();

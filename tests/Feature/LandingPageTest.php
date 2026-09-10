@@ -16,7 +16,7 @@ it('renders the German application shell with the expected page', function () {
         ->assertSee('lang="de"', false)
         ->assertInertia(fn (Assert $page) => $page
             ->component('Atm/Welcome')
-            ->where('version', '0.6.0')
+            ->where('version', '0.7.0')
             ->where('appName', 'Cash Machine'));
 });
 
@@ -31,7 +31,7 @@ it('serves the Inertia navigation response', function () {
         ->assertOk()
         ->assertHeader('X-Inertia', 'true')
         ->assertJsonPath('component', 'Atm/Welcome')
-        ->assertJsonPath('props.version', '0.6.0');
+        ->assertJsonPath('props.version', '0.7.0');
 });
 
 it('provides a health endpoint', function () {

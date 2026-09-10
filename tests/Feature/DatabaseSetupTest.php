@@ -19,5 +19,7 @@ it('runs the infrastructure migrations against isolated SQLite', function () {
         ->and(Schema::hasColumn('transactions', 'receipt_reference'))->toBeTrue()
         ->and(Schema::hasColumn('transactions', 'purpose'))->toBeTrue()
         ->and(Schema::hasTable('atms'))->toBeTrue()
-        ->and(Schema::hasTable('cash_inventories'))->toBeTrue();
+        ->and(Schema::hasTable('cash_inventories'))->toBeTrue()
+        ->and(Schema::hasColumn('users', 'is_operator'))->toBeTrue()
+        ->and(Schema::hasTable('audit_events'))->toBeTrue();
 });

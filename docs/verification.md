@@ -1,4 +1,22 @@
-# Prüfprotokoll — v0.6
+# Prüfprotokoll — v0.7
+
+Abgeschlossen am 10. September 2026. Keine neuen Paketabhängigkeiten.
+
+- **104 Tests, 650 Assertions erfolgreich** unter PHP 8.4.25.
+- Produktionsbuild einschließlich strikter TypeScript-Prüfung erfolgreich mit Node 24.20.0.
+- Pint, strikte Composer-Validierung und Plattformanforderungen unter PHP 8.4.25 erfolgreich.
+
+Die neuen Tests prüfen die Trennung von Betreiber und normalem User, Session-Rotation, Passwortschutz in Fehlerweiterleitungen, fehlgeschlagene Anmeldungen und Rate-Limit, geschützten Dashboardzugriff, Statuswechsel, atomare Bestandsänderung, Fremdautomaten, Abmeldung und Audit-Inhalte. Weitere Prüfungen sichern erfolgreiche und abgewiesene Kartenanmeldungen, Sitzungsablauf, Ein- und Auszahlungsaudit sowie den anwendungsseitigen Änderungsschutz der Audit-Ereignisse. Ein Test durchsucht die serialisierten Ereignisse ausdrücklich nach den verwendeten PINs, IP-Adresse und einem privaten Verwendungszweck.
+
+Die lokale Migration und das lokale Demo-Seeding liefen erfolgreich; bestehende Kontosalden und Bargeldmengen wurden dabei nicht zurückgesetzt. Im integrierten Browser wurde der lokale Betreiber angemeldet. Der ATM wurde auf Wartung und zurück auf aktiv gesetzt, der Bestand eines 10-Euro-Scheins erhöht und wieder vermindert. Dashboard und Audit zeigten alle Änderungen; der fachliche Endzustand entspricht dem Zustand vor der Prüfung. Das Browserprotokoll blieb ohne JavaScript-Fehler.
+
+Bei der ersten mobilen Prüfung hatte die Seite bei 375 Pixeln Breite eine Dokumentbreite von 551 Pixeln. Ursache war die Mindestbreite langer JSON-Auditzeilen innerhalb des CSS-Grids. Nach begrenzten Grid-Spalten und erzwungenem Textumbruch beträgt die Dokumentbreite exakt 375 Pixel; die Betreiberansicht bleibt bedienbar. Die temporäre Viewport-Vorgabe wurde anschließend zurückgesetzt.
+
+Grenzen: Das Audit ist auf Anwendungsebene append-only und nicht extern revisionssicher. Eine Aufbewahrungsregel fehlt. Der bekannte lokale Betreiber wird in Produktion nicht angelegt; der Produktionsweg für das erste Betreiberkonto folgt mit dem Deployment. PostgreSQL, verteiltes Rate-Limiting, automatisierte Browserläufe und öffentliche Erreichbarkeit bleiben ungeprüft.
+
+---
+
+# Historisches Prüfprotokoll — v0.6
 
 Abgeschlossen am 10. September 2026. Keine neuen Paketabhängigkeiten.
 

@@ -1,4 +1,4 @@
-# Cash Machine — v0.6
+# Cash Machine — v0.7
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -12,9 +12,11 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - Stabile Belegreferenzen, kontogebundene Belegansicht und druckfreundliche Darstellung.
 - Optionaler Verwendungszweck sowie nach Typ filter- und nach Datum oder Betrag sortierbare Historie.
 - PIN-Sperre, Anfragelimit, Ablauf nach Inaktivität und Abmeldung.
+- Getrennter Betreiberzugang für Automatenstatus und Bargeldbestand.
+- Datensparsames, unveränderliches Audit für Anmeldungen, Sitzungsabläufe, Geldbewegungen und Betreiberänderungen.
 - Customer, Account, Card, Transaction, ATM und CashInventory als einfache Eloquent-Modelle mit Migrationen und lokalem Demo-Seeding.
 
-**Noch nicht implementiert:** Tageslimits, Scheinannahme, Audit fehlgeschlagener Versuche und geschützte Automatenverwaltung. Einzahlungen sind weiterhin reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
+**Noch nicht implementiert:** Tageslimits, Scheinannahme, PostgreSQL-Nebenläufigkeit, CI und öffentliches Deployment. Einzahlungen sind weiterhin reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
 
 ## Lokal starten
 
@@ -36,7 +38,9 @@ Diese PINs sind absichtlich öffentlich bekannte Lernzugänge. Niemals persönli
 
 Nach fünf falschen PINs wird die Karte 15 Minuten gesperrt; danach kann wieder versucht werden. Zusätzlich höchstens zehn Anmeldeversuche je IP in einer Minute. Die Sitzung läuft nach fünf Minuten ohne serverseitige Aktivität ab. Eine Mausbewegung verlängert sie nicht. Werte stehen in `config/atm.php`. Diese Regeln sind vorläufige Lernprojekt-Entscheidungen, keine Sicherheitszusage für Banking.
 
-## Geldbewegungen in v0.6
+Der lokale Betreiberzugang liegt unter `/operator`: `operator@example.test` mit Passwort `local-demo-operator`. Beide Werte sind über `DEMO_OPERATOR_EMAIL` und `DEMO_OPERATOR_PASSWORD` änderbar. Dieser bekannte Zugang wird ausschließlich in `local` und `testing` angelegt; Produktion muss einen eigenen Betreiber sicher bereitstellen.
+
+## Geldbewegungen in v0.7
 
 Nach der PIN-Anmeldung einen Eurobetrag eingeben, zum Beispiel `25,50`. Komma oder Punkt als Dezimaltrennzeichen sind erlaubt, höchstens zwei Nachkommastellen; keine Tausendertrennzeichen. Bereich: 0,01 € bis 10.000,00 € pro Buchung. Das gesamte Demo-Guthaben ist auf 10.000.000,00 € begrenzt. Die Grenzen stehen in `config/atm.php`.
 
@@ -72,6 +76,8 @@ Eine bestehende `.env` nicht überschreiben. Alternativ `composer setup` für di
 
 Demo-Seeding ist nur in `local` und `testing` erlaubt. Wiederholtes Seeding verändert bestehende PINs, Sperren und Salden nicht. Ohne Seeding zeigt die Kartenauswahl einen erklärenden Leerzustand. Die SQLite-Datei liegt in `database/database.sqlite`; Tests erzwingen eine separate `:memory:`-Datenbank.
 
+Der Betreiberbereich kann den konfigurierten Automaten aktiv beziehungsweise außer Betrieb setzen und die Anzahl einer Stückelung um höchstens 100 Scheine je Vorgang ändern. Negative Bestände werden atomar abgewiesen. Audit-Ereignisse enthalten technische Zuordnungen, Ergebnis, Grundcode und eine kleine strukturierte Kontextmenge; PIN, Passwort, IP-Adresse und Verwendungszweck werden nicht ins Audit kopiert. Das Audit hat in v0.7 noch keine Aufbewahrungs- oder Archivierungsregel.
+
 ## Prüfungen
 
 ```sh
@@ -88,7 +94,7 @@ Der Build enthält die strikte TypeScript-Prüfung. Die Testbasis prüft zusätz
 
 | Pfad | Aufgabe |
 | --- | --- |
-| `app/Models/` | Customer, Account, Card, Transaction, Atm, CashInventory und technischer Laravel-User |
+| `app/Models/` | Fachmodelle, technischer Betreiber-User und AuditEvent |
 | `app/Http/Controllers/AtmSessionController.php` | Kartenauswahl, PIN-Prüfung und Sitzungsantworten |
 | `app/Http/Controllers/ReceiptController.php` | Kontogebundene, maskierte Belegantwort |
 | `app/Actions/DepositMoney.php` | Atomare Kontobuchung und Wiederholungsschutz |
@@ -96,7 +102,10 @@ Der Build enthält die strikte TypeScript-Prüfung. Die Testbasis prüft zusätz
 | `app/Support/CashCombination.php` | Findet eine mögliche Kombination aus dem begrenzten Scheinbestand |
 | `app/Http/Requests/DepositRequest.php` | Betragsvalidierung und Umrechnung in Cent |
 | `app/Http/Middleware/RequireAtmSession.php` | Gültigkeit und Inaktivitätsgrenze auf geschützten Routen |
+| `app/Http/Controllers/OperatorDashboardController.php` | Geschützte Status- und Bestandsverwaltung |
+| `app/Support/AuditLogger.php` | Zentral begrenzte Erzeugung von Audit-Ereignissen |
 | `resources/js/pages/Atm/` | Welcome, SignIn und Session mit Kontoübersicht |
+| `resources/js/pages/Operator/` | Betreiberanmeldung und Dashboard |
 | `resources/js/layouts/AppShell.vue` | Gemeinsamer Rahmen und Statusmeldungen |
 | `database/migrations/` | Laravel-Infrastruktur sowie Identitätstabellen und Buchungen |
 | `tests/Feature/` | Pest-Integrationstests |
@@ -113,12 +122,17 @@ Der Build enthält die strikte TypeScript-Prüfung. Die Testbasis prüft zusätz
 | POST | `/atm/deposits` | Geschützte simulierte Einzahlung |
 | POST | `/atm/withdrawals` | Geschützte simulierte Auszahlung |
 | DELETE | `/atm/session` | Sitzung und CSRF-Token erneuern, abmelden |
+| GET/HEAD | `/operator/login` | Betreiberanmeldung |
+| GET/HEAD | `/operator` | Geschützte Bestands-, Status- und Auditansicht |
+| PATCH | `/operator/atm/status` | Geschützte Statusänderung |
+| POST | `/operator/inventory/{id}/adjust` | Geschützte Bestandsänderung |
+| DELETE | `/operator/session` | Betreibersitzung beenden |
 | GET/HEAD | `/up` | Laravel-Healthcheck |
 
-Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kein zusätzlicher Client-Router, kein SSR, keine Repository-/DDD-Schichten. ATM-Sitzungen sind unabhängig vom technischen Laravel-User. Vor späterer Veröffentlichung sind HTTPS, Ziel-Datenbank und Betriebsregeln gesondert festzulegen; kein Deployment oder Remote-Repository angelegt.
+Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kein zusätzlicher Client-Router, kein SSR, keine Repository-/DDD-Schichten. ATM-Kartensitzungen bleiben unabhängig vom Laravel-User des Betreiberbereichs. Das öffentliche GitHub-Repository ist eingerichtet; ein Deployment besteht noch nicht.
 
 ## Weiterentwicklung
 
-Als Nächstes folgt v0.7 mit datensparsamem Audit und einem authentifizierten Betreiberbereich. Wegen der geplanten öffentlichen Showcase-Instanz sind PostgreSQL, HTTPS, Demo-Reset, CI und Produktionshärtung Teil des verbindlichen Wegs zu v1.0. Siehe [Roadmap](docs/roadmap.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
+Als Nächstes folgt v0.8 mit PostgreSQL und gezielten Nebenläufigkeitstests. Wegen der geplanten öffentlichen Showcase-Instanz bleiben HTTPS, Demo-Reset, CI und Produktionshärtung Teil des verbindlichen Wegs zu v1.0. Siehe [Roadmap](docs/roadmap.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
 
 Offizielle Referenzen: [Laravel 13](https://laravel.com/framework/docs/releases), [Inertia-Setup](https://inertiajs.com/docs/v3/installation/server-side-setup), [Laravel Rate Limiting](https://github.com/laravel/docs/blob/13.x/rate-limiting.md), [Inertia History Encryption](https://inertiajs.com/docs/v3/security/history-encryption).

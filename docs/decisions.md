@@ -1,6 +1,6 @@
 # Entscheidungen, Annahmen und offene Fragen
 
-Stand: v0.5, 10. September 2026. Der Abschnitt v0.1 beschreibt die ursprüngliche Ausgangslage.
+Stand: v0.7, 10. September 2026. Der Abschnitt v0.1 beschreibt die ursprüngliche Ausgangslage.
 
 ## In v0.1 festgelegt
 
@@ -35,7 +35,7 @@ Die Planung orientiert sich bewusst am kleinen Lernumfang. Das kann spätere Erw
 | Bargeld | Erlaubte Scheine, Auswahlalgorithmus, Höchstbetrag pro Vorgang/Tag und Verhalten bei knappem Bestand. |
 | Einzahlung | Freier Betrag oder konkrete Scheine? Werden eingezahlte Scheine unmittelbar auszahlbar? |
 | Datenbank | PostgreSQL für Showcase wahrscheinlich; noch kein verbindliches Deploymentziel. Nebenläufigkeit dort gesondert prüfen. |
-| Audit / Beleg | Fehlgeschlagene Versuche, Aufbewahrung und Belegformat. |
+| Audit | Aufbewahrungsdauer, Archivierung und Löschweg für eine öffentliche Instanz. |
 | Qualität / Betrieb | Browser-Testautomatisierung, CI-Anbieter, Deployment, Lizenzentscheidung für eigene Projektanteile. |
 
 ## Umgebung und Nebenwirkungen
@@ -114,3 +114,15 @@ Die verbindliche Reihenfolge steht in [roadmap.md](roadmap.md). Als nächster Me
 - Nicht unterstützte Query-Werte fallen auf alle Typen, Datum und absteigende Reihenfolge zurück. Query-Parameter werden in Pagination-Links übernommen.
 
 Im lokalen Browserlauf wurden eine Einzahlung über 4,50 EUR mit „Browserprüfung v0.6“ und eine Auszahlung über 10,00 EUR mit „Testabhebung v0.6“ gebucht. DEMO-002 steht danach bei 0,00 EUR. Diese Testdaten werden nicht mit Git veröffentlicht.
+
+## v0.7: Audit und Betreiberbereich
+
+- Betreiber verwenden Laravels vorhandenes `User`-Modell mit dem expliziten Kennzeichen `is_operator`. Diese Identität bleibt fachlich getrennt von Customer, Card und der PIN-Sitzung. Eine Rollenbibliothek wäre für genau eine Rolle unnötig.
+- Der lokale Seeder legt einen Betreiber mit konfigurierbarer E-Mail und konfigurierbarem Passwort nur in `local` und `testing` an. Eine Produktionsumgebung darf diesen bekannten Zugang nicht seeden und braucht einen gesonderten, geheimen Bereitstellungsweg.
+- Betreiberanmeldungen werden pro normalisierter E-Mail und IP im Cache auf fünf Versuche pro Minute begrenzt. Weder E-Mail noch IP gelangen in den Audit-Kontext. Das Limit ist auf mehreren Webinstanzen nur mit gemeinsamem Cache konsistent.
+- Der Betreiber kann ausschließlich den konfigurierten ATM zwischen `active` und `maintenance` wechseln sowie vorhandene Stückelungen um −100 bis +100 Scheine verändern. Fremde Automaten werden abgewiesen; ein negativer Zielbestand führt zum atomaren Rollback.
+- AuditEvent erfasst Ereignistyp, Ergebnis, optionalen Grundcode, technische Fremdschlüssel und einen allowlist-basierten JSON-Kontext. PIN, Passwort, IP-Adresse und Buchungsverwendungszweck werden nicht kopiert. Abgedeckt sind Karten- und Betreiberanmeldung, Abmeldung beziehungsweise Sitzungsinvalidierung, Geldbewegungen sowie Betreiberänderungen.
+- Audit-Ereignisse lassen sich über Eloquent weder ändern noch löschen. Das ist nachvollziehbare Anwendungskontrolle, aber kein kryptografisch verkettetes oder extern revisionssicher archiviertes Audit.
+- Die Betreiberseite zeigt die 50 jüngsten Ereignisse. Pagination, Suche, Export, Aufbewahrungsdauer, Passwort-Reset und Mehrfaktor-Anmeldung sind vor der öffentlichen Veröffentlichung erneut zu bewerten; sie gehören nicht automatisch zum kleinen v1.0-Showcase.
+
+Der nächste Meilenstein v0.8 prüft Migrationen und konkurrierende Auszahlungen mit PostgreSQL. Noch unbestätigt ist, ob Koyeb Free plus Neon Free zum Deploymentzeitpunkt dieselben Tarif- und Betriebsbedingungen bietet; [hosting.md](hosting.md) hält diese zeitabhängige Empfehlung deshalb ausdrücklich vorläufig.

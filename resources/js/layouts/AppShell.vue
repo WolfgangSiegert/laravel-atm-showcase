@@ -14,6 +14,7 @@ const page = usePage<{ notice?: string | null }>();
                 </Link>
                 <nav aria-label="Hauptnavigation" class="flex items-center gap-6 text-sm">
                     <Link href="/atm" :aria-current="page.url === '/atm' ? 'page' : undefined" class="font-semibold underline decoration-lime-600 underline-offset-8">Automat</Link>
+                    <Link href="/operator/login" :aria-current="page.url.startsWith('/operator') ? 'page' : undefined" class="text-stone-600 hover:text-stone-950">Betrieb</Link>
                     <Link href="/atm#ausblick" class="text-stone-600 hover:text-stone-950">Ausblick ↗</Link>
                 </nav>
             </div>

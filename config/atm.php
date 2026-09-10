@@ -18,4 +18,7 @@ return [
     'lock_seconds' => 900,
     'idle_seconds' => 300,
     'requests_per_minute' => 10,
+    'operator_requests_per_minute' => 5,
+    'demo_operator_email' => env('DEMO_OPERATOR_EMAIL', 'operator@example.test'),
+    'demo_operator_password' => env('DEMO_OPERATOR_PASSWORD', 'local-demo-operator'),
 ];
