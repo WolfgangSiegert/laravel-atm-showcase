@@ -25,25 +25,31 @@ class OperatorSessionController extends Controller
 
     public function store(Request $request, AuditLogger $audit): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'string', 'max:255'],
-        ], [
-            'email.*' => 'Bitte gib eine gültige E-Mail-Adresse ein.',
-            'password.*' => 'Bitte gib das Betreiberpasswort ein.',
-        ]);
+        try {
+            $credentials = $request->validate([
+                'email' => ['required', 'string', 'email', 'max:255'],
+                'password' => ['required', 'string', 'max:255'],
+            ], [
+                'email.*' => 'Bitte gib eine gültige E-Mail-Adresse ein.',
+                'password.*' => 'Bitte gib das Betreiberpasswort ein.',
+            ]);
+        } catch (ValidationException $exception) {
+            throw $exception->redirectTo(route('operator.login'));
+        }
         $credentials['email'] = Str::lower($credentials['email']);
         $key = 'operator-login:'.hash('sha256', $credentials['email'].'|'.$request->ip());
 
         if (RateLimiter::tooManyAttempts($key, config('atm.operator_requests_per_minute'))) {
             RateLimiter::attempt($key.':audit', 1, fn () => $audit->record('operator.login', 'rejected', reasonCode: 'rate_limited'), 60);
-            throw ValidationException::withMessages(['email' => 'Zu viele Anmeldeversuche. Bitte warte eine Minute.']);
+            throw ValidationException::withMessages(['email' => 'Zu viele Anmeldeversuche. Bitte warte eine Minute.'])
+                ->redirectTo(route('operator.login'));
         }
         RateLimiter::hit($key, 60);
 
         if (! Auth::attempt([...$credentials, 'is_operator' => true])) {
             $audit->record('operator.login', 'rejected', reasonCode: 'invalid_credentials');
-            throw ValidationException::withMessages(['email' => 'Die Betreiberanmeldung ist fehlgeschlagen.']);
+            throw ValidationException::withMessages(['email' => 'Die Betreiberanmeldung ist fehlgeschlagen.'])
+                ->redirectTo(route('operator.login'));
         }
 
         $request->session()->regenerate();

@@ -1,4 +1,20 @@
-# Prüfprotokoll — v0.8
+# Prüfprotokoll — v0.9
+
+Abgeschlossen am 11. September 2026. Playwright wurde als Entwicklungsabhängigkeit ergänzt.
+
+- **107 Pest-Tests, 678 Assertions erfolgreich; 3 PostgreSQL-Tests im SQLite-Standardlauf erwartungsgemäß übersprungen.**
+- **2 Playwright-Tests erfolgreich** in lokalem Google Chrome.
+- Produktionsbuild einschließlich strikter TypeScript-Prüfung erfolgreich mit Node 24.20.0.
+
+Der automatisierte Browserlauf verwendet eine eigene SQLite-Datei und löscht sie anschließend. Er prüft falsche PIN und sichtbare Fehlermeldung, erfolgreiche Nummernfeld-Anmeldung, Einzahlung über 50,00 EUR, Auszahlung über 20,00 EUR, beide Belege, „LERN-Bank Mein Geldautomat“, Endsaldo 30,00 EUR und Abmeldung. Der zweite Test bestätigt Tastatureingabe, Rückschritt, vollständiges Löschen und fehlenden horizontalen Überlauf bei 375 × 812 Pixeln.
+
+Der erste E2E-Lauf fand ein falsches Rücksprungziel nach fehlgeschlagener PIN aus einer Inertia-Navigation. Nach expliziten Fehlerzielen für Anmeldungen besteht der vollständige Ablauf. Die produktionsabhängige Fehlerseite sowie Basisheader, CSP und HSTS werden zusätzlich durch Featuretests geprüft.
+
+Grenzen: Chrome ist der einzige automatisierte Browser. Screenreader und reale Mobilgeräte wurden nicht geprüft. Die CSP enthält für Styles weiterhin `'unsafe-inline'`; HSTS und sichere Cookies setzen eine korrekt erkannte HTTPS-Verbindung beim späteren Host voraus. Öffentliche Abuse-Grenzen, Demo-Reset und Zielhost-Konfiguration folgen in v1.0.
+
+---
+
+# Historisches Prüfprotokoll — v0.8
 
 Abgeschlossen am 11. September 2026. Keine neuen PHP- oder JavaScript-Pakete; `ext-pdo_pgsql` ist nun explizite Plattformanforderung.
 

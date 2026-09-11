@@ -1,6 +1,6 @@
 # Entscheidungen, Annahmen und offene Fragen
 
-Stand: v0.8, 11. September 2026. Der Abschnitt v0.1 beschreibt die ursprüngliche Ausgangslage.
+Stand: v0.9, 11. September 2026. Der Abschnitt v0.1 beschreibt die ursprüngliche Ausgangslage.
 
 ## In v0.1 festgelegt
 
@@ -137,3 +137,14 @@ Der nächste Meilenstein v0.8 prüft Migrationen und konkurrierende Auszahlungen
 - PostgreSQL-Tests sind opt-in, weil sie `migrate:fresh` auf der angegebenen Datenbank ausführen. `ATM_POSTGRES_TEST_URL` muss deshalb auf eine ausschließlich dafür vorgesehene Datenbank zeigen; als zusätzliche Fehlbedienungssperre muss deren Name auf `_test` enden. Der normale Testlauf bleibt unabhängig und nutzt SQLite im Speicher.
 
 Die Tests sind reale lokale Mehrprozessprüfungen, aber kein Beweis für Verhalten bei Netzwerkabbrüchen, Prozessabstürzen, hoher Dauerlast oder anbieterspezifischen Proxy-/Pooling-Einstellungen. Diese Restunsicherheit gehört in den Deployment-Prototyp.
+
+## v0.9: Browserprüfung und Produktionshärtung
+
+- Playwright automatisiert den öffentlichen Kernablauf in lokal installiertem Chrome. Eine eigene, von Git ignorierte SQLite-Datei wird frisch migriert und geseedet und nach dem Lauf entfernt; lokale Showcase-Daten bleiben unangetastet.
+- Der Ablauf prüft eine abgewiesene PIN, Nummernfeld-Anmeldung, Einzahlung, Auszahlungsbestand, beide Belege, neuen Automatennamen, Endsaldo und Abmeldung. Eine zweite Prüfung deckt physische Tastatureingabe, Rückschritt, Löschfunktion und 375-Pixel-Breite ab.
+- Der erste automatisierte Lauf deckte ein inkonsistentes Fehlerziel auf: Nach Inertia-Navigation konnte Laravels allgemeines Zurück-Ziel bei falscher PIN auf die Landingpage weisen. Anmeldefehler setzen deshalb nun explizit die jeweilige Loginroute als Ziel.
+- Basissicherheitsheader gelten für alle Webantworten. CSP wird nur ohne Debug-Modus aktiviert, damit Vites lokaler Entwicklungsserver nicht blockiert wird. HSTS wird zusätzlich ausschließlich bei HTTPS gesetzt.
+- Die CSP erlaubt ausschließlich eigene Skripte, Bilder und Verbindungen; `style-src 'unsafe-inline'` bleibt vorläufig nötig, weil Inertia seinen Fortschrittsindikator dynamisch gestaltet. Das wird als begrenzter Kompromiss dokumentiert, nicht als vollständige XSS-Härtung.
+- Bei deaktiviertem Debug-Modus erhalten typische Webfehler eine knappe Inertia-Fehlerseite. JSON-Antworten und lokale Debug-Antworten behalten Laravels reguläres Verhalten.
+
+Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKIE=true` erforderlich. Ob der Zielhost HTTPS und Proxyinformationen korrekt an Laravel weitergibt, lässt sich lokal nicht bestätigen und muss im v1.0-Deployment geprüft werden.
