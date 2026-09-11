@@ -1,22 +1,23 @@
-# Cash Machine — v0.7
+# Cash Machine — v0.8
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
 ## Was funktioniert?
 
 - Responsive deutsche Landingpage und gemeinsame App-Shell.
-- Auswahl zweier Demo-Karten und Anmeldung mit vierstelliger PIN.
+- Auswahl zweier Demo-Karten und Anmeldung mit vierstelliger PIN über Tastatur oder klickbares Nummernfeld.
 - Persönliche Kontoübersicht mit Karte, Kontoreferenz und aktuellem Guthaben.
 - Simulierte Ein- und Auszahlungen und eine kontobezogene Buchungshistorie mit zehn Einträgen pro Seite.
-- Ein Demo-Automat mit bestandsgeführtem Bargeld und nachvollziehbarer Scheinverteilung.
+- Der Demo-Automat „LERN-Bank Mein Geldautomat“ mit bestandsgeführtem Bargeld und nachvollziehbarer Scheinverteilung.
 - Stabile Belegreferenzen, kontogebundene Belegansicht und druckfreundliche Darstellung.
 - Optionaler Verwendungszweck sowie nach Typ filter- und nach Datum oder Betrag sortierbare Historie.
 - PIN-Sperre, Anfragelimit, Ablauf nach Inaktivität und Abmeldung.
 - Getrennter Betreiberzugang für Automatenstatus und Bargeldbestand.
 - Datensparsames, unveränderliches Audit für Anmeldungen, Sitzungsabläufe, Geldbewegungen und Betreiberänderungen.
+- Unter PostgreSQL geprüfte Sperren für konkurrierende Auszahlungen und idempotente Wiederholungen.
 - Customer, Account, Card, Transaction, ATM und CashInventory als einfache Eloquent-Modelle mit Migrationen und lokalem Demo-Seeding.
 
-**Noch nicht implementiert:** Tageslimits, Scheinannahme, PostgreSQL-Nebenläufigkeit, CI und öffentliches Deployment. Einzahlungen sind weiterhin reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
+**Noch nicht implementiert:** Tageslimits, Scheinannahme, CI und öffentliches Deployment. Einzahlungen sind weiterhin reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
 
 ## Lokal starten
 
@@ -40,7 +41,7 @@ Nach fünf falschen PINs wird die Karte 15 Minuten gesperrt; danach kann wieder 
 
 Der lokale Betreiberzugang liegt unter `/operator`: `operator@example.test` mit Passwort `local-demo-operator`. Beide Werte sind über `DEMO_OPERATOR_EMAIL` und `DEMO_OPERATOR_PASSWORD` änderbar. Dieser bekannte Zugang wird ausschließlich in `local` und `testing` angelegt; Produktion muss einen eigenen Betreiber sicher bereitstellen.
 
-## Geldbewegungen in v0.7
+## Geldbewegungen in v0.8
 
 Nach der PIN-Anmeldung einen Eurobetrag eingeben, zum Beispiel `25,50`. Komma oder Punkt als Dezimaltrennzeichen sind erlaubt, höchstens zwei Nachkommastellen; keine Tausendertrennzeichen. Bereich: 0,01 € bis 10.000,00 € pro Buchung. Das gesamte Demo-Guthaben ist auf 10.000.000,00 € begrenzt. Die Grenzen stehen in `config/atm.php`.
 
@@ -58,7 +59,7 @@ Für ein vorhandenes v0.2-Projekt: `php artisan migrate` und `npm run build`. Di
 
 ## Neue Installation
 
-Voraussetzungen: PHP **8.4.x**, Composer 2, Node **24.x**, npm und PDO/SQLite sowie die üblichen Laravel-PHP-Erweiterungen. `.php-version` dokumentiert die PHP-Version; `.nvmrc` wird von `nvm use` ausgewertet. Beide Lockfiles reproduzieren die Paketversionen.
+Voraussetzungen: PHP **8.4.x**, Composer 2, Node **24.x**, npm, PDO/SQLite und PDO/PostgreSQL sowie die üblichen Laravel-PHP-Erweiterungen. `.php-version` dokumentiert die PHP-Version; `.nvmrc` wird von `nvm use` ausgewertet. Beide Lockfiles reproduzieren die Paketversionen.
 
 ```sh
 composer install
@@ -89,6 +90,14 @@ composer check-platform-reqs
 ```
 
 Der Build enthält die strikte TypeScript-Prüfung. Die Testbasis prüft zusätzlich zu HTTP/Inertia/Migrationen PIN-Schutz und Sitzungen sowie Cent-Genauigkeit, Betragsgrenzen, Doppelanfragen, Verwendungszwecke, Filter, Sortierung, Kontozuordnung, Rollback, Historienseiten, Anfangsbestände und begrenzte Scheinkombinationen. Details und Grenzen stehen im [Prüfprotokoll](docs/verification.md).
+
+Die PostgreSQL-Tests benötigen eine ausschließlich für Tests bestimmte leere Datenbank, deren Name auf `_test` endet. Sie führen `migrate:fresh` aus und löschen deshalb sämtliche Tabellen in dieser Datenbank:
+
+```sh
+ATM_POSTGRES_TEST_URL='postgresql://user:password@127.0.0.1:5432/atm_test' composer test:postgres
+```
+
+Ohne `ATM_POSTGRES_TEST_URL` werden diese drei Tests im normalen SQLite-Lauf übersprungen. Niemals eine Entwicklungs- oder Produktionsdatenbank als Test-URL verwenden.
 
 ## Struktur und Routing
 
@@ -133,6 +142,6 @@ Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kei
 
 ## Weiterentwicklung
 
-Als Nächstes folgt v0.8 mit PostgreSQL und gezielten Nebenläufigkeitstests. Wegen der geplanten öffentlichen Showcase-Instanz bleiben HTTPS, Demo-Reset, CI und Produktionshärtung Teil des verbindlichen Wegs zu v1.0. Siehe [Roadmap](docs/roadmap.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
+Als Nächstes folgt v0.9 mit automatisiertem Browser-Hauptablauf, Accessibility-Nachprüfung und Produktionshärtung. Wegen der geplanten öffentlichen Showcase-Instanz bleiben HTTPS, Demo-Reset, CI und Deployment Teil des verbindlichen Wegs zu v1.0. Siehe [Roadmap](docs/roadmap.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
 
 Offizielle Referenzen: [Laravel 13](https://laravel.com/framework/docs/releases), [Inertia-Setup](https://inertiajs.com/docs/v3/installation/server-side-setup), [Laravel Rate Limiting](https://github.com/laravel/docs/blob/13.x/rate-limiting.md), [Inertia History Encryption](https://inertiajs.com/docs/v3/security/history-encryption).

@@ -13,7 +13,7 @@ Ein Besucher kann eine Demo-Karte wählen, sich mit einer veröffentlichten Demo
 | v0.5 ✓ | Beleg und Abschluss | Jede neue Geldbewegung erhält eine stabile Referenz, eine kontogebundene Ansicht und eine druckfreundliche Darstellung. |
 | v0.6 ✓ | Buchungsdetails und Übersicht | Ein- und Auszahlungen akzeptieren einen optionalen Verwendungszweck. Die Transaktionsübersicht filtert nach Typ und sortiert serverseitig nach Datum oder Betrag. |
 | v0.7 ✓ | Audit und Betreiberbereich | Relevante Ereignisse werden datensparsam gespeichert. Authentifizierte Betreiber können Bestand und Automatenstatus verwalten; jede Änderung wird protokolliert. |
-| v0.8 | PostgreSQL und Nebenläufigkeit | Migrationen und parallele Auszahlungen sind auf PostgreSQL geprüft; Doppelbelastung und negativer Bestand werden verhindert. |
+| v0.8 ✓ | PostgreSQL und Nebenläufigkeit | Migrationen und parallele Auszahlungen sind auf PostgreSQL geprüft; Doppelbelastung und negativer Bestand werden verhindert. |
 | v0.9 | Qualität und Härtung | Der Hauptablauf ist im Browser automatisiert, per Tastatur bedienbar und für typische Fehlerzustände verständlich. Produktionswerte und Security-Header sind geprüft. |
 | v1.0 | Veröffentlichung | CI, reproduzierbare Installation, Demo-Reset, Lizenz, Deployment-Dokumentation und öffentlich erreichbare Showcase-Instanz sind fertig. |
 
@@ -27,7 +27,7 @@ Ein Besucher kann eine Demo-Karte wählen, sich mit einer veröffentlichten Demo
 - Produktionskonfiguration ohne Debug-Ausgaben, mit passenden Security-Headern, Fehlerseiten, Logging und Verfügbarkeitsprüfung.
 - Automatisierte CI-Prüfung und dokumentierter Deployment- und Wiederherstellungsweg.
 
-Die vorläufige Hosting-Empfehlung ist GitHub für Repository und CI, Koyeb Free für den Laravel-Webdienst und Neon Free für PostgreSQL. Grenzen und Alternativen stehen in [hosting.md](hosting.md). Die Auswahl wird vor v0.8 durch einen echten Deployment-Prototyp bestätigt oder verworfen.
+Die vorläufige Hosting-Empfehlung ist GitHub für Repository und CI, Koyeb Free für den Laravel-Webdienst und Neon Free für PostgreSQL. Grenzen und Alternativen stehen in [hosting.md](hosting.md). Die lokale PostgreSQL-Semantik ist bestätigt; Anbietergrenzen und Deployment werden im späteren Veröffentlichungsprototyp bestätigt oder verworfen.
 
 ## Zusätzliche Buchungsfunktionen
 

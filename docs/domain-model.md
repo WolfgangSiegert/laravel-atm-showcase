@@ -1,8 +1,8 @@
 # Fachmodell
 
-**Status v0.7: Customer, Account, Card, Transaction, ATM, CashInventory und AuditEvent sind implementiert.**
+**Status v0.8: Customer, Account, Card, Transaction, ATM, CashInventory und AuditEvent sind implementiert.**
 
-v0.7 verwendet `deposit`, `withdrawal` und bei übernommenen positiven Salden `opening`. Anfangsbuchungen haben keine Karte und keinen Automaten. Einzahlungen haben keine ATM-Zuordnung, weil keine Scheinannahme simuliert wird. Auszahlungen speichern den verwendeten Automaten und die ausgegebene Scheinverteilung. Jede Buchung besitzt eine stabile Belegreferenz und optional einen auf 140 Zeichen begrenzten Verwendungszweck; Zugriffe auf Belege und Historie werden über das aktive Sitzungskonto begrenzt. Das Modell bildet weiterhin keine vollständige Bankbuchhaltung ab; die Anwendung bleibt eine Simulation mit erfundenen Daten.
+v0.8 verwendet `deposit`, `withdrawal` und bei übernommenen positiven Salden `opening`. Anfangsbuchungen haben keine Karte und keinen Automaten. Einzahlungen haben keine ATM-Zuordnung, weil keine Scheinannahme simuliert wird. Auszahlungen speichern den verwendeten Automaten und die ausgegebene Scheinverteilung. Jede Buchung besitzt eine stabile Belegreferenz und optional einen auf 140 Zeichen begrenzten Verwendungszweck; Zugriffe auf Belege und Historie werden über das aktive Sitzungskonto begrenzt. Das Modell bildet weiterhin keine vollständige Bankbuchhaltung ab; die Anwendung bleibt eine Simulation mit erfundenen Daten.
 
 ## Beziehungen
 
@@ -34,7 +34,7 @@ Präzisierung: Jedes Account gehört zunächst genau einem Customer. Jede Card g
 | CashInventory | Scheine je Automat und Stückelung | `id`, `atm_id`, `denomination_minor`, `quantity` | Unique auf `(atm_id, denomination_minor)`. Stückelung positiv, Anzahl ganzzahlig und ≥ 0. Geldbestand = Summe aus Stückelung × Anzahl. |
 | AuditEvent | Datensparsame technische Nachvollziehbarkeit | `id`, `event_type`, `outcome`, optionale Referenzen auf User, Account, Card und ATM, optional `reason_code`, begrenzter JSON-Kontext, `created_at` | Append-only auf Eloquent-Ebene. Keine PIN, Passwörter, IP-Adressen oder Verwendungszwecke. Abgewiesene Anmeldungen und Geschäftsregeln erzeugen keine Transaction, aber ein AuditEvent. |
 
-`ATM` ist der fachliche Name; die PHP-Klasse heißt `Atm` und verwendet die Laravel-konforme Tabelle `atms`. IDs sind konventionelle Laravel-Bigints; es gibt keine abstrakten Identifier-Objekte. `User` repräsentiert in v0.7 ausschließlich Betreiber und ist **keine** Identitätszuordnung für Customer oder Card.
+`ATM` ist der fachliche Name; die PHP-Klasse heißt `Atm` und verwendet die Laravel-konforme Tabelle `atms`. IDs sind konventionelle Laravel-Bigints; es gibt keine abstrakten Identifier-Objekte. `User` repräsentiert in v0.8 ausschließlich Betreiber und ist **keine** Identitätszuordnung für Customer oder Card.
 
 ## Ablauf einer Auszahlung
 
@@ -50,7 +50,7 @@ Jeder Fehler vor dem Commit lässt Saldo, Bestand und Buchungen unverändert. Hi
 ## Wichtige Grenzen
 
 - Der Entwurf ist noch kein Double-Entry-Ledger. Vor komplexeren Buchungen muss entschieden werden, ob ein einfacher Saldo plus Transaktionsliste genügt.
-- SQLite eignet sich lokal für den Einstieg, beweist aber keine PostgreSQL-Sperrsemantik. Vor Nebenläufigkeitsfunktionen ist eine eigene Prüfung mit der späteren Ziel-Datenbank nötig.
+- SQLite bleibt der einfache lokale Standard. PostgreSQL-18-Mehrprozesstests bestätigen für die implementierten Abläufe, dass Zeilensperren konkurrierende Konto- und Bestandszugriffe serialisieren; sie ersetzen keinen Last- oder Ausfalltest.
 - Die Scheinverteilung minimiert die Zahl der Scheine unter Beachtung des vorhandenen Bestands. Sie bevorzugt bei gleicher Anzahl nicht ausdrücklich eine bestimmte Stückelung; diese Produktregel ist offen.
 - Fremdschlüssel und Unique-Constraints sichern die zentralen Beziehungen. Ein vollständiger datenbankseitiger Schutz gegen jede direkte SQL-Manipulation ist nicht umgesetzt.
 - Kunden-, Konto- und Kartendaten sind nicht pauschal an das Frontend weiterzugeben. Spätere Antworten benötigen eine explizite Auswahl öffentlicher Felder.
@@ -60,4 +60,4 @@ Jeder Fehler vor dem Commit lässt Saldo, Bestand und Buchungen unverändert. Hi
 
 Die Umsetzung verwendet konventionelle Eloquent-Modelle, Migrationen, Form Requests und kleine Controller. `WithdrawMoney` kapselt die zusammengehörigen Änderungen an Konto, Bargeldbestand und Buchung. Es gibt keine vorsorglichen Repositories, Aggregate-Basisklassen, CQRS- oder Event-Sourcing-Infrastruktur.
 
-Tests decken falsche/gesperrte PIN, fremdes Konto, abgelaufene Sitzung, fehlende Deckung, nicht darstellbaren Betrag, begrenzten Bestand, Rollback bei Fehler und wiederholte Requests ab. Parallelzugriffe mit PostgreSQL bleiben ungeprüft.
+Tests decken falsche/gesperrte PIN, fremdes Konto, abgelaufene Sitzung, fehlende Deckung, nicht darstellbaren Betrag, begrenzten Bestand, Rollback bei Fehler und wiederholte Requests ab. Getrennte Prozesse prüfen unter PostgreSQL konkurrierende Kontobelastungen, den letzten passenden Schein und identische Idempotenzschlüssel.

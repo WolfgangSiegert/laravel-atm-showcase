@@ -1,6 +1,6 @@
 # Entscheidungen, Annahmen und offene Fragen
 
-Stand: v0.7, 10. September 2026. Der Abschnitt v0.1 beschreibt die ursprüngliche Ausgangslage.
+Stand: v0.8, 11. September 2026. Der Abschnitt v0.1 beschreibt die ursprüngliche Ausgangslage.
 
 ## In v0.1 festgelegt
 
@@ -126,3 +126,14 @@ Im lokalen Browserlauf wurden eine Einzahlung über 4,50 EUR mit „Browserprüf
 - Die Betreiberseite zeigt die 50 jüngsten Ereignisse. Pagination, Suche, Export, Aufbewahrungsdauer, Passwort-Reset und Mehrfaktor-Anmeldung sind vor der öffentlichen Veröffentlichung erneut zu bewerten; sie gehören nicht automatisch zum kleinen v1.0-Showcase.
 
 Der nächste Meilenstein v0.8 prüft Migrationen und konkurrierende Auszahlungen mit PostgreSQL. Noch unbestätigt ist, ob Koyeb Free plus Neon Free zum Deploymentzeitpunkt dieselben Tarif- und Betriebsbedingungen bietet; [hosting.md](hosting.md) hält diese zeitabhängige Empfehlung deshalb ausdrücklich vorläufig.
+
+## v0.8: PostgreSQL und Nebenläufigkeit
+
+- Der sichtbare Name des Demo-Automaten lautet ab v0.8 **LERN-Bank Mein Geldautomat**. Eine kleine Datenmigration ändert nur den bekannten Datensatz `BER-DEMO-01`, wenn er noch den alten Standardnamen trägt; individuell geänderte Labels bleiben erhalten. Der Seeder gleicht den lokalen Demo-Datensatz dagegen bewusst an den aktuellen Projektnamen an.
+- Die PIN kann weiterhin über eine physische Tastatur eingegeben werden. Zusätzlich gibt es ein semantisch beschriftetes 3×4-Nummernfeld mit Ziffern, Löschen und Rückschritt. Damit bleibt die normale Formvalidierung die einzige serverseitige PIN-Prüfung.
+- PostgreSQL ist als unterstützte Ziel-Datenbank festgelegt; `ext-pdo_pgsql` ist nun eine explizite Plattformanforderung. SQLite bleibt für den schnellen lokalen Standardlauf erhalten.
+- Der PostgreSQL-Test startet pro Szenario zwei eigenständige PHP-Prozesse hinter einer gemeinsamen Startbarriere. Geprüft werden zwei Auszahlungen gegen ein unzureichendes gemeinsames Kontoguthaben, zwei Konten gegen den letzten passenden Schein sowie zwei identische Anfragen mit demselben Idempotenzschlüssel.
+- Die vorhandene Sperrfolge Account → Card → ATM → CashInventory serialisiert diese drei Fälle unter PostgreSQL 18.6 korrekt. Ein Vorgang wird bei fehlender Deckung beziehungsweise fehlendem Schein abgewiesen; identische Wiederholungen liefern dieselbe Transaction zurück.
+- PostgreSQL-Tests sind opt-in, weil sie `migrate:fresh` auf der angegebenen Datenbank ausführen. `ATM_POSTGRES_TEST_URL` muss deshalb auf eine ausschließlich dafür vorgesehene Datenbank zeigen; als zusätzliche Fehlbedienungssperre muss deren Name auf `_test` enden. Der normale Testlauf bleibt unabhängig und nutzt SQLite im Speicher.
+
+Die Tests sind reale lokale Mehrprozessprüfungen, aber kein Beweis für Verhalten bei Netzwerkabbrüchen, Prozessabstürzen, hoher Dauerlast oder anbieterspezifischen Proxy-/Pooling-Einstellungen. Diese Restunsicherheit gehört in den Deployment-Prototyp.

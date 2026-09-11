@@ -17,10 +17,14 @@ class DemoAtmSeeder extends Seeder
 
         DB::transaction(function () {
             $atm = Atm::firstOrCreate(['code' => config('atm.code')], [
-                'label' => 'Berlin Lern-Automat',
+                'label' => config('atm.label'),
                 'currency' => 'EUR',
                 'status' => 'active',
             ]);
+
+            if ($atm->label !== config('atm.label')) {
+                $atm->update(['label' => config('atm.label')]);
+            }
 
             foreach (config('atm.initial_cash_quantities') as $denomination => $quantity) {
                 $atm->cashInventories()->firstOrCreate(

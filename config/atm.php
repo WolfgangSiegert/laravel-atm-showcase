@@ -2,6 +2,7 @@
 
 return [
     'code' => 'BER-DEMO-01',
+    'label' => 'LERN-Bank Mein Geldautomat',
     'withdrawal_denominations_minor' => [10000, 5000, 2000, 1000],
     'initial_cash_quantities' => [
         10000 => 10,

@@ -3,9 +3,27 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
 import AppShell from '../../layouts/AppShell.vue';
 
-defineProps<{ cards: { id: number; demo_reference: string }[]; pinLength: number }>();
+const { cards, pinLength } = defineProps<{ cards: { id: number; demo_reference: string }[]; pinLength: number }>();
 const form = useForm({ card_id: '', pin: '' });
 const pinInput = ref<HTMLInputElement | null>(null);
+const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+function appendDigit(digit: string) {
+    if (form.pin.length < pinLength) {
+        form.pin += digit;
+        form.clearErrors('pin');
+    }
+    pinInput.value?.focus();
+}
+function removeDigit() {
+    form.pin = form.pin.slice(0, -1);
+    form.clearErrors('pin');
+    pinInput.value?.focus();
+}
+function clearPin() {
+    form.pin = '';
+    form.clearErrors('pin');
+    pinInput.value?.focus();
+}
 function submit() {
     form.post('/atm/session', {
         onError: () => nextTick(() => pinInput.value?.focus()),
@@ -35,6 +53,12 @@ function submit() {
                     <input id="pin" ref="pinInput" v-model="form.pin" type="password" inputmode="numeric" autocomplete="off" :maxlength="pinLength" :minlength="pinLength" pattern="[0-9]+" required class="w-full rounded-lg border border-stone-400 bg-white p-3 text-xl tracking-[0.35em]" :aria-invalid="!!form.errors.pin" aria-describedby="pin-hint pin-error">
                     <p id="pin-hint" class="mt-2 text-sm text-stone-600">{{ pinLength }} Ziffern. Verwende ausschließlich die Demo-PIN.</p>
                     <p v-if="form.errors.pin" id="pin-error" role="alert" class="mt-3 text-sm text-red-800">{{ form.errors.pin }}</p>
+                    <div class="mx-auto mt-5 grid max-w-xs grid-cols-3 gap-3" role="group" aria-label="PIN-Nummernfeld">
+                        <button v-for="digit in digits" :key="digit" type="button" class="rounded-lg border border-stone-400 bg-white py-4 text-xl font-semibold hover:border-green-800 hover:bg-green-50 disabled:opacity-40" :disabled="form.pin.length >= pinLength || form.processing" :aria-label="`Ziffer ${digit}`" @click="appendDigit(digit)">{{ digit }}</button>
+                        <button type="button" class="rounded-lg border border-stone-400 bg-stone-100 py-4 font-semibold hover:border-green-800 disabled:opacity-40" :disabled="form.pin.length === 0 || form.processing" aria-label="PIN löschen" @click="clearPin">C</button>
+                        <button type="button" class="rounded-lg border border-stone-400 bg-white py-4 text-xl font-semibold hover:border-green-800 disabled:opacity-40" :disabled="form.pin.length >= pinLength || form.processing" aria-label="Ziffer 0" @click="appendDigit('0')">0</button>
+                        <button type="button" class="rounded-lg border border-stone-400 bg-stone-100 py-4 text-xl font-semibold hover:border-green-800 disabled:opacity-40" :disabled="form.pin.length === 0 || form.processing" aria-label="Letzte Ziffer löschen" @click="removeDigit">⌫</button>
+                    </div>
                 </div>
                 <button type="submit" :disabled="form.processing" class="w-full rounded-lg bg-green-900 px-5 py-4 font-semibold text-white hover:bg-green-800 disabled:opacity-60">{{ form.processing ? 'Wird geprüft …' : 'Sitzung starten' }}</button>
             </form>

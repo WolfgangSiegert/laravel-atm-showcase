@@ -73,6 +73,7 @@ it('shows the configured ATM and recent audit events', function () {
         ->component('Operator/Dashboard')
         ->where('operatorName', 'Lokaler Demo-Betrieb')
         ->where('atm.code', config('atm.code'))
+        ->where('atm.label', 'LERN-Bank Mein Geldautomat')
         ->has('atm.inventory', 4)
         ->where('auditEvents.0.event_type', 'test.event'));
 });

@@ -39,7 +39,7 @@ it('includes the ATM and note breakdown on a withdrawal receipt', function () {
 
     $this->get(route('atm.receipt', $transaction->receipt_reference))->assertInertia(fn (Assert $page) => $page
         ->where('receipt.type', 'withdrawal')
-        ->where('receipt.atmLabel', 'Berlin Lern-Automat')
+        ->where('receipt.atmLabel', 'LERN-Bank Mein Geldautomat')
         ->where('receipt.cashBreakdown.10000', 1)
         ->where('receipt.cashBreakdown.2000', 1)
         ->where('receipt.cashBreakdown.1000', 1));

@@ -1,4 +1,20 @@
-# Prüfprotokoll — v0.7
+# Prüfprotokoll — v0.8
+
+Abgeschlossen am 11. September 2026. Keine neuen PHP- oder JavaScript-Pakete; `ext-pdo_pgsql` ist nun explizite Plattformanforderung.
+
+- **104 SQLite-Tests, 652 Assertions erfolgreich; 3 PostgreSQL-Tests im Standardlauf erwartungsgemäß übersprungen.**
+- **3 PostgreSQL-Mehrprozesstests, 12 Assertions erfolgreich** unter PHP 8.4.25 und PostgreSQL 18.6.
+- Produktionsbuild einschließlich strikter TypeScript-Prüfung erfolgreich mit Node 24.20.0.
+
+Jedes PostgreSQL-Szenario führte zunächst alle Migrationen auf einer leeren Testdatenbank aus. Zwei getrennte PHP-Prozesse starteten danach gleichzeitig. Bestätigt sind genau eine Belastung bei unzureichendem gemeinsamem Kontoguthaben, genau eine Ausgabe des letzten passenden 100-Euro-Scheins an zwei konkurrierende Konten und genau eine Transaction bei zwei identischen Idempotenzschlüsseln. Salden, Scheinbestand und Buchungsanzahl blieben in allen Fällen konsistent.
+
+Der sichtbare ATM-Name wurde per Migration und Seeder zu „LERN-Bank Mein Geldautomat“ geändert. Die PIN-Seite bietet zusätzlich zur Tastatureingabe ein klickbares Nummernfeld mit Rückschritt und vollständigem Löschen. Im Browser wurde DEMO-002 vollständig über das Nummernfeld einschließlich Rückschritt eingegeben und erfolgreich angemeldet. Die neue Bezeichnung erschien anschließend im Betreiberbereich. Bei 375 × 812 Pixeln blieb die Dokumentbreite exakt 375 Pixel, das Nummernfeld vollständig bedienbar und das Browserfehlerprotokoll leer.
+
+Grenzen: Die PostgreSQL-Prüfung verwendet einen lokalen Einzelserver ohne Verbindungsproxy. Sie simuliert keine Prozessabbrüche, Netzfehler, hohe Dauerlast oder mehrere Webserver. Anbieterbedingungen von Neon/Koyeb und das spätere Pooling bleiben im Deployment-Prototyp zu prüfen.
+
+---
+
+# Historisches Prüfprotokoll — v0.7
 
 Abgeschlossen am 10. September 2026. Keine neuen Paketabhängigkeiten.
 
