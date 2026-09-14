@@ -9,7 +9,9 @@ Lokale Prüfung am 14. September 2026 mit PHP 8.4.25 und Node 24.20.0.
 
 Reset-Prüfungen bestätigen ausdrückliches Opt-in und CLI-Bestätigung, erhaltene fremde Konten/Buchungen/Betreiber, Nullsaldo und wiederhergestellten Scheinbestand, ungültige alte Sitzungen und bereits vorbereitete Buchungsanfragen, einmaligen fälligen Reset, sieben Tage Audit-Aufbewahrung, öffentliche Buchungslimits und ausschließlich sichtbare Demo-PINs im öffentlichen Modus. Ein Proxytest bestätigt HTTPS-Forwarding nur von konfigurierten IPs.
 
-GitHub-CI und Produktionscontainerprüfung werden nach Übertragung geprüft. Der lokale Docker-Daemon ist nicht aktiv. Die zwei zusätzlichen PostgreSQL-Szenarien prüfen Reset gegen vorbereitete Auszahlung und zwei gleichzeitig fällige Resets. Öffentliche Koyeb-/Neon-Instanz, tatsächliches TLS/Proxyverhalten, Kaltstart und Free-Instanzspeicher sind noch nicht bestätigt; der Stand bleibt deshalb ein Release Candidate.
+Die [GitHub-CI für Commit fb6703c](https://github.com/WolfgangSiegert/laravel-atm-showcase/actions/runs/34834098957) ist vollständig grün: 117 Standardtests mit 745 Assertions, fünf PostgreSQL-Mehrprozessszenarien mit 20 Assertions und zwei Chromium-Browserabläufe. Der Containerjob baute das Image in 2 Minuten 36 Sekunden einschließlich Startprüfung erfolgreich und bestätigte HTTP-Antworten auf `/up` und `/atm/cards` sowie den noch nicht fälligen CLI-Reset gegen isoliertes PostgreSQL. Der Prüfjob lief 1 Minute 39 Sekunden. Diese Zeiten sind CI-Zeiten und keine gemessenen Koyeb-Kaltstarts.
+
+Der lokale Docker-Daemon ist nicht aktiv; Build und Runtime wurden deshalb auf dem Linux-Runner geprüft. Die zwei zusätzlichen PostgreSQL-Szenarien bestätigen Reset gegen vorbereitete Auszahlung und zwei gleichzeitig fällige Resets. Öffentliche Koyeb-/Neon-Instanz, tatsächliches TLS/Proxyverhalten, Kaltstart und Free-Instanzspeicher sind noch nicht bestätigt; der Stand bleibt deshalb ein Release Candidate.
 
 ---
 
