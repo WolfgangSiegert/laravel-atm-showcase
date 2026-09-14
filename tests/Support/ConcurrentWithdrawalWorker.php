@@ -17,7 +17,7 @@ $app->make(Kernel::class)->bootstrap();
 DB::purge();
 DB::reconnect();
 $card = Card::findOrFail((int) $cardId);
-$operation = $argv[7] ?? 'withdrawal';
+$operation = $argv[6] ?? 'withdrawal';
 file_put_contents($readyFile, 'ready');
 
 $deadline = microtime(true) + 10;
