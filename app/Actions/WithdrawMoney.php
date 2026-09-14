@@ -32,6 +32,10 @@ class WithdrawMoney
                     throw ValidationException::withMessages(['withdrawal_amount' => 'Der Demo-Automat ist nicht eingerichtet.']);
                 }
 
+                if ((int) $card->session_version !== (int) $sessionCard->session_version) {
+                    throw ValidationException::withMessages(['withdrawal_amount' => 'Die Demo wurde zurückgesetzt. Bitte melde dich erneut an.']);
+                }
+
                 $existing = Transaction::where('account_id', $account->id)
                     ->where('idempotency_key', $key)
                     ->first();

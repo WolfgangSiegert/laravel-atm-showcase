@@ -17,6 +17,8 @@ Ein Besucher kann eine Demo-Karte wählen, sich mit einer veröffentlichten Demo
 | v0.9 ✓ | Qualität und Härtung | Der Hauptablauf ist im Browser automatisiert, per Tastatur bedienbar und für typische Fehlerzustände verständlich. Produktionswerte und Security-Header sind geprüft. |
 | v1.0 | Veröffentlichung | CI, reproduzierbare Installation, Demo-Reset, Lizenz, Deployment-Dokumentation und öffentlich erreichbare Showcase-Instanz sind fertig. |
 
+v1.0-rc.1 ergänzt CI, opt-in Demo-Reset, MIT-Lizenz und einen Produktionscontainer mit Deployment-Anleitung. Die öffentliche Instanz und ihre Abnahme sind noch offen; v1.0 ist deshalb nicht abgeschlossen.
+
 ## Durch das öffentliche Showcase verpflichtend
 
 - HTTPS und sichere Cookies in Produktion.

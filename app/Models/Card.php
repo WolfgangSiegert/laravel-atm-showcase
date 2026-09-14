@@ -9,13 +9,14 @@ class Card extends Model
 {
     protected $fillable = ['account_id', 'demo_reference', 'pin_hash', 'status', 'expires_at'];
 
-    protected $hidden = ['pin_hash', 'failed_attempts', 'locked_until'];
+    protected $hidden = ['pin_hash', 'failed_attempts', 'locked_until', 'session_version'];
 
     protected function casts(): array
     {
         return [
             'pin_hash' => 'hashed',
             'failed_attempts' => 'integer',
+            'session_version' => 'integer',
             'locked_until' => 'immutable_datetime',
             'expires_at' => 'immutable_datetime',
         ];

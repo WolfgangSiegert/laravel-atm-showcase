@@ -11,7 +11,7 @@ class DemoAtmSeeder extends Seeder
 {
     public function run(): void
     {
-        if (! app()->environment(['local', 'testing'])) {
+        if (! app()->environment(['local', 'testing']) && ! config('demo.enabled')) {
             throw new RuntimeException('Demo-Seeding ist nur lokal oder in Tests erlaubt.');
         }
 

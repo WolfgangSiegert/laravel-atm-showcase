@@ -10,6 +10,7 @@ export const browserEnvironment = {
     CACHE_STORE: 'array',
     SESSION_DRIVER: 'file',
     BCRYPT_ROUNDS: '4',
+    PUBLIC_DEMO_ENABLED: 'true',
 };
 
 export default defineConfig({
@@ -32,5 +33,5 @@ export default defineConfig({
         reuseExistingServer: false,
         timeout: 30_000,
     },
-    projects: [{ name: 'chrome', use: { ...devices['Desktop Chrome'], channel: 'chrome' } }],
+    projects: [{ name: process.env.PLAYWRIGHT_BROWSER === 'chromium' ? 'chromium' : 'chrome', use: { ...devices['Desktop Chrome'], channel: process.env.PLAYWRIGHT_BROWSER === 'chromium' ? undefined : 'chrome' } }],
 });

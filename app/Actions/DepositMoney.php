@@ -24,7 +24,7 @@ class DepositMoney
                 $account = Account::lockForUpdate()->findOrFail($sessionCard->account_id);
                 $card = Card::lockForUpdate()->findOrFail($sessionCard->id);
                 $card->setRelation('account', $account);
-                if ($card->account_id !== $account->id || ! $card->isUsable() || $account->currency !== 'EUR') {
+                if ($card->account_id !== $account->id || (int) $card->session_version !== (int) $sessionCard->session_version || ! $card->isUsable() || $account->currency !== 'EUR') {
                     throw ValidationException::withMessages(['amount' => 'Karte oder Konto sind nicht für eine Einzahlung verfügbar.']);
                 }
                 $existing = Transaction::where('account_id', $account->id)->where('idempotency_key', $key)->first();

@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 test('completes the public ATM flow with isolated demo data', async ({ page }) => {
     await page.goto('/atm');
     await page.getByRole('link', { name: 'Karte auswählen' }).click();
+    await expect(page.getByRole('complementary', { name: 'Öffentliche Demo-Zugänge' })).toContainText('DEMO-001 · PIN 1234');
     await page.getByRole('combobox', { name: 'Demo-Karte' }).selectOption({ label: 'DEMO-002' });
 
     for (const digit of ['9', '9', '9', '9']) {

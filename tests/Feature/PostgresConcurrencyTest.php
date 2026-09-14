@@ -34,7 +34,7 @@ beforeEach(function () {
 });
 
 /**
- * @param  list<array{card_id: int, amount: int, key: string}>  $jobs
+ * @param  list<array{card_id: int, amount: int, key: string, operation?: string}>  $jobs
  * @return list<array{status: string, transaction_id?: int}>
  */
 function runConcurrentWithdrawals(array $jobs): array
@@ -50,6 +50,7 @@ function runConcurrentWithdrawals(array $jobs): array
         'CACHE_STORE' => 'array',
         'SESSION_DRIVER' => 'array',
         'BCRYPT_ROUNDS' => '4',
+        'PUBLIC_DEMO_ENABLED' => 'true',
     ];
 
     foreach ($jobs as $index => $job) {
@@ -62,6 +63,7 @@ function runConcurrentWithdrawals(array $jobs): array
             $job['key'],
             $readyFile,
             $startFile,
+            $job['operation'] ?? 'withdrawal',
         ], base_path(), $environment);
         $process->setTimeout(20);
         $process->start();
@@ -118,6 +120,30 @@ it('serializes two withdrawals that exceed one account balance', function () {
     expect(collect($results)->pluck('status')->sort()->values()->all())->toBe(['rejected', 'success'])
         ->and($card->account->fresh()->balance_minor)->toBe(5000)
         ->and(Transaction::where('type', 'withdrawal')->count())->toBe(1);
+});
+
+it('serializes a demo reset against an already prepared withdrawal', function () {
+    $card = Card::where('demo_reference', 'DEMO-001')->firstOrFail();
+    $card->account->update(['balance_minor' => 20000]);
+    $results = runConcurrentWithdrawals([
+        ['card_id' => $card->id, 'amount' => 10000, 'key' => (string) Str::uuid()],
+        ['card_id' => $card->id, 'amount' => 0, 'key' => (string) Str::uuid(), 'operation' => 'reset'],
+    ]);
+    expect($results[1]['status'])->toBe('reset')
+        ->and($results[0]['status'])->toBeIn(['success', 'rejected'])
+        ->and($card->account->fresh()->balance_minor)->toBe(0)
+        ->and($card->fresh()->session_version)->toBe(1)
+        ->and(Transaction::count())->toBe(0)
+        ->and(CashInventory::where('denomination_minor', 10000)->value('quantity'))->toBe(10);
+});
+
+it('performs an overdue demo reset exactly once under concurrent traffic', function () {
+    DB::table('demo_reset_state')->insert(['id' => 1, 'last_reset_at' => now()->subDays(2)]);
+    $card = Card::where('demo_reference', 'DEMO-001')->firstOrFail();
+    $job = ['card_id' => $card->id, 'amount' => 0, 'key' => (string) Str::uuid(), 'operation' => 'reset_due'];
+    $results = runConcurrentWithdrawals([$job, $job]);
+    expect(collect($results)->pluck('status')->sort()->values()->all())->toBe(['reset', 'skipped'])
+        ->and($card->fresh()->session_version)->toBe(1);
 });
 
 it('serializes two accounts competing for the final matching note', function () {

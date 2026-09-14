@@ -33,3 +33,12 @@ it('renders a useful production error page without replacing the status', functi
         ->component('Error')
         ->where('status', 404));
 });
+
+it('honors HTTPS forwarding only from a configured proxy', function () {
+    config(['app.debug' => false, 'trustedproxy.proxies' => ['127.0.0.1']]);
+    $this->withHeaders(['X-Forwarded-Proto' => 'https'])->get('http://localhost/atm')->assertOk()
+        ->assertHeader('Strict-Transport-Security', config('security.strict_transport_security'));
+    config(['trustedproxy.proxies' => ['10.0.0.1']]);
+    $this->withHeaders(['X-Forwarded-Proto' => 'https'])->get('http://localhost/atm')->assertOk()
+        ->assertHeaderMissing('Strict-Transport-Security');
+});

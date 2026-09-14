@@ -148,3 +148,16 @@ Die Tests sind reale lokale Mehrprozessprüfungen, aber kein Beweis für Verhalt
 - Bei deaktiviertem Debug-Modus erhalten typische Webfehler eine knappe Inertia-Fehlerseite. JSON-Antworten und lokale Debug-Antworten behalten Laravels reguläres Verhalten.
 
 Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKIE=true` erforderlich. Ob der Zielhost HTTPS und Proxyinformationen korrekt an Laravel weitergibt, lässt sich lokal nicht bestätigen und muss im v1.0-Deployment geprüft werden.
+
+## v1.0-rc.1: Veröffentlichung vorbereiten
+
+- Noch keine v1.0-Freigabe: Eine öffentlich erreichbare, am Zielhost geprüfte Instanz fehlt. Der Release Candidate setzt CI, Lizenz, kontrollierten Demo-Reset und den Deployment-Weg um.
+- Der öffentliche Modus ist über `PUBLIC_DEMO_ENABLED` standardmäßig deaktiviert. Produktion erhält nur zwei fiktive Demo-Identitäten und einen ATM über einen eigenen idempotenten CLI-Provisionierungsweg. Bekannte lokale Betreiberpasswörter bleiben in Produktion ausgeschlossen; ein CLI-Befehl fragt ein eigenes Passwort verdeckt ab.
+- Die Konten bleiben zwischen Besuchern geteilt. Öffentliche PINs sowie ein Hinweis auf geteilte Konten und ausschließlich erfundene Freitexte erscheinen direkt auf der Loginseite. Separate Besucher-Konten wären eine zusätzliche Produktentscheidung.
+- Der Reset setzt bekannte Demo-Konten auf 0 €, verwirft deren Buchungen/Audits, stellt Karten und Scheinbestand wieder her und erhöht eine Kartensitzungsversion. Middleware und Buchungs-Actions prüfen diese Version, damit vor dem Reset vorbereitete Vorgänge nicht nachträglich buchen können. Fremde Konten und Betreiberbenutzer bleiben erhalten.
+- Ein 24-Stunden-Intervall wird über eine gesperrte PostgreSQL-Zeile koordiniert. Die erste Besucheranfrage nach Ablauf löst den Reset aus; Ruhephasen brauchen keinen aktiven Scheduler. Ein manueller CLI-Reset erfordert zusätzlich `--force`; es gibt keine Reset-Webroute.
+- Im ausdrücklich aktivierten Demo-Modus ist Audit-Aufbewahrung auf sieben Tage begrenzt; zugehörige Konto-Audits werden bereits beim Reset gelöscht. Diese kontrollierte Wartung verwendet Query Builder und umgeht bewusst den Eloquent-Löschschutz für kurzlebige erfundene Daten. Lokal passiert kein automatisches Löschen.
+- Geldbewegungsanfragen werden im öffentlichen Modus zusätzlich auf 30 je IP/Minute begrenzt. Verteilte Anfragen, dauerhaftes Leeren innerhalb eines Intervalls und eine absolute Zeilen-/Quotenobergrenze sind nicht gelöst. Der Showcase ist kein ständig verfügbarer Mehrnutzer-Bankdienst.
+- GitHub Actions verwendet PHP 8.4/Node 24, SQLite, PostgreSQL 18, Chromium und einen Produktionscontainer-Smoke-Test. Docker trennt Frontend-Build und PHP-/Apache-Runtime, verwendet Lockfiles und kopiert keine lokalen Secrets/Daten.
+- Im Container sind maximal zwei Apache-Worker vorgesehen. Die 512-MB-Free-Instanz muss dennoch am Host gemessen werden. Basisimages sind auf Hauptversionen statt Digests festgelegt; OS/PHP-Patches können sich bei einem Neubau ändern.
+- Der vorhandene MIT-Eintrag in Composer wird um eine tatsächliche MIT-Lizenzdatei ergänzt. Hostingkonten, Proxyvertrauen, TLS, Kaltstart, Speicher und Tarifbedingungen bleiben vor Veröffentlichung zu bestätigen.

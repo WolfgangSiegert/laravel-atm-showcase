@@ -1,6 +1,6 @@
 # Hosting-Empfehlung für den öffentlichen Showcase
 
-Stand: 10. September 2026. Kostenlose Tarife können sich ändern und müssen vor dem tatsächlichen Deployment erneut geprüft werden.
+Stand: 14. September 2026; Free-Instanzgrenzen erneut geprüft. Kostenlose Tarife können sich ändern und müssen vor dem tatsächlichen Deployment erneut geprüft werden.
 
 ## Empfehlung
 
@@ -9,7 +9,7 @@ Stand: 10. September 2026. Kostenlose Tarife können sich ändern und müssen vo
 | Quellcode und Pull Requests | GitHub | Free, öffentliches Repository | Geeignet für Versionsverwaltung und Portfolio-Präsentation. |
 | CI | GitHub Actions | Standard-Runner im öffentlichen Repository | Laut GitHub für öffentliche Repositories kostenlos. |
 | Laravel-Webdienst | Koyeb | Free Web Service, Region Frankfurt | Unterstützt PHP, GitHub-basierte Deployments und Docker; verwaltetes TLS und eine öffentliche `koyeb.app`-Adresse. |
-| PostgreSQL | Neon | Free | Dauerhaft kostenloser Einstieg ohne Zeitlimit, derzeit 0,5 GB Speicher und 100 Compute-Stunden pro Projekt und Monat. |
+| PostgreSQL | Neon | Free | Kostenloser Einstieg; laut offizieller Free-FAQ 0,5 GB Speicher und 100 **CU-Stunden** pro Projekt und Monat. CU-Stunden sind eine Compute-Einheit, keine pauschalen Laufzeitstunden. |
 
 GitHub Pages ist für diese Anwendung nicht geeignet. Es veröffentlicht statische HTML-, CSS- und JavaScript-Dateien, führt aber kein dauerhaftes Laravel-/PHP-Backend aus und stellt keine PostgreSQL-Datenbank bereit. GitHub bleibt trotzdem der richtige Ort für Repository, Review und CI.
 
@@ -22,6 +22,8 @@ GitHub Pages ist für diese Anwendung nicht geeignet. Es veröffentlicht statisc
 - Eine eigene Domain verursacht gegebenenfalls Registrierungsgebühren. Für den kostenlosen Start genügt die bereitgestellte `koyeb.app`-Adresse.
 
 Diese Kombination ist für einen Portfolio-Showcase vertretbar, aber keine kostenlose Produktionsgarantie. Der Deployment-Prototyp muss Speicherverbrauch, Kaltstart, Datenbankverbindungen und den Demo-Reset tatsächlich messen.
+
+Der vorbereitete Container und die Abnahme stehen in [deployment.md](deployment.md). Der Demo-Reset erfolgt beim ersten Besucher nach Ablauf des 24-Stunden-Intervalls und benötigt deshalb keinen bezahlten oder ständig aktiven Worker. Koyeb beschreibt Free ausdrücklich als Angebot für Hobby-/Testprojekte, nicht als Produktionsdienst.
 
 ## Alternative
 
@@ -36,5 +38,6 @@ Render Free plus Neon Free ist einfacher dokumentiert, weil Render eine konkrete
 - [Koyeb PHP-Deployment](https://www.koyeb.com/docs/deploy/php)
 - [Koyeb-Deployment aus GitHub](https://www.koyeb.com/docs/build-and-deploy/deploy-with-git)
 - [Neon-Preise](https://neon.com/pricing)
+- [Neon Free-Quoten](https://neon.com/faqs/free-plan-limits-and-quotas)
 - [Render Free](https://render.com/docs/free)
 - [Render Laravel mit Docker](https://render.com/docs/deploy-php-laravel-docker)

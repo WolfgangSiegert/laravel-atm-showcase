@@ -3,7 +3,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
 import AppShell from '../../layouts/AppShell.vue';
 
-const { cards, pinLength } = defineProps<{ cards: { id: number; demo_reference: string }[]; pinLength: number }>();
+const { cards, pinLength, demoAccess } = defineProps<{ cards: { id: number; demo_reference: string }[]; pinLength: number; demoAccess: Record<string, string> | null }>();
 const form = useForm({ card_id: '', pin: '' });
 const pinInput = ref<HTMLInputElement | null>(null);
 const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -63,7 +63,12 @@ function submit() {
                 <button type="submit" :disabled="form.processing" class="w-full rounded-lg bg-green-900 px-5 py-4 font-semibold text-white hover:bg-green-800 disabled:opacity-60">{{ form.processing ? 'Wird geprüft …' : 'Sitzung starten' }}</button>
             </form>
             <p v-else role="status" class="mt-8 rounded-lg border border-stone-300 p-5">Noch keine Demo-Karten vorhanden. Die Beispieldaten müssen zunächst eingerichtet werden.</p>
-            <p class="mt-6 text-sm text-stone-600">Die Demo-Zugangsdaten stehen in der Projekt-README.</p>
+            <aside v-if="demoAccess" class="mt-6 rounded-lg border border-green-200 bg-green-50 p-5 text-sm" aria-label="Öffentliche Demo-Zugänge">
+                <p class="font-semibold">Zum Ausprobieren</p>
+                <p v-for="(pin, reference) in demoAccess" :key="reference" class="mt-2">{{ reference }} · PIN {{ pin }}</p>
+                <p class="mt-3">Die Konten werden gemeinsam genutzt und regelmäßig zurückgesetzt. Starte mit einer Einzahlung. Verwende ausschließlich erfundene Angaben im Verwendungszweck.</p>
+            </aside>
+            <p v-else class="mt-6 text-sm text-stone-600">Die Demo-Zugangsdaten stehen in der Projekt-README.</p>
             <Link href="/atm" class="mt-5 inline-block py-3 font-semibold text-green-900 hover:underline">← Zur Startseite</Link>
         </section>
     </AppShell>

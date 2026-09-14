@@ -1,4 +1,19 @@
-# Prüfprotokoll — v0.9
+# Prüfprotokoll — v1.0-rc.1
+
+Lokale Prüfung am 14. September 2026 mit PHP 8.4.25 und Node 24.20.0.
+
+- **117 Pest-Tests, 745 Assertions erfolgreich; fünf PostgreSQL-Szenarien im SQLite-Lauf übersprungen.**
+- **Zwei Chrome-Browserabläufe erfolgreich**, jetzt mit aktiviertem öffentlichen Demo-Modus und sichtbaren PINs.
+- TypeScript/Produktionsbuild, Pint und Composer-Validierung erfolgreich. Plattformanforderungen mit ausdrücklich aktiviertem PHP 8.4 geprüft.
+- Neue Migration auf der bestehenden lokalen Datenbank erfolgreich; vorhandene Salden/Buchungen nicht zurückgesetzt.
+
+Reset-Prüfungen bestätigen ausdrückliches Opt-in und CLI-Bestätigung, erhaltene fremde Konten/Buchungen/Betreiber, Nullsaldo und wiederhergestellten Scheinbestand, ungültige alte Sitzungen und bereits vorbereitete Buchungsanfragen, einmaligen fälligen Reset, sieben Tage Audit-Aufbewahrung, öffentliche Buchungslimits und ausschließlich sichtbare Demo-PINs im öffentlichen Modus. Ein Proxytest bestätigt HTTPS-Forwarding nur von konfigurierten IPs.
+
+GitHub-CI und Produktionscontainerprüfung werden nach Übertragung geprüft. Der lokale Docker-Daemon ist nicht aktiv. Die zwei zusätzlichen PostgreSQL-Szenarien prüfen Reset gegen vorbereitete Auszahlung und zwei gleichzeitig fällige Resets. Öffentliche Koyeb-/Neon-Instanz, tatsächliches TLS/Proxyverhalten, Kaltstart und Free-Instanzspeicher sind noch nicht bestätigt; der Stand bleibt deshalb ein Release Candidate.
+
+---
+
+# Historisches Prüfprotokoll — v0.9
 
 Abgeschlossen am 11. September 2026. Playwright wurde als Entwicklungsabhängigkeit ergänzt.
 

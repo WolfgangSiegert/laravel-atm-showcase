@@ -17,7 +17,7 @@ class RequireAtmSession
     {
         $card = Card::with('account.customer')->find($request->session()->get('atm_card_id'));
         $lastActivity = (int) $request->session()->get('atm_last_activity', 0);
-        if (! $card || ! $card->isUsable() || now()->timestamp - $lastActivity >= config('atm.idle_seconds')) {
+        if (! $card || ! $card->isUsable() || $card->session_version !== (int) $request->session()->get('atm_session_version', 0) || now()->timestamp - $lastActivity >= config('atm.idle_seconds')) {
             if ($request->session()->has('atm_card_id')) {
                 $this->audit->record('atm_session.invalidated', 'rejected', card: $card, reasonCode: $card && now()->timestamp - $lastActivity >= config('atm.idle_seconds') ? 'idle_timeout' : 'unavailable_card');
             }

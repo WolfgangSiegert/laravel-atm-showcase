@@ -23,12 +23,13 @@ class AtmSessionController extends Controller
         return Inertia::render('Atm/SignIn', [
             'cards' => Card::orderBy('demo_reference')->get(['id', 'demo_reference']),
             'pinLength' => config('atm.pin_length'),
+            'demoAccess' => config('demo.enabled') ? config('demo.cards') : null,
         ]);
     }
 
     public function store(Request $request, AuditLogger $audit): RedirectResponse
     {
-        $request->session()->forget(['atm_card_id', 'atm_last_activity']);
+        $request->session()->forget(['atm_card_id', 'atm_last_activity', 'atm_session_version']);
         $key = 'atm-login:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, config('atm.requests_per_minute'))) {
             RateLimiter::attempt($key.':audit', 1, fn () => $audit->record('atm_session.login', 'rejected', reasonCode: 'rate_limited'), 60);
@@ -87,6 +88,7 @@ class AtmSessionController extends Controller
         $request->session()->regenerate(true);
         $request->session()->put([
             'atm_card_id' => $card->id,
+            'atm_session_version' => $card->session_version,
             'atm_last_activity' => now()->timestamp,
         ]);
         Inertia::clearHistory();

@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', 'README.md', 'LICENSE']
+  pull_request:
+    paths-ignore: ['docs/**', 'README.md', 'LICENSE']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: atm
+          POSTGRES_PASSWORD: testing-only
+          POSTGRES_DB: atm_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, pdo_pgsql, mbstring, intl
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env && php artisan key:generate
+      - run: composer validate --strict && composer check-platform-reqs
+      - run: composer test
+      - run: composer test:postgres
+        env:
+          ATM_POSTGRES_TEST_URL: postgresql://atm:testing-only@127.0.0.1:5432/atm_test
+      - run: vendor/bin/pint --test
+      - run: npm ci && npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+        env:
+          PLAYWRIGHT_BROWSER: chromium
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure
+          path: test-results/
+          retention-days: 7
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: atm
+          POSTGRES_PASSWORD: testing-only
+          POSTGRES_DB: atm_container_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker build --tag atm-showcase:ci .
+      - name: Start production container against isolated PostgreSQL
+        run: |
+          docker run --detach --name atm --network host \
+            -e APP_ENV=production -e APP_DEBUG=false \
+            -e APP_KEY="base64:$(openssl rand -base64 32)" \
+            -e APP_URL=https://showcase.example.test \
+            -e DB_CONNECTION=pgsql \
+            -e DB_URL=postgresql://atm:testing-only@127.0.0.1:5432/atm_container_test \
+            -e SESSION_DRIVER=database -e CACHE_STORE=database \
+            -e SESSION_SECURE_COOKIE=true -e PUBLIC_DEMO_ENABLED=true \
+            -e TRUSTED_PROXIES=127.0.0.1 atm-showcase:ci
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/up; then break; fi
+            sleep 2
+          done
+          curl --fail --silent http://127.0.0.1:8080/atm/cards > /tmp/atm-cards.html
+          docker exec atm php artisan atm:demo-reset --force --if-due
+      - run: docker logs atm
+        if: failure()

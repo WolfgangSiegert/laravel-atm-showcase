@@ -1,4 +1,4 @@
-# Cash Machine — v0.9
+# Cash Machine — v1.0 Release Candidate 1
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -17,9 +17,11 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - Unter PostgreSQL geprüfte Sperren für konkurrierende Auszahlungen und idempotente Wiederholungen.
 - Automatisierter Chrome-Hauptablauf mit isolierter Browser-Testdatenbank.
 - Sicherheitsheader und verständliche Fehlerseiten bei deaktiviertem Debug-Modus.
+- Explizit aktivierbarer öffentlicher Demo-Modus mit sichtbaren Demo-PINs, Reset und ungültig werdenden alten Sitzungen.
+- GitHub-CI für SQLite, PostgreSQL, Browser und Produktionscontainer; Docker-Deployment mit PHP 8.4.
 - Customer, Account, Card, Transaction, ATM und CashInventory als einfache Eloquent-Modelle mit Migrationen und lokalem Demo-Seeding.
 
-**Noch nicht implementiert:** Tageslimits, Scheinannahme, kontrollierter öffentlicher Demo-Reset, CI und öffentliches Deployment. Einzahlungen sind weiterhin reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
+**Noch offen für v1.0:** öffentliche Instanz und Abnahme auf Koyeb/Neon einschließlich HTTPS, Proxyverhalten, Speicherverbrauch und Kaltstart. Tageslimits und Scheinannahme bleiben außerhalb des Umfangs. Einzahlungen sind reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
 
 ## Lokal starten
 
@@ -43,7 +45,7 @@ Nach fünf falschen PINs wird die Karte 15 Minuten gesperrt; danach kann wieder 
 
 Der lokale Betreiberzugang liegt unter `/operator`: `operator@example.test` mit Passwort `local-demo-operator`. Beide Werte sind über `DEMO_OPERATOR_EMAIL` und `DEMO_OPERATOR_PASSWORD` änderbar. Dieser bekannte Zugang wird ausschließlich in `local` und `testing` angelegt; Produktion muss einen eigenen Betreiber sicher bereitstellen.
 
-## Geldbewegungen in v0.9
+## Geldbewegungen
 
 Nach der PIN-Anmeldung einen Eurobetrag eingeben, zum Beispiel `25,50`. Komma oder Punkt als Dezimaltrennzeichen sind erlaubt, höchstens zwei Nachkommastellen; keine Tausendertrennzeichen. Bereich: 0,01 € bis 10.000,00 € pro Buchung. Das gesamte Demo-Guthaben ist auf 10.000.000,00 € begrenzt. Die Grenzen stehen in `config/atm.php`.
 
@@ -77,9 +79,9 @@ composer dev
 
 Eine bestehende `.env` nicht überschreiben. Alternativ `composer setup` für die erstmalige Einrichtung und danach `php artisan db:seed`. `composer setup` erzeugt bei erneutem Aufruf einen neuen Anwendungsschlüssel; für spätere Updates die einzelnen Befehle verwenden.
 
-Demo-Seeding ist nur in `local` und `testing` erlaubt. Wiederholtes Seeding verändert bestehende PINs, Sperren und Salden nicht. Ohne Seeding zeigt die Kartenauswahl einen erklärenden Leerzustand. Die SQLite-Datei liegt in `database/database.sqlite`; Tests erzwingen eine separate `:memory:`-Datenbank.
+Normales vollständiges Demo-Seeding ist nur in `local` und `testing` erlaubt. Wiederholtes Seeding verändert bestehende PINs, Sperren und Salden nicht. Produktion verwendet ausschließlich `atm:demo-provision` bei ausdrücklich aktiviertem `PUBLIC_DEMO_ENABLED=true`; der bekannte Betreiber wird dort niemals angelegt. Ohne Seeding zeigt die Kartenauswahl einen erklärenden Leerzustand. Die SQLite-Datei liegt in `database/database.sqlite`; Tests erzwingen eine separate `:memory:`-Datenbank.
 
-Der Betreiberbereich kann den konfigurierten Automaten aktiv beziehungsweise außer Betrieb setzen und die Anzahl einer Stückelung um höchstens 100 Scheine je Vorgang ändern. Negative Bestände werden atomar abgewiesen. Audit-Ereignisse enthalten technische Zuordnungen, Ergebnis, Grundcode und eine kleine strukturierte Kontextmenge; PIN, Passwort, IP-Adresse und Verwendungszweck werden nicht ins Audit kopiert. Das Audit hat in v0.7 noch keine Aufbewahrungs- oder Archivierungsregel.
+Der Betreiberbereich kann den konfigurierten Automaten aktiv beziehungsweise außer Betrieb setzen und die Anzahl einer Stückelung um höchstens 100 Scheine je Vorgang ändern. Negative Bestände werden atomar abgewiesen. Audit-Ereignisse enthalten technische Zuordnungen, Ergebnis, Grundcode und eine kleine strukturierte Kontextmenge; PIN, Passwort, IP-Adresse und Verwendungszweck werden nicht ins Audit kopiert. Im öffentlichen Demo-Modus werden Konto-Audits beim Reset und weitere Audits nach sieben Tagen verworfen. Lokal bleibt die Historie erhalten.
 
 ## Prüfungen
 
@@ -100,9 +102,17 @@ Die PostgreSQL-Tests benötigen eine ausschließlich für Tests bestimmte leere 
 ATM_POSTGRES_TEST_URL='postgresql://user:password@127.0.0.1:5432/atm_test' composer test:postgres
 ```
 
-Ohne `ATM_POSTGRES_TEST_URL` werden diese drei Tests im normalen SQLite-Lauf übersprungen. Niemals eine Entwicklungs- oder Produktionsdatenbank als Test-URL verwenden.
+Ohne `ATM_POSTGRES_TEST_URL` werden diese fünf Tests im normalen SQLite-Lauf übersprungen. Niemals eine Entwicklungs- oder Produktionsdatenbank als Test-URL verwenden.
 
 `npm run test:browser` verwendet den lokal installierten Google Chrome, startet Laravel auf Port 8010 und legt vorübergehend `database/browser-testing.sqlite` an. Der Ablauf prüft falsche und richtige PIN, Ein- und Auszahlung, beide Belege, Kontostand, Abmeldung, Tastatureingabe und die mobile Breite. Die Datei wird danach gelöscht; die normale lokale Datenbank bleibt unverändert.
+
+In CI wird Chromium über Playwright installiert und mit `PLAYWRIGHT_BROWSER=chromium` gewählt. PHP 8.4 und Node 24 müssen auch beim lokalen Browserlauf im aktiven Suchpfad stehen.
+
+## Öffentliche Demo und Deployment
+
+Der öffentliche Modus wird ausschließlich für eine dedizierte fiktive Datenbank mit `PUBLIC_DEMO_ENABLED=true` aktiviert. Besucher sehen die veröffentlichten PINs direkt auf der Anmeldeseite und einen Hinweis auf gemeinsam genutzte Konten. Nach 24 Stunden greift bei der nächsten ATM-Anfrage ein atomarer Reset: Demo-Salden auf 0 €, alte Demo-Buchungen entfernen, Kartensperren aufheben, Scheine auffüllen und alte Kartensitzungen ungültig machen. Lokal ist dieser Modus standardmäßig deaktiviert. Ein manueller Reset benötigt zusätzlich `php artisan atm:demo-reset --force` und löscht fiktive Daten.
+
+[Deployment-Anleitung](docs/deployment.md) beschreibt Koyeb Free/Neon Free, Secrets, sicheren Betreiberzugang, Abnahme und Wiederherstellung. Die Version bleibt ein Release Candidate, bis die öffentliche Instanz geprüft ist. Lizenz: [MIT](LICENSE).
 
 ## Struktur und Routing
 
@@ -149,6 +159,6 @@ Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kei
 
 ## Weiterentwicklung
 
-Als Nächstes folgt v1.0 mit CI, kontrolliertem Demo-Reset, finaler Deployment-Konfiguration und der öffentlichen Showcase-Instanz. Siehe [Roadmap](docs/roadmap.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
+Als Nächstes folgt die Prüfung der öffentlichen Showcase-Instanz und danach die v1.0-Freigabe. Siehe [Roadmap](docs/roadmap.md), [Deployment](docs/deployment.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
 
 Offizielle Referenzen: [Laravel 13](https://laravel.com/framework/docs/releases), [Inertia-Setup](https://inertiajs.com/docs/v3/installation/server-side-setup), [Laravel Rate Limiting](https://github.com/laravel/docs/blob/13.x/rate-limiting.md), [Inertia History Encryption](https://inertiajs.com/docs/v3/security/history-encryption).
