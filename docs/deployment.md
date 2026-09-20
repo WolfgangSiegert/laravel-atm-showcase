@@ -1,6 +1,6 @@
 # Deployment — v1.0 Release Candidate
 
-Stand: 14. September 2026. Noch keine öffentliche Instanz eingerichtet. v1.0 wird erst nach erfolgreicher Prüfung am Zielhost freigegeben.
+Stand: 20. September 2026. Das Neon-Projekt `steep-shape-34891524` ist mit dem lokalen Projekt und dem Branch `production` verknüpft. Die leere Deployment-Policy in `neon.ts` ist die dokumentierte Ausgangsbasis. Die lokale Anwendung verwendet weiterhin SQLite; eine öffentliche App-Instanz und die Koyeb-Verbindung sind noch nicht eingerichtet. v1.0 wird erst nach erfolgreicher Prüfung am Zielhost freigegeben.
 
 ## Ziel und Voraussetzungen
 
@@ -35,7 +35,7 @@ Der `APP_KEY` bleibt über Neustarts und Deployments unverändert. `composer set
 
 ## Erste Veröffentlichung
 
-1. In Neon Free ein separates Showcase-Projekt und eine PostgreSQL-Datenbank anlegen; die direkte Verbindungs-URL mit TLS für den kleinen Einzelservice verwenden. Die lokale Entwicklungsdatenbank bleibt getrennt.
+1. Das separate Neon-Projekt ist angelegt und sein Branch `production` verknüpft. Für Koyeb die direkte Verbindungs-URL mit TLS verwenden; sie wird erst dort als Secret hinterlegt. Die lokale Entwicklungsdatenbank bleibt getrennt.
 2. In Koyeb das öffentliche GitHub-Repository verbinden, Branch `main`, Build mit dem enthaltenen `Dockerfile`, Webdienst ausdrücklich **Free**, Frankfurt, Port **8080**, HTTP-Healthcheck **`/up`** wählen. Kein Volume und keinen zweiten Dienst hinzufügen.
 3. Die Variablen und Secrets oben setzen. Die endgültige Service-Adresse als `APP_URL` hinterlegen.
 4. Nur einen grünen CI-Stand deployen. Vorläufig automatisches Deployment deaktivieren, damit fehlgeschlagene CI-Läufe nicht veröffentlicht werden. Rollbackfähigen Commit notieren.

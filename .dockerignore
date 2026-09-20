@@ -14,4 +14,7 @@ public/hot
 test-results
 playwright-report
 .codex
+.agents
+.neon
+skills-lock.json
 .DS_Store
