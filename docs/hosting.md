@@ -23,7 +23,7 @@ Koyeb war zunächst vorgesehen, scheidet für eine kostenlose Neuinstallation ab
 - Render kann Free-Dienste neu starten und bietet dafür kein Produktions-SLA. Neon Free hat ebenfalls Anbieterquoten und kein Produktions-SLA.
 - Eine eigene Domain kann Registrierungsgebühren verursachen. Für den kostenlosen Start genügt die bereitgestellte `onrender.com`-Adresse.
 
-Diese Kombination ist für einen Portfolio-Showcase vertretbar, aber keine Garantie dauerhaft unveränderter kostenloser Bedingungen. Der Deployment-Prototyp muss Kaltstart, Speicherverbrauch, Datenbankverbindungen und Proxyverhalten tatsächlich messen.
+Diese Kombination ist für einen Portfolio-Showcase vertretbar, aber keine Garantie dauerhaft unveränderter kostenloser Bedingungen. Veröffentlichung, Datenbankverbindung und Proxyverhalten sind geprüft; Kaltstart und Speicherverbrauch müssen noch gemessen werden.
 
 Der vorbereitete Container und die Abnahme stehen in [deployment.md](deployment.md). Der Demo-Reset erfolgt beim ersten Besucher nach Ablauf des 24-Stunden-Intervalls und benötigt keinen Worker oder externen Keepalive-Dienst.
 

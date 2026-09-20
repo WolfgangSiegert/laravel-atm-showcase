@@ -11,7 +11,11 @@ Reset-Prüfungen bestätigen ausdrückliches Opt-in und CLI-Bestätigung, erhalt
 
 Die [GitHub-CI für Commit 8616e48](https://github.com/WolfgangSiegert/laravel-atm-showcase/actions/runs/35528895773) ist vollständig grün: 117 Standardtests mit 745 Assertions, fünf PostgreSQL-Mehrprozessszenarien mit 20 Assertions und zwei Chromium-Browserabläufe. Der Containerjob baute das Image in 2 Minuten 23 Sekunden und bestätigte den Render-kompatiblen Port 10000, HTTP-Antworten auf `/up` und `/atm/cards` sowie den noch nicht fälligen CLI-Reset gegen isoliertes PostgreSQL. Der Prüfjob lief 1 Minute 9 Sekunden. Diese Zeiten sind CI-Zeiten und keine gemessenen Render-Kaltstarts.
 
-Der lokale Docker-Daemon ist nicht aktiv; Build und Runtime wurden deshalb auf dem Linux-Runner geprüft. Die zwei zusätzlichen PostgreSQL-Szenarien bestätigen Reset gegen vorbereitete Auszahlung und zwei gleichzeitig fällige Resets. Öffentliche Render-/Neon-Instanz, tatsächliches TLS/Proxyverhalten, Kaltstart und Free-Instanzspeicher sind noch nicht bestätigt; der Stand bleibt deshalb ein Release Candidate.
+Der lokale Docker-Daemon ist nicht aktiv; Build und Runtime wurden deshalb auf dem Linux-Runner geprüft. Die zwei zusätzlichen PostgreSQL-Szenarien bestätigen Reset gegen vorbereitete Auszahlung und zwei gleichzeitig fällige Resets.
+
+Die öffentliche Render-/Neon-Instanz wurde am 20. September 2026 unter `https://lern-bank-geldautomat.onrender.com` abgenommen. Bestätigt sind HTTP/2 und TLS, HSTS/CSP/Basisheader, Secure/HttpOnly/SameSite-Cookies, HTTPS-Asset-URLs trotz manipulierter Forwarded-Header sowie der vollständige Ablauf mit Nummernfeld-Anmeldung, Ein- und Auszahlung über jeweils 10,00 € mit Zweck, beiden Belegen, Typfilter, Betragssortierung und Abmeldung. Der Kontosaldo blieb durch die gegenläufigen Buchungen unverändert; der Automat gab dabei einen 10-Euro-Schein aus. Die warme Antwort auf `/atm` benötigte bei einer Einzelmessung 0,27 Sekunden bis zum vollständigen Empfang. Dieser Einzelwert ist kein Lasttest.
+
+Im ersten Lauf erreichte Apache mit zwei Workern `MaxRequestWorkers`. Die Konfiguration wurde deshalb auf vier begrenzt und um einen globalen `ServerName` ergänzt. Diese Änderung muss nach dem nächsten grünen Deployment erneut beobachtet werden. Kaltstart und Free-Instanzspeicher sind noch nicht bestätigt; der Stand bleibt deshalb ein Release Candidate.
 
 ---
 

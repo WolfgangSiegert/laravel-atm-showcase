@@ -1,6 +1,6 @@
 # Deployment — v1.0 Release Candidate
 
-Stand: 20. September 2026. Das Neon-Projekt `steep-shape-34891524` ist mit dem lokalen Projekt und dem Branch `production` verknüpft. Die leere Deployment-Policy in `neon.ts` ist die dokumentierte Ausgangsbasis. Die lokale Anwendung verwendet weiterhin SQLite; eine öffentliche Render-Instanz ist noch nicht eingerichtet. v1.0 wird erst nach erfolgreicher Prüfung am Zielhost freigegeben.
+Stand: 20. September 2026. Das Neon-Projekt `steep-shape-34891524` ist mit dem lokalen Projekt und dem Branch `production` verknüpft. Die leere Deployment-Policy in `neon.ts` ist die dokumentierte Ausgangsbasis. Die lokale Anwendung verwendet weiterhin SQLite; die öffentliche Instanz läuft unter `https://lern-bank-geldautomat.onrender.com`. Die funktionale Zielhost-Abnahme ist erfolgt. v1.0 wird nach der noch offenen Speicher- und Kaltstartmessung freigegeben.
 
 ## Ziel und Voraussetzungen
 
@@ -25,11 +25,11 @@ Das Render-Konto muss vorab eingerichtet und mit GitHub verbunden werden. Zugang
 | `SESSION_SAME_SITE` | `lax` |
 | `PUBLIC_DEMO_ENABLED` | `true` ausschließlich für diese Demo-Datenbank |
 | `SECURITY_HEADERS_ENABLED` | `true` |
-| `TRUSTED_PROXIES` | `*`, anschließend Render-Proxyverhalten prüfen |
+| `TRUSTED_PROXIES` | `*`, für den ausschließlich über Render veröffentlichten Container geprüft |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` |
 | `QUEUE_CONNECTION` | `sync` (keine Hintergrundjobs vorgesehen) |
 
-`render.yaml` setzt `TRUSTED_PROXIES=*`, weil der Container nur über den verwalteten Render-Gateway veröffentlicht wird. Ob Render eingehende Forwarded-Header zuverlässig ersetzt, wird nach dem ersten Deploy ausdrücklich getestet. Ohne diese Bestätigung sind HTTPS-Erkennung einschließlich HSTS und IP-basierte Limits noch nicht vollständig abgenommen. Laravels TrustProxies-Middleware liest die Konfiguration auch nach `config:cache`.
+`render.yaml` setzt `TRUSTED_PROXIES=*`, weil der Container nur über den verwalteten Render-Gateway veröffentlicht wird. Die Zielhost-Prüfung am 20. September 2026 bestätigte HTTPS-Erkennung, HSTS und sichere Cookies. Direkte Versuche mit `X-Forwarded-Proto: http` und `Forwarded: proto=http;host=attacker.invalid` änderten weder Status noch kanonische HTTPS-Asset-URLs oder HSTS. Damit ist die Manipulation des Schemas und Hosts über diese Besucherheader auf dem Render-Pfad ausgeschlossen. Die konkrete Client-IP lässt sich ohne Diagnose-Endpunkt nicht direkt beobachten; das IP-Limit bleibt deshalb keine vollständige Abuse-Abwehr. Laravels TrustProxies-Middleware liest die Konfiguration auch nach `config:cache`.
 
 Der `APP_KEY` bleibt über Neustarts und Deployments unverändert. `composer setup` gehört nicht in das Deployment: Es regeneriert den Schlüssel. Keine `.env`, lokalen SQLite-Dateien, Sitzungen oder lokalen Betreiberpasswörter werden ins Docker-Image kopiert.
 
@@ -43,7 +43,7 @@ Der `APP_KEY` bleibt über Neustarts und Deployments unverändert. `composer set
 6. Beim Containerstart prüft `atm:deployment-check` Konfiguration und Datenbankverbindung. Danach folgen Config-Cache, additive Migrationen, idempotente Einrichtung der beiden Demo-Karten/ATM und Route-/View-Cache. Bei einem Fehler startet Apache nicht. Es wird **kein bekannter Betreiber** in Produktion angelegt.
 7. Falls der Betreiberbereich vorgeführt werden soll, auf einem vertrauenswürdigen lokalen Checkout mit derselben Produktionsdatenbank `php artisan atm:operator-create deine-adresse@example.org` ausführen. Das Passwort wird verdeckt abgefragt, ist mindestens 16 Zeichen lang und steht weder im Repository noch in Prozessargumenten. Dafür die Produktionsvariablen nur in einer separaten, ignorierten Umgebung verwenden; keine lokalen Datenbankwerte überschreiben.
 
-Das Image verwendet PHP 8.4/Apache, Node 24 nur während des Builds und maximal zwei Apache-Worker. Speicherverbrauch und Startzeit auf der kleinen Free-Instanz sind noch nicht gemessen. Die Basisimages folgen ihren gepflegten Hauptversionen; PHP-/OS-Patchstände sind damit bewusst nicht auf einen unveränderlichen Digest festgeschrieben. Abhängigkeiten werden über beide Lockfiles fixiert.
+Das Image verwendet PHP 8.4/Apache, Node 24 nur während des Builds und maximal vier Apache-Worker. Der erste öffentliche Lauf erreichte das frühere Limit von zwei Workern bereits durch Healthchecks und Besucherzugriffe; vier Worker sind der vorsichtige Folgewert für 512 MB. Der reale Speicherverbrauch nach dieser Änderung und die Startzeit auf der Free-Instanz sind noch nicht gemessen. Die Basisimages folgen ihren gepflegten Hauptversionen; PHP-/OS-Patchstände sind damit bewusst nicht auf einen unveränderlichen Digest festgeschrieben. Abhängigkeiten werden über beide Lockfiles fixiert.
 
 ## Demo-Reset und Aufbewahrung
 

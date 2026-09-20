@@ -21,7 +21,7 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - GitHub-CI für SQLite, PostgreSQL, Browser und Produktionscontainer; Docker-Deployment mit PHP 8.4.
 - Customer, Account, Card, Transaction, ATM und CashInventory als einfache Eloquent-Modelle mit Migrationen und lokalem Demo-Seeding.
 
-**Noch offen für v1.0:** öffentliche Instanz und Abnahme auf Render/Neon einschließlich HTTPS, Proxyverhalten, Speicherverbrauch und Kaltstart. Tageslimits und Scheinannahme bleiben außerhalb des Umfangs. Einzahlungen sind reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
+Die öffentliche Demo läuft unter **https://lern-bank-geldautomat.onrender.com** auf Render Free mit Neon PostgreSQL. HTTPS, Sicherheitsheader, Proxyverhalten und der vollständige ATM-Ablauf sind am Zielhost geprüft. **Noch offen für v1.0:** Speicherverbrauch nach der Apache-Worker-Anpassung und ein gemessener Kaltstart. Tageslimits und Scheinannahme bleiben außerhalb des Umfangs. Einzahlungen sind reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
 
 ## Lokal starten
 
@@ -112,7 +112,7 @@ In CI wird Chromium über Playwright installiert und mit `PLAYWRIGHT_BROWSER=chr
 
 Der öffentliche Modus wird ausschließlich für eine dedizierte fiktive Datenbank mit `PUBLIC_DEMO_ENABLED=true` aktiviert. Besucher sehen die veröffentlichten PINs direkt auf der Anmeldeseite und einen Hinweis auf gemeinsam genutzte Konten. Nach 24 Stunden greift bei der nächsten ATM-Anfrage ein atomarer Reset: Demo-Salden auf 0 €, alte Demo-Buchungen entfernen, Kartensperren aufheben, Scheine auffüllen und alte Kartensitzungen ungültig machen. Lokal ist dieser Modus standardmäßig deaktiviert. Ein manueller Reset benötigt zusätzlich `php artisan atm:demo-reset --force` und löscht fiktive Daten.
 
-[Deployment-Anleitung](docs/deployment.md) beschreibt Render Free/Neon Free, Secrets, sicheren Betreiberzugang, Abnahme und Wiederherstellung. Die Version bleibt ein Release Candidate, bis die öffentliche Instanz geprüft ist. Lizenz: [MIT](LICENSE).
+[Deployment-Anleitung](docs/deployment.md) beschreibt Render Free/Neon Free, Secrets, sicheren Betreiberzugang, Abnahme und Wiederherstellung. Die Version bleibt bis zur Speicher- und Kaltstartmessung ein Release Candidate. Lizenz: [MIT](LICENSE).
 
 ## Struktur und Routing
 
