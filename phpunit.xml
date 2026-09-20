@@ -19,7 +19,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing" force="true"/>
-        <env name="APP_NAME" value="Cash Machine" force="true"/>
+        <env name="APP_NAME" value="LERN-Bank Mein Geldautomat" force="true"/>
         <env name="APP_LOCALE" value="de" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

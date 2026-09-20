@@ -1,5 +1,7 @@
 <?php
 
+$renderHostname = env('RENDER_EXTERNAL_HOSTNAME');
+
 return [
 
     /*
@@ -13,7 +15,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Cash Machine'),
+    'name' => env('APP_NAME', 'LERN-Bank Mein Geldautomat'),
 
     /*
     |--------------------------------------------------------------------------
@@ -52,7 +54,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', $renderHostname ? 'https://'.$renderHostname : 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------

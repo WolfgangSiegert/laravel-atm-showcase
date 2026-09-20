@@ -21,6 +21,6 @@ RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoload
 COPY --from=frontend /app/public/build ./public/build
 COPY deploy/apache.conf /etc/apache2/sites-available/000-default.conf
 COPY deploy/php.ini /usr/local/etc/php/conf.d/showcase.ini
-RUN sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf
-EXPOSE 8080
+RUN sed -i 's/Listen 80/Listen 10000/' /etc/apache2/ports.conf
+EXPOSE 10000
 CMD ["sh", "deploy/start.sh"]

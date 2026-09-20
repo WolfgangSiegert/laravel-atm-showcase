@@ -89,16 +89,17 @@ jobs:
             -e APP_ENV=production -e APP_DEBUG=false \
             -e APP_KEY="base64:$(openssl rand -base64 32)" \
             -e APP_URL=https://showcase.example.test \
+            -e PORT=10000 \
             -e DB_CONNECTION=pgsql \
             -e DB_URL=postgresql://atm:testing-only@127.0.0.1:5432/atm_container_test \
             -e SESSION_DRIVER=database -e CACHE_STORE=database \
             -e SESSION_SECURE_COOKIE=true -e PUBLIC_DEMO_ENABLED=true \
             -e TRUSTED_PROXIES=127.0.0.1 atm-showcase:ci
           for attempt in $(seq 1 30); do
-            if curl --fail --silent http://127.0.0.1:8080/up; then break; fi
+            if curl --fail --silent http://127.0.0.1:10000/up; then break; fi
             sleep 2
           done
-          curl --fail --silent http://127.0.0.1:8080/atm/cards > /tmp/atm-cards.html
+          curl --fail --silent http://127.0.0.1:10000/atm/cards > /tmp/atm-cards.html
           docker exec atm php artisan atm:demo-reset --force --if-due
       - run: docker logs atm
         if: failure()

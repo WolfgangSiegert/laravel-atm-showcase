@@ -17,7 +17,7 @@ it('renders the German application shell with the expected page', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('Atm/Welcome')
             ->where('version', '1.0.0-rc.1')
-            ->where('appName', 'Cash Machine'));
+            ->where('appName', 'LERN-Bank Mein Geldautomat'));
 });
 
 it('serves the Inertia navigation response', function () {

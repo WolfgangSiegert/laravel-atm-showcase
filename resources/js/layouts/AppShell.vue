@@ -8,9 +8,9 @@ const page = usePage<{ notice?: string | null }>();
         <a href="#main" class="skip-link">Zum Inhalt</a>
         <header class="border-b border-stone-300">
             <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-6 py-6 sm:px-10">
-                <Link href="/atm" class="flex items-center gap-3 font-bold tracking-tight" aria-label="Cash Machine – Startseite">
-                    <span class="brand-symbol" aria-hidden="true">C<span>↗</span></span>
-                    <span>cash machine<span class="block text-xs font-normal tracking-widest text-stone-600">ATM LERNPROJEKT</span></span>
+                <Link href="/atm" class="flex items-center gap-3 font-bold tracking-tight" aria-label="LERN-Bank Mein Geldautomat – Startseite">
+                    <span class="brand-symbol" aria-hidden="true">L<span>↗</span></span>
+                    <span>LERN-Bank<span class="block text-xs font-normal tracking-widest text-stone-600">MEIN GELDAUTOMAT</span></span>
                 </Link>
                 <nav aria-label="Hauptnavigation" class="flex items-center gap-6 text-sm">
                     <Link href="/atm" :aria-current="page.url === '/atm' ? 'page' : undefined" class="font-semibold underline decoration-lime-600 underline-offset-8">Automat</Link>

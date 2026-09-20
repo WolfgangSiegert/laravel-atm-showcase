@@ -20,7 +20,7 @@ Stand: v0.9, 11. September 2026. Der Abschnitt v0.1 beschreibt die ursprünglich
 
 ## Vorläufige fachliche Annahmen
 
-EUR, Integer-Centbeträge, ein Demo-ATM, kein Dispo, genau ein Kontoinhaber je Konto und genau ein Konto je Karte. Diese Annahmen dienen dem dokumentierten Modell; sie werden in v0.1 nicht durch Geschäftslogik erzwungen. Die Oberfläche verwendet den Arbeitsnamen **Cash Machine**, keine festgelegte Markenidentität.
+EUR, Integer-Centbeträge, ein Demo-ATM, kein Dispo, genau ein Kontoinhaber je Konto und genau ein Konto je Karte. Diese Annahmen dienen dem dokumentierten Modell; sie werden in v0.1 nicht durch Geschäftslogik erzwungen. Der ursprüngliche Arbeitsname **Cash Machine** wurde später durch **LERN-Bank Mein Geldautomat** ersetzt.
 
 Die Planung orientiert sich bewusst am kleinen Lernumfang. Das kann spätere Erweiterungen wie Gemeinschaftskonten, mehrere Währungen oder echte Ledger-Strukturen erschweren; deshalb werden diese Grenzen explizit festgehalten statt vermeintlich zukunftssicher abstrahiert.
 
@@ -103,7 +103,7 @@ Die verbindliche Reihenfolge steht in [roadmap.md](roadmap.md). Als nächster Me
 - Ein- und Auszahlungen erhalten einen optionalen Verwendungszweck. Er gehört unveränderlich zur Transaction und erscheint auf Beleg und Übersicht.
 - Die Transaktionsübersicht wird serverseitig nach Typ filterbar sowie nach Datum und Betrag in beide Richtungen sortierbar. Query-Parameter bleiben bei Pagination erhalten; eine umfangreiche freie Suche gehört nicht zum Pflichtumfang.
 - Das Projekt war bis zu diesem Zeitpunkt noch kein lokales Git-Repository. GitHub ist für Repository und CI vorgesehen; GitHub Pages kann das Laravel-Backend nicht ausführen.
-- Vorläufig empfohlen sind Koyeb Free für den Webdienst und Neon Free für PostgreSQL. Render Free plus Neon bleibt die einfachere, aber wegen des längeren beziehungsweise häufigeren Kaltstarts schlechtere Alternative. Details und aktuelle Tarifgrenzen stehen in [hosting.md](hosting.md).
+- Für den kostenlosen öffentlichen Showcase werden Render Free für den Webdienst und Neon Free für PostgreSQL verwendet. Koyeb schied aus, nachdem kostenlose Pläne für neue Nutzer nicht mehr verfügbar waren. Details und aktuelle Tarifgrenzen stehen in [hosting.md](hosting.md).
 
 ## v0.6: Verwendungszweck und Transaktionsübersicht
 
@@ -125,7 +125,7 @@ Im lokalen Browserlauf wurden eine Einzahlung über 4,50 EUR mit „Browserprüf
 - Audit-Ereignisse lassen sich über Eloquent weder ändern noch löschen. Das ist nachvollziehbare Anwendungskontrolle, aber kein kryptografisch verkettetes oder extern revisionssicher archiviertes Audit.
 - Die Betreiberseite zeigt die 50 jüngsten Ereignisse. Pagination, Suche, Export, Aufbewahrungsdauer, Passwort-Reset und Mehrfaktor-Anmeldung sind vor der öffentlichen Veröffentlichung erneut zu bewerten; sie gehören nicht automatisch zum kleinen v1.0-Showcase.
 
-Der nächste Meilenstein v0.8 prüft Migrationen und konkurrierende Auszahlungen mit PostgreSQL. Noch unbestätigt ist, ob Koyeb Free plus Neon Free zum Deploymentzeitpunkt dieselben Tarif- und Betriebsbedingungen bietet; [hosting.md](hosting.md) hält diese zeitabhängige Empfehlung deshalb ausdrücklich vorläufig.
+Der nächste Meilenstein v0.8 prüft Migrationen und konkurrierende Auszahlungen mit PostgreSQL. Hostingbedingungen bleiben zeitabhängig; die aktuelle Entscheidung für Render Free plus Neon Free und ihre Grenzen stehen in [hosting.md](hosting.md).
 
 ## v0.8: PostgreSQL und Nebenläufigkeit
 

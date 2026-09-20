@@ -29,7 +29,7 @@ v1.0-rc.1 ergänzt CI, opt-in Demo-Reset, MIT-Lizenz und einen Produktionscontai
 - Produktionskonfiguration ohne Debug-Ausgaben, mit passenden Security-Headern, Fehlerseiten, Logging und Verfügbarkeitsprüfung.
 - Automatisierte CI-Prüfung und dokumentierter Deployment- und Wiederherstellungsweg.
 
-Die vorläufige Hosting-Empfehlung ist GitHub für Repository und CI, Koyeb Free für den Laravel-Webdienst und Neon Free für PostgreSQL. Grenzen und Alternativen stehen in [hosting.md](hosting.md). Die lokale PostgreSQL-Semantik ist bestätigt; Anbietergrenzen und Deployment werden im späteren Veröffentlichungsprototyp bestätigt oder verworfen.
+Die Hosting-Empfehlung ist GitHub für Repository und CI, Render Free für den Laravel-Webdienst und Neon Free für PostgreSQL. Grenzen und Alternativen stehen in [hosting.md](hosting.md). Die lokale PostgreSQL-Semantik ist bestätigt; Anbietergrenzen und Deployment werden im Veröffentlichungsprototyp geprüft.
 
 ## Zusätzliche Buchungsfunktionen
 
