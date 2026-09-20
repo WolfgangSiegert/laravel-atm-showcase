@@ -1,6 +1,6 @@
 # Prüfprotokoll — v1.0-rc.1
 
-Lokale Prüfung am 14. September 2026 mit PHP 8.4.25 und Node 24.20.0.
+Erneute lokale Prüfung am 20. September 2026 mit PHP 8.4.25 und Node 24.20.0 nach der Vorbereitung für Render.
 
 - **117 Pest-Tests, 745 Assertions erfolgreich; fünf PostgreSQL-Szenarien im SQLite-Lauf übersprungen.**
 - **Zwei Chrome-Browserabläufe erfolgreich**, jetzt mit aktiviertem öffentlichen Demo-Modus und sichtbaren PINs.
@@ -9,7 +9,7 @@ Lokale Prüfung am 14. September 2026 mit PHP 8.4.25 und Node 24.20.0.
 
 Reset-Prüfungen bestätigen ausdrückliches Opt-in und CLI-Bestätigung, erhaltene fremde Konten/Buchungen/Betreiber, Nullsaldo und wiederhergestellten Scheinbestand, ungültige alte Sitzungen und bereits vorbereitete Buchungsanfragen, einmaligen fälligen Reset, sieben Tage Audit-Aufbewahrung, öffentliche Buchungslimits und ausschließlich sichtbare Demo-PINs im öffentlichen Modus. Ein Proxytest bestätigt HTTPS-Forwarding nur von konfigurierten IPs.
 
-Die [GitHub-CI für Commit fb6703c](https://github.com/WolfgangSiegert/laravel-atm-showcase/actions/runs/34834098957) ist vollständig grün: 117 Standardtests mit 745 Assertions, fünf PostgreSQL-Mehrprozessszenarien mit 20 Assertions und zwei Chromium-Browserabläufe. Der Containerjob baute das Image in 2 Minuten 36 Sekunden einschließlich Startprüfung erfolgreich und bestätigte HTTP-Antworten auf `/up` und `/atm/cards` sowie den noch nicht fälligen CLI-Reset gegen isoliertes PostgreSQL. Der Prüfjob lief 1 Minute 39 Sekunden. Diese Zeiten sind CI-Zeiten und keine gemessenen Render-Kaltstarts.
+Die [GitHub-CI für Commit 8616e48](https://github.com/WolfgangSiegert/laravel-atm-showcase/actions/runs/35528895773) ist vollständig grün: 117 Standardtests mit 745 Assertions, fünf PostgreSQL-Mehrprozessszenarien mit 20 Assertions und zwei Chromium-Browserabläufe. Der Containerjob baute das Image in 2 Minuten 23 Sekunden und bestätigte den Render-kompatiblen Port 10000, HTTP-Antworten auf `/up` und `/atm/cards` sowie den noch nicht fälligen CLI-Reset gegen isoliertes PostgreSQL. Der Prüfjob lief 1 Minute 9 Sekunden. Diese Zeiten sind CI-Zeiten und keine gemessenen Render-Kaltstarts.
 
 Der lokale Docker-Daemon ist nicht aktiv; Build und Runtime wurden deshalb auf dem Linux-Runner geprüft. Die zwei zusätzlichen PostgreSQL-Szenarien bestätigen Reset gegen vorbereitete Auszahlung und zwei gleichzeitig fällige Resets. Öffentliche Render-/Neon-Instanz, tatsächliches TLS/Proxyverhalten, Kaltstart und Free-Instanzspeicher sind noch nicht bestätigt; der Stand bleibt deshalb ein Release Candidate.
 
