@@ -161,3 +161,12 @@ Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKI
 - GitHub Actions verwendet PHP 8.4/Node 24, SQLite, PostgreSQL 18, Chromium und einen Produktionscontainer-Smoke-Test. Docker trennt Frontend-Build und PHP-/Apache-Runtime, verwendet Lockfiles und kopiert keine lokalen Secrets/Daten.
 - Im Container sind maximal zwei Apache-Worker vorgesehen. Die 512-MB-Free-Instanz muss dennoch am Host gemessen werden. Basisimages sind auf Hauptversionen statt Digests festgelegt; OS/PHP-Patches können sich bei einem Neubau ändern.
 - Der vorhandene MIT-Eintrag in Composer wird um eine tatsächliche MIT-Lizenzdatei ergänzt. Hostingkonten, Proxyvertrauen, TLS, Kaltstart, Speicher und Tarifbedingungen bleiben vor Veröffentlichung zu bestätigen.
+
+## v1.0-rc.2: Showcase-Darstellung und Rückmeldung
+
+- Die App bietet `light`, `dark` und `retro` als drei Darstellungen in einem gemeinsamen Umschalter. Die Wahl wird nur im Browser gespeichert; es gibt weder Benutzerprofil noch serverseitiges Tracking dieser Einstellung. Ohne gespeicherte Wahl gilt die Betriebssystempräferenz für dunkle Darstellung.
+- Der Dark Mode überschreibt die bewusst kleine, vorhandene Tailwind-Farbpalette. Der Retro-Skin bleibt reines CSS mit Systemschrift, eckigen Flächen, versetzten Schatten und Scanlines. Es werden keine Bild-, Font- oder JavaScript-Abhängigkeiten ergänzt.
+- Flash-Erfolgsmeldungen werden zentral als Toast ausgegeben. Validierungs- und Geschäftsfehler bleiben nahe am jeweiligen Formular, weil ein Erfolgssymbol für Fehlermeldungen irreführend wäre.
+- Eine Inertia-Navigation zeigt erst nach 180 Millisekunden ein Lade-Overlay. Dadurch erhalten langsame Kaltstart- oder Netzwerkantworten eine klare Rückmeldung, während warme Antworten nicht durch kurzes Flackern unruhig wirken.
+- GitHub verweist direkt auf das Showcase-Repository. `PORTFOLIO_URL` ist eine Laufzeitkonfiguration; ohne gesetzten Wert heißt der Link ausdrücklich „Portfolio-Code“ und verweist auf das Portfolio-Repository. Die lokal gefundene Domain `tiny-bits.org` wurde nicht fest eingetragen, weil ihre HTTPS-Zertifikatsprüfung derzeit fehlschlägt.
+- Der Stand wird als `v1.0.0-rc.2` geführt. Die UI-Arbeit ändert die offene Freigabebedingung zur realen Render-Speichermessung nicht.

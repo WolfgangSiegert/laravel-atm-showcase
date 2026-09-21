@@ -2,6 +2,9 @@ import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h, type DefineComponent } from 'vue';
+import { initializeTheme } from './composables/useTheme';
+
+initializeTheme();
 
 createInertiaApp({
     title: (title) => `${title} · LERN-Bank Mein Geldautomat`,

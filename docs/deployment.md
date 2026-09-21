@@ -28,6 +28,7 @@ Das Render-Konto muss vorab eingerichtet und mit GitHub verbunden werden. Zugang
 | `TRUSTED_PROXIES` | `*`, für den ausschließlich über Render veröffentlichten Container geprüft |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` |
 | `QUEUE_CONNECTION` | `sync` (keine Hintergrundjobs vorgesehen) |
+| `PORTFOLIO_URL` | Optional: öffentliche HTTPS-Adresse des persönlichen Portfolios; ohne Wert verweist die App auf dessen GitHub-Repository. |
 
 `render.yaml` setzt `TRUSTED_PROXIES=*`, weil der Container nur über den verwalteten Render-Gateway veröffentlicht wird. Die Zielhost-Prüfung am 20. September 2026 bestätigte HTTPS-Erkennung, HSTS und sichere Cookies. Direkte Versuche mit `X-Forwarded-Proto: http` und `Forwarded: proto=http;host=attacker.invalid` änderten weder Status noch kanonische HTTPS-Asset-URLs oder HSTS. Damit ist die Manipulation des Schemas und Hosts über diese Besucherheader auf dem Render-Pfad ausgeschlossen. Die konkrete Client-IP lässt sich ohne Diagnose-Endpunkt nicht direkt beobachten; das IP-Limit bleibt deshalb keine vollständige Abuse-Abwehr. Laravels TrustProxies-Middleware liest die Konfiguration auch nach `config:cache`.
 

@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-const page = usePage<{ notice?: string | null }>();
+import LoadingOverlay from '../components/LoadingOverlay.vue';
+import ThemeSwitcher from '../components/ThemeSwitcher.vue';
+import ToastNotice from '../components/ToastNotice.vue';
+
+const page = usePage<{ portfolioUrl?: string | null }>();
+const portfolioUrl = page.props.portfolioUrl || 'https://github.com/WolfgangSiegert/WolfgangSiegert.github.io';
+const hasPortfolioWebsite = Boolean(page.props.portfolioUrl);
 </script>
 
 <template>
@@ -12,20 +18,25 @@ const page = usePage<{ notice?: string | null }>();
                     <span class="brand-symbol" aria-hidden="true">L<span>↗</span></span>
                     <span>LERN-Bank<span class="block text-xs font-normal tracking-widest text-stone-600">MEIN GELDAUTOMAT</span></span>
                 </Link>
-                <nav aria-label="Hauptnavigation" class="flex items-center gap-6 text-sm">
+                <nav aria-label="Hauptnavigation" class="flex flex-wrap items-center justify-end gap-4 text-sm sm:gap-6">
                     <Link href="/atm" :aria-current="page.url === '/atm' ? 'page' : undefined" class="font-semibold underline decoration-lime-600 underline-offset-8">Automat</Link>
                     <Link href="/operator/login" :aria-current="page.url.startsWith('/operator') ? 'page' : undefined" class="text-stone-600 hover:text-stone-950">Betrieb</Link>
                     <Link href="/atm#ausblick" class="text-stone-600 hover:text-stone-950">Ausblick ↗</Link>
+                    <ThemeSwitcher />
                 </nav>
             </div>
         </header>
         <main id="main" tabindex="-1" class="mx-auto max-w-6xl px-6 py-12 sm:px-10 sm:py-20">
-            <p v-if="page.props.notice" role="status" class="mb-8 rounded-lg border border-green-800 bg-green-50 p-4 text-green-950">{{ page.props.notice }}</p>
             <slot />
         </main>
         <footer class="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 border-t border-stone-300 px-6 py-6 text-xs text-stone-600 sm:px-10">
-            <span>Zum Lernen gebaut.</span>
-            <span>Simulation · Keine echten Bankgeschäfte</span>
+            <span>Zum Lernen gebaut · Simulation ohne echte Bankgeschäfte</span>
+            <span class="flex flex-wrap gap-x-5 gap-y-2">
+                <a href="https://github.com/WolfgangSiegert/laravel-atm-showcase" target="_blank" rel="noopener noreferrer" class="font-semibold hover:underline">GitHub ↗</a>
+                <a :href="portfolioUrl" target="_blank" rel="noopener noreferrer" class="font-semibold hover:underline">{{ hasPortfolioWebsite ? 'Portfolio' : 'Portfolio-Code' }} ↗</a>
+            </span>
         </footer>
+        <ToastNotice />
+        <LoadingOverlay />
     </div>
 </template>

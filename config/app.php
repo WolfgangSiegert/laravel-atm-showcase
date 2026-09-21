@@ -56,6 +56,8 @@ return [
 
     'url' => env('APP_URL', $renderHostname ? 'https://'.$renderHostname : 'http://localhost'),
 
+    'portfolio_url' => env('PORTFOLIO_URL'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

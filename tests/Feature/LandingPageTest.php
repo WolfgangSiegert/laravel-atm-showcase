@@ -16,7 +16,7 @@ it('renders the German application shell with the expected page', function () {
         ->assertSee('lang="de"', false)
         ->assertInertia(fn (Assert $page) => $page
             ->component('Atm/Welcome')
-            ->where('version', '1.0.0-rc.1')
+            ->where('version', '1.0.0-rc.2')
             ->where('appName', 'LERN-Bank Mein Geldautomat'));
 });
 
@@ -31,7 +31,16 @@ it('serves the Inertia navigation response', function () {
         ->assertOk()
         ->assertHeader('X-Inertia', 'true')
         ->assertJsonPath('component', 'Atm/Welcome')
-        ->assertJsonPath('props.version', '1.0.0-rc.1');
+        ->assertJsonPath('props.version', '1.0.0-rc.2');
+});
+
+it('shares a configured portfolio website with the application shell', function () {
+    config()->set('app.portfolio_url', 'https://portfolio.example.test');
+
+    $this->get(route('atm.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('portfolioUrl', 'https://portfolio.example.test'));
 });
 
 it('provides a health endpoint', function () {

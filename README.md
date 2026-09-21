@@ -1,4 +1,4 @@
-# LERN-Bank Mein Geldautomat — v1.0 Release Candidate 1
+# LERN-Bank Mein Geldautomat — v1.0 Release Candidate 2
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -17,6 +17,9 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - Unter PostgreSQL geprüfte Sperren für konkurrierende Auszahlungen und idempotente Wiederholungen.
 - Automatisierter Chrome-Hauptablauf mit isolierter Browser-Testdatenbank.
 - Sicherheitsheader und verständliche Fehlerseiten bei deaktiviertem Debug-Modus.
+- Helle, dunkle und optionale Retro-Darstellung mit dauerhaft gespeicherter Auswahl.
+- Toast-Benachrichtigungen für erfolgreiche Aktionen und verzögertes Lade-Overlay bei längeren Seitenwechseln.
+- Direkte Links zum Projekt auf GitHub und zum Portfolio; `PORTFOLIO_URL` setzt die Portfolio-Adresse zur Laufzeit.
 - Explizit aktivierbarer öffentlicher Demo-Modus mit sichtbaren Demo-PINs, Reset und ungültig werdenden alten Sitzungen.
 - GitHub-CI für SQLite, PostgreSQL, Browser und Produktionscontainer; Docker-Deployment mit PHP 8.4.
 - Customer, Account, Card, Transaction, ATM und CashInventory als einfache Eloquent-Modelle mit Migrationen und lokalem Demo-Seeding.
@@ -155,7 +158,7 @@ Der öffentliche Modus wird ausschließlich für eine dedizierte fiktive Datenba
 | DELETE | `/operator/session` | Betreibersitzung beenden |
 | GET/HEAD | `/up` | Laravel-Healthcheck |
 
-Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kein zusätzlicher Client-Router, kein SSR, keine Repository-/DDD-Schichten. ATM-Kartensitzungen bleiben unabhängig vom Laravel-User des Betreiberbereichs. Das öffentliche GitHub-Repository ist eingerichtet; ein Deployment besteht noch nicht.
+Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kein zusätzlicher Client-Router, kein SSR, keine Repository-/DDD-Schichten. ATM-Kartensitzungen bleiben unabhängig vom Laravel-User des Betreiberbereichs. Das öffentliche GitHub-Repository und das Render-Deployment sind eingerichtet.
 
 ## Weiterentwicklung
 

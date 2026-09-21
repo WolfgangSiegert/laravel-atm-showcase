@@ -1,4 +1,20 @@
-# Prüfprotokoll — v1.0-rc.1
+# Prüfprotokoll — v1.0-rc.2
+
+Lokal geprüft am 21. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
+
+- Helle, dunkle und pixel-inspirierte Retro-Darstellung funktionieren ohne zusätzliche Abhängigkeiten. Die Auswahl bleibt über `localStorage` erhalten; ohne gespeicherte Wahl folgt die App der Systempräferenz für dunkle Darstellung.
+- Erfolgreiche Servermeldungen erscheinen als zugänglicher, schließbarer Toast und verschwinden nach sechs Sekunden. Bei Inertia-Navigationen, die länger als 180 Millisekunden dauern, erscheint ein blockierendes Lade-Overlay; die Verzögerung vermeidet Flackern bei schnellen Antworten.
+- Footer-Links führen zum öffentlichen Projekt-Repository und zum Portfolio. Solange `PORTFOLIO_URL` leer ist, wird der funktionierende Portfolio-Quellcode verlinkt, weil die gefundene Portfolio-Domain derzeit kein gültiges TLS-Zertifikat für ihren Hostnamen liefert.
+- Produktionsbuild einschließlich TypeScript-Prüfung, Pint, strikte Composer-Validierung und Plattformanforderungen waren erfolgreich.
+- 119 Pest-Tests mit 817 Assertions waren erfolgreich; fünf PostgreSQL-Szenarien wurden im SQLite-Standardlauf wie vorgesehen übersprungen. Drei Playwright-Abläufe waren in lokalem Google Chrome erfolgreich.
+- Der dritte Browserablauf prüft GitHub-/Portfolio-Link, Theme-Wechsel, gespeicherte dunkle Darstellung und Retro-Auswahl. Der Hauptablauf prüft zusätzlich Anzeige und manuelles Schließen des Einzahlungs-Toasts.
+- Visuell geprüft wurden die drei Darstellungen auf der Startseite sowie Retro bei 375 × 812 Pixeln. Die Dokumentbreite blieb exakt 375 Pixel; Browserprotokoll ohne Warnungen oder Fehler.
+
+Der Ladezustand ist absichtlich erst nach 180 Millisekunden sichtbar und daher nicht mit einem künstlich verlangsamten E2E-Test gekoppelt. Die Retro-Darstellung ist ein CSS-Skin und kein vollständig neu gezeichneter ATM-Ablauf. Die reale Portfolio-Website bleibt offen, bis eine funktionierende HTTPS-Adresse bekannt ist. Der Render-Speicherverbrauch bleibt die letzte dokumentierte Freigabebedingung für v1.0.
+
+---
+
+# Historisches Prüfprotokoll — v1.0-rc.1
 
 Erneute lokale Prüfung am 21. September 2026 mit PHP 8.4.25 und Node 24.20.0 nach der ersten öffentlichen Render-Abnahme.
 

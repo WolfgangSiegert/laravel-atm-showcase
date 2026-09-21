@@ -14,6 +14,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'appName' => config('app.name'),
+            'portfolioUrl' => config('app.portfolio_url'),
             'notice' => fn () => $request->session()->get('notice'),
         ];
     }
