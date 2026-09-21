@@ -24,7 +24,7 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - GitHub-CI für SQLite, PostgreSQL, Browser und Produktionscontainer; Docker-Deployment mit PHP 8.4.
 - Customer, Account, Card, Transaction, ATM und CashInventory als einfache Eloquent-Modelle mit Migrationen und lokalem Demo-Seeding.
 
-Die öffentliche Demo läuft unter **https://lern-bank-geldautomat.onrender.com** auf Render Free mit Neon PostgreSQL. HTTPS, Sicherheitsheader, Proxyverhalten, Kaltstart und der vollständige ATM-Ablauf sind am Zielhost geprüft. **Noch offen für v1.0:** Speicherverbrauch nach der Apache-Worker-Anpassung. Tageslimits und Scheinannahme bleiben außerhalb des Umfangs. Einzahlungen sind reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
+Die öffentliche Demo läuft auf Render Free mit Neon PostgreSQL und wird nach DNS-Verifizierung unter **https://atm.tiny-bits.org** erreichbar; die technische Render-Adresse bleibt als Rückfalladresse erhalten. HTTPS, Sicherheitsheader, Proxyverhalten, Kaltstart und der vollständige ATM-Ablauf sind am Render-Zielhost geprüft. **Noch offen für v1.0:** Speicherverbrauch nach der Apache-Worker-Anpassung und die abschließende TLS-Abnahme der eigenen Subdomain. Tageslimits und Scheinannahme bleiben außerhalb des Umfangs. Einzahlungen sind reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
 
 ## Lokal starten
 

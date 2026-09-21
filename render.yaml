@@ -12,6 +12,8 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /up
+    domains:
+      - atm.tiny-bits.org
     envVars:
       - key: APP_NAME
         value: LERN-Bank Mein Geldautomat
@@ -25,6 +27,8 @@ services:
         value: de
       - key: APP_FALLBACK_LOCALE
         value: de
+      - key: PORTFOLIO_URL
+        value: https://tiny-bits.org/portfolio/
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_URL

@@ -11,6 +11,8 @@ Stand: 20. September 2026. Kostenlose Tarife können sich ändern und müssen vo
 | Laravel-Webdienst | Render | Free Web Service, Region Frankfurt | Unterstützt Docker aus GitHub, verwaltetes TLS und eine öffentliche `onrender.com`-Adresse. |
 | PostgreSQL | Neon | Free | Das getrennte Showcase-Projekt ist bereits eingerichtet; die Daten bleiben unabhängig vom flüchtigen Webcontainer erhalten. |
 
+Die öffentliche Showcase-Adresse ist `atm.tiny-bits.org`. Sie wird als CNAME auf `lern-bank-geldautomat.onrender.com` geführt. Die Hauptdomain `tiny-bits.org` und `www` bleiben bei GitHub Pages; das Portfolio unter `/portfolio/` wird dadurch nicht verändert.
+
 GitHub Pages und Netlify Static Hosting führen kein dauerhaftes Laravel-/PHP-Backend aus. Eine Aufteilung in statisches Frontend und serverlose APIs würde das Projekt grundlegend umbauen und ist für diesen Showcase nicht sinnvoll.
 
 Koyeb war zunächst vorgesehen, scheidet für eine kostenlose Neuinstallation aber aus. Seit der angekündigten Übernahme durch Mistral können neue Nutzer nur noch kostenpflichtige Pläne buchen; der bisherige Starter-Plan bleibt lediglich für bestehende Organisationen erhalten.

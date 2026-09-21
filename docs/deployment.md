@@ -1,6 +1,6 @@
 # Deployment — v1.0 Release Candidate
 
-Stand: 21. September 2026. Das Neon-Projekt `steep-shape-34891524` ist mit dem lokalen Projekt und dem Branch `production` verknüpft. Die leere Deployment-Policy in `neon.ts` ist die dokumentierte Ausgangsbasis. Die lokale Anwendung verwendet weiterhin SQLite; die öffentliche Instanz läuft unter `https://lern-bank-geldautomat.onrender.com`. Funktionale Zielhost-Abnahme und Kaltstartmessung sind erfolgt. v1.0 wird nach der noch offenen Speichermessung freigegeben.
+Stand: 21. September 2026. Das Neon-Projekt `steep-shape-34891524` ist mit dem lokalen Projekt und dem Branch `production` verknüpft. Die leere Deployment-Policy in `neon.ts` ist die dokumentierte Ausgangsbasis. Die lokale Anwendung verwendet weiterhin SQLite; die Render-Instanz läuft unter `https://lern-bank-geldautomat.onrender.com`. Der Blueprint registriert zusätzlich `https://atm.tiny-bits.org`; DNS- und TLS-Abnahme stehen noch aus. Funktionale Zielhost-Abnahme und Kaltstartmessung sind erfolgt. v1.0 wird nach Custom-Domain- und Speichermessung freigegeben.
 
 ## Ziel und Voraussetzungen
 
@@ -31,6 +31,8 @@ Das Render-Konto muss vorab eingerichtet und mit GitHub verbunden werden. Zugang
 | `PORTFOLIO_URL` | Optional: öffentliche HTTPS-Adresse des persönlichen Portfolios; ohne Wert verweist die App auf dessen GitHub-Repository. |
 
 `render.yaml` setzt `TRUSTED_PROXIES=*`, weil der Container nur über den verwalteten Render-Gateway veröffentlicht wird. Die Zielhost-Prüfung am 20. September 2026 bestätigte HTTPS-Erkennung, HSTS und sichere Cookies. Direkte Versuche mit `X-Forwarded-Proto: http` und `Forwarded: proto=http;host=attacker.invalid` änderten weder Status noch kanonische HTTPS-Asset-URLs oder HSTS. Damit ist die Manipulation des Schemas und Hosts über diese Besucherheader auf dem Render-Pfad ausgeschlossen. Die konkrete Client-IP lässt sich ohne Diagnose-Endpunkt nicht direkt beobachten; das IP-Limit bleibt deshalb keine vollständige Abuse-Abwehr. Laravels TrustProxies-Middleware liest die Konfiguration auch nach `config:cache`.
+
+Die eigene Adresse verwendet bewusst die Subdomain `atm.tiny-bits.org`. Die Hauptdomain und `www` bleiben bei GitHub Pages; `tiny-bits.org/portfolio/` bleibt dadurch unverändert erreichbar. Im HostGator-DNS wird ausschließlich ein CNAME mit Name `atm` und Ziel `lern-bank-geldautomat.onrender.com` benötigt. Kein A-, AAAA- oder Wildcard-Eintrag für diese Subdomain ergänzen. Nach DNS-Propagation wird die Domain in Render verifiziert und HTTPS, Assets, Cookies sowie ein vollständiger ATM-Ablauf erneut geprüft. Die Render-Subdomain bleibt bis dahin aktiviert.
 
 Der `APP_KEY` bleibt über Neustarts und Deployments unverändert. `composer setup` gehört nicht in das Deployment: Es regeneriert den Schlüssel. Keine `.env`, lokalen SQLite-Dateien, Sitzungen oder lokalen Betreiberpasswörter werden ins Docker-Image kopiert.
 
