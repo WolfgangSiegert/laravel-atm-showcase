@@ -1,6 +1,6 @@
 # Deployment — v1.0 Release Candidate
 
-Stand: 20. September 2026. Das Neon-Projekt `steep-shape-34891524` ist mit dem lokalen Projekt und dem Branch `production` verknüpft. Die leere Deployment-Policy in `neon.ts` ist die dokumentierte Ausgangsbasis. Die lokale Anwendung verwendet weiterhin SQLite; die öffentliche Instanz läuft unter `https://lern-bank-geldautomat.onrender.com`. Die funktionale Zielhost-Abnahme ist erfolgt. v1.0 wird nach der noch offenen Speicher- und Kaltstartmessung freigegeben.
+Stand: 21. September 2026. Das Neon-Projekt `steep-shape-34891524` ist mit dem lokalen Projekt und dem Branch `production` verknüpft. Die leere Deployment-Policy in `neon.ts` ist die dokumentierte Ausgangsbasis. Die lokale Anwendung verwendet weiterhin SQLite; die öffentliche Instanz läuft unter `https://lern-bank-geldautomat.onrender.com`. Funktionale Zielhost-Abnahme und Kaltstartmessung sind erfolgt. v1.0 wird nach der noch offenen Speichermessung freigegeben.
 
 ## Ziel und Voraussetzungen
 
@@ -43,7 +43,7 @@ Der `APP_KEY` bleibt über Neustarts und Deployments unverändert. `composer set
 6. Beim Containerstart prüft `atm:deployment-check` Konfiguration und Datenbankverbindung. Danach folgen Config-Cache, additive Migrationen, idempotente Einrichtung der beiden Demo-Karten/ATM und Route-/View-Cache. Bei einem Fehler startet Apache nicht. Es wird **kein bekannter Betreiber** in Produktion angelegt.
 7. Falls der Betreiberbereich vorgeführt werden soll, auf einem vertrauenswürdigen lokalen Checkout mit derselben Produktionsdatenbank `php artisan atm:operator-create deine-adresse@example.org` ausführen. Das Passwort wird verdeckt abgefragt, ist mindestens 16 Zeichen lang und steht weder im Repository noch in Prozessargumenten. Dafür die Produktionsvariablen nur in einer separaten, ignorierten Umgebung verwenden; keine lokalen Datenbankwerte überschreiben.
 
-Das Image verwendet PHP 8.4/Apache, Node 24 nur während des Builds und maximal vier Apache-Worker. Der erste öffentliche Lauf erreichte das frühere Limit von zwei Workern bereits durch Healthchecks und Besucherzugriffe; vier Worker sind der vorsichtige Folgewert für 512 MB. Der reale Speicherverbrauch nach dieser Änderung und die Startzeit auf der Free-Instanz sind noch nicht gemessen. Die Basisimages folgen ihren gepflegten Hauptversionen; PHP-/OS-Patchstände sind damit bewusst nicht auf einen unveränderlichen Digest festgeschrieben. Abhängigkeiten werden über beide Lockfiles fixiert.
+Das Image verwendet PHP 8.4/Apache, Node 24 nur während des Builds und maximal vier Apache-Worker. Der erste öffentliche Lauf erreichte das frühere Limit von zwei Workern bereits durch Healthchecks und Besucherzugriffe; vier Worker sind der vorsichtige Folgewert für 512 MB. Der reale Speicherverbrauch nach dieser Änderung ist noch nicht gemessen. Ein beobachteter Free-Kaltstart am 21. September benötigte ungefähr 28 Sekunden von Renders erster eingehender Anfrage bis zur nutzbaren Kartenauswahl; das ist eine Einzelmessung. Die Basisimages folgen ihren gepflegten Hauptversionen; PHP-/OS-Patchstände sind damit bewusst nicht auf einen unveränderlichen Digest festgeschrieben. Abhängigkeiten werden über beide Lockfiles fixiert.
 
 ## Demo-Reset und Aufbewahrung
 
@@ -67,7 +67,7 @@ Diese Befehle löschen fiktive Daten. Sie gehören ausschließlich in die dedizi
 - Session-Cookie ist Secure/HttpOnly/SameSite=Lax; HSTS, CSP und Basisheader sind vorhanden. Proxy-Header einer direkten Besucheranfrage dürfen die ermittelte IP nicht beliebig überschreiben.
 - Bekannte lokale Betreiberzugänge sind öffentlich ungültig. `/operator` ist geschützt; Fehlerseiten zeigen keine Debug-Daten.
 - Erzwungener Demo-Reset invalidiert eine offene Sitzung und stellt Saldo/Scheine wieder her; ein normaler Neustart erhält Daten und `APP_KEY`.
-- Aufwachen nach mindestens 15 Minuten Ruhephase, Speicherverbrauch, Datenbankverbindungen und Free-Quoten tatsächlich messen. `/up` bestätigt den Webprozess; es ist kein vollständiger Datenbank-/Buchungsmonitor. Keine dauernden externen Keepalive-Abfragen einsetzen.
+- Speicherverbrauch, Datenbankverbindungen und Free-Quoten weiter beobachten. Der erste Kaltstart nach der Ruhephase dauerte ungefähr 28 Sekunden; weitere Starts können abweichen. `/up` bestätigt den Webprozess, ist aber kein vollständiger Datenbank-/Buchungsmonitor. Keine dauernden externen Keepalive-Abfragen einsetzen.
 
 Für ein Code-Rollback den letzten grünen Commit mit unveränderten Secrets deployen. Bei einer Migration zuerst deren Kompatibilität prüfen; das automatische Zurückrollen oder Löschen von Migrationen ist kein Wiederherstellungsweg. Eine kaputte fiktive Demo kann auf einer **neuen dedizierten** Neon-Datenbank migriert/provisioniert werden; URL als Secret aktualisieren. Es werden keine echten Geschäftsdaten aufbewahrt. Wer Demo-Verläufe erhalten möchte, muss vor dem Reset getrennt sichern; derzeit ist kein bezahlter Backupdienst vorgesehen.
 
