@@ -9,6 +9,7 @@ Lokal geprüft am 21. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chr
 - 119 Pest-Tests mit 817 Assertions waren erfolgreich; fünf PostgreSQL-Szenarien wurden im SQLite-Standardlauf wie vorgesehen übersprungen. Drei Playwright-Abläufe waren in lokalem Google Chrome erfolgreich.
 - Der dritte Browserablauf prüft GitHub-/Portfolio-Link, Theme-Wechsel, gespeicherte dunkle Darstellung und Retro-Auswahl. Der Hauptablauf prüft zusätzlich Anzeige und manuelles Schließen des Einzahlungs-Toasts.
 - Visuell geprüft wurden die drei Darstellungen auf der Startseite sowie Retro bei 375 × 812 Pixeln. Die Dokumentbreite blieb exakt 375 Pixel; Browserprotokoll ohne Warnungen oder Fehler.
+- Nach einer Ruhephase am 21. September beantworteten zwölf gleichzeitig gestartete `/up`-Anfragen den Kaltstart vollständig mit HTTP 200 nach 23,39 bis 24,05 Sekunden. Zwölf unmittelbar folgende warme Anfragen antworteten ebenfalls vollständig mit HTTP 200 nach 0,13 bis 1,18 Sekunden. Die gebündelten Kaltstartzeiten beschreiben dasselbe Aufwachen und sind kein Lasttest mit zwölf bereits laufenden Worker-Prozessen.
 
 Der Ladezustand ist absichtlich erst nach 180 Millisekunden sichtbar und daher nicht mit einem künstlich verlangsamten E2E-Test gekoppelt. Die Retro-Darstellung ist ein CSS-Skin und kein vollständig neu gezeichneter ATM-Ablauf. Die reale Portfolio-Website bleibt offen, bis eine funktionierende HTTPS-Adresse bekannt ist. Der Render-Speicherverbrauch bleibt die letzte dokumentierte Freigabebedingung für v1.0.
 

@@ -19,4 +19,16 @@ php artisan atm:demo-provision
 php artisan route:cache
 php artisan view:cache
 chown -R www-data:www-data storage bootstrap/cache
+
+# Render hides application metrics on Free compute. Sample the container cgroup
+# briefly after startup so memory headroom can still be verified in service logs.
+(
+    sample=1
+    while [ "$sample" -le 12 ]; do
+        sleep 10
+        sh deploy/log-memory.sh
+        sample=$((sample + 1))
+    done
+) &
+
 exec apache2-foreground
