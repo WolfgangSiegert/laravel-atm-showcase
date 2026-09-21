@@ -55,7 +55,10 @@ it('rejects invalid purposes without creating a booking', function (string $purp
 ]);
 
 it('rejects invalid or out of range amounts without changing the account', function (mixed $amount) {
-    $this->post('/atm/deposits', [...$this->payload, 'amount' => $amount])->assertSessionHasErrors('amount');
+    $this->post('/atm/deposits', [...$this->payload, 'amount' => $amount])
+        ->assertRedirect(route('atm.session'))
+        ->assertSessionHasErrors('amount')
+        ->assertSessionHas('atm_card_id', $this->card->id);
     expect(Transaction::count())->toBe(0)->and($this->card->account->fresh()->balance_minor)->toBe(0);
 })->with(['0', '-1', '1.001', '1e3', '10000,01', '999999999999999999', 'NaN', 25.5, '1.000,00']);
 
@@ -110,7 +113,9 @@ it('rolls back the balance when creating the booking fails', function () {
 
 it('enforces the configured account balance ceiling', function () {
     config(['atm.max_balance_minor' => 2500]);
-    $this->post('/atm/deposits', $this->payload)->assertSessionHasErrors('amount');
+    $this->post('/atm/deposits', $this->payload)
+        ->assertRedirect(route('atm.session'))
+        ->assertSessionHasErrors('amount');
     expect(Transaction::count())->toBe(0)->and($this->card->account->fresh()->balance_minor)->toBe(0);
 });
 

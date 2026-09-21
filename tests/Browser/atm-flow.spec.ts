@@ -25,6 +25,11 @@ test('completes the public ATM flow with isolated demo data', async ({ page }) =
     await expect(page.getByText('+50,00 €')).toBeVisible();
 
     await page.getByRole('link', { name: 'Zurück zum Konto' }).click();
+    await page.getByLabel('Auszahlungsbetrag in Euro').fill('2,5');
+    await page.getByRole('button', { name: 'Demo-Auszahlung buchen' }).click();
+    await expect(page).toHaveURL('/atm/session');
+    await expect(page.getByRole('alert')).toContainText('ganzen Eurobetrag');
+
     await page.getByLabel('Auszahlungsbetrag in Euro').fill('20');
     await page.getByLabel('Verwendungszweck', { exact: false }).first().fill('Browser-Testauszahlung');
     await page.getByRole('button', { name: 'Demo-Auszahlung buchen' }).click();

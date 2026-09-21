@@ -6,6 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class WithdrawalRequest extends FormRequest
 {
+    protected $redirectRoute = 'atm.session';
+
     public function authorize(): bool
     {
         return $this->attributes->has('atm_card');

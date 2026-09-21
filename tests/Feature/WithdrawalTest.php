@@ -83,19 +83,23 @@ it('rejects invalid withdrawal formats and limits without changing state', funct
     $inventory = CashInventory::where('atm_id', $this->atm->id)->pluck('quantity', 'denomination_minor')->all();
 
     $this->post('/atm/withdrawals', [...$this->payload, 'withdrawal_amount' => $amount])
-        ->assertSessionHasErrors('withdrawal_amount');
+        ->assertRedirect(route('atm.session'))
+        ->assertSessionHasErrors('withdrawal_amount')
+        ->assertSessionHas('atm_card_id', $this->card->id);
 
     expect(Transaction::count())->toBe(0)
         ->and($this->card->account->fresh()->balance_minor)->toBe(100000)
         ->and(CashInventory::where('atm_id', $this->atm->id)->pluck('quantity', 'denomination_minor')->all())->toBe($inventory);
-})->with(['0', '9', '25', '1001', '-10', '10,00', '1e2', 50]);
+})->with(['0', '2,5', '9', '25', '1001', '-10', '10,00', '1e2', 50]);
 
 it('rejects an amount above the account balance', function () {
     $this->card->account->update(['balance_minor' => 12000]);
 
-    $this->post('/atm/withdrawals', $this->payload)->assertSessionHasErrors([
-        'withdrawal_amount' => 'Das Demo-Guthaben reicht für diese Auszahlung nicht aus.',
-    ]);
+    $this->post('/atm/withdrawals', $this->payload)
+        ->assertRedirect(route('atm.session'))
+        ->assertSessionHasErrors([
+            'withdrawal_amount' => 'Das Demo-Guthaben reicht für diese Auszahlung nicht aus.',
+        ]);
 
     expect(Transaction::count())->toBe(0)->and($this->card->account->fresh()->balance_minor)->toBe(12000);
 });
