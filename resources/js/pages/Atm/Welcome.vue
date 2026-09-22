@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import { PhBank, PhCreditCard, PhHandTap } from '@phosphor-icons/vue';
+import { computed } from 'vue';
+import { useTheme } from '../../composables/useTheme';
 import AppShell from '../../layouts/AppShell.vue';
 
 defineProps<{ version: string; appName: string }>();
+const { theme } = useTheme();
+const modeName = computed(() => theme.value === 'classic' ? 'KLASSISCHER GELDAUTOMAT' : theme.value === 'touch' ? 'TOUCHSCREEN' : 'ATM / SIMULATION');
 </script>
 
 <template>
     <Head title="Willkommen" />
     <AppShell>
-        <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            <section aria-labelledby="welcome-heading">
+        <div class="welcome-grid grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+            <section class="welcome-copy" aria-labelledby="welcome-heading">
                 <p class="mb-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-stone-600">
                     <span class="h-2 w-2 rounded-full bg-green-800" aria-hidden="true"></span>
                     Der nächste Schritt · v{{ version }}
@@ -28,13 +33,12 @@ defineProps<{ version: string; appName: string }>();
                     <span>{{ appName }}</span><span>01 / Willkommen</span>
                 </div>
                 <div class="terminal-screen">
-                    <div class="mb-12 flex items-center justify-between text-xs text-green-100/80">
-                        <span>ATM / SIMULATION</span><span class="rounded-full border border-green-100/30 px-3 py-1">Vorschau</span>
+                    <div class="terminal-screen__meta mb-12 flex items-center justify-between text-xs text-green-100/80">
+                        <span>{{ modeName }}</span><span class="rounded-full border border-green-100/30 px-3 py-1">Bereit</span>
                     </div>
-                    <svg class="mb-6 h-12 w-16 text-lime-200" viewBox="0 0 64 48" fill="none" aria-hidden="true">
-                        <rect x="2" y="2" width="60" height="44" rx="6" stroke="currentColor" stroke-width="2" />
-                        <path d="M2 15h60M12 34h13m8 0h7" stroke="currentColor" stroke-width="3" />
-                    </svg>
+                    <PhBank v-if="theme === 'classic'" class="terminal-icon" :size="58" weight="duotone" aria-hidden="true" />
+                    <PhHandTap v-else-if="theme === 'touch'" class="terminal-icon" :size="58" weight="duotone" aria-hidden="true" />
+                    <PhCreditCard v-else class="terminal-icon" :size="58" weight="duotone" aria-hidden="true" />
                     <h2 id="terminal-heading" class="text-3xl font-medium tracking-tight">Willkommen.</h2>
                     <p class="mt-3 max-w-xs text-sm leading-relaxed text-green-100/80">Beginne deine Sitzung mit der Auswahl einer Demo-Karte.</p>
                     <Link href="/atm/cards" class="mt-9 block w-full rounded-lg bg-lime-200 px-5 py-4 text-left font-semibold text-green-950 hover:bg-lime-100">Karte auswählen <span class="float-right" aria-hidden="true">→</span></Link>

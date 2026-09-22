@@ -1,19 +1,19 @@
 import { readonly, ref } from 'vue';
 
-export type Theme = 'light' | 'dark' | 'retro';
+export type Theme = 'light' | 'dark' | 'retro' | 'classic' | 'touch';
 
 const storageKey = 'lern-bank-theme';
 const theme = ref<Theme>('light');
 let initialized = false;
 
 function isTheme(value: string | null): value is Theme {
-    return value === 'light' || value === 'dark' || value === 'retro';
+    return value === 'light' || value === 'dark' || value === 'retro' || value === 'classic' || value === 'touch';
 }
 
 function applyTheme(value: Theme) {
     theme.value = value;
     document.documentElement.dataset.theme = value;
-    document.documentElement.style.colorScheme = value === 'dark' ? 'dark' : 'light';
+    document.documentElement.style.colorScheme = value === 'dark' || value === 'classic' || value === 'touch' ? 'dark' : 'light';
 }
 
 export function initializeTheme() {

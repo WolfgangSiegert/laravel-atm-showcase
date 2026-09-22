@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { PhBank, PhHandTap, PhMonitor, PhMoonStars, PhSun } from '@phosphor-icons/vue';
 import { useTheme, type Theme } from '../composables/useTheme';
 
 const { theme, setTheme } = useTheme();
-const themes: { value: Theme; label: string; symbol: string }[] = [
-    { value: 'light', label: 'Hell', symbol: '☀' },
-    { value: 'dark', label: 'Dunkel', symbol: '◐' },
-    { value: 'retro', label: 'Retro', symbol: '▦' },
+const themes = [
+    { value: 'light' as Theme, label: 'Hell', icon: PhSun },
+    { value: 'dark' as Theme, label: 'Dunkel', icon: PhMoonStars },
+    { value: 'retro' as Theme, label: 'Retro', icon: PhMonitor },
+    { value: 'classic' as Theme, label: 'Klassik-ATM', icon: PhBank },
+    { value: 'touch' as Theme, label: 'Touchscreen', icon: PhHandTap },
 ];
 </script>
 
@@ -21,8 +24,8 @@ const themes: { value: Theme; label: string; symbol: string }[] = [
             :aria-label="`${option.label}-Darstellung`"
             @click="setTheme(option.value)"
         >
-            <span aria-hidden="true">{{ option.symbol }}</span>
-            <span class="hidden sm:inline">{{ option.label }}</span>
+            <component :is="option.icon" :size="17" weight="bold" aria-hidden="true" />
+            <span class="theme-switcher__label">{{ option.label }}</span>
         </button>
     </div>
 </template>

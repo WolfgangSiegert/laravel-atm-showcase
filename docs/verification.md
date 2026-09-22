@@ -1,4 +1,20 @@
-# Prüfprotokoll — v1.0
+# Prüfprotokoll — v1.1
+
+Geprüft am 22. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
+
+- Die Darstellungswahl umfasst jetzt `light`, `dark`, `retro`, `classic` und `touch`; alle fünf Werte werden gespeichert und nach einem Neuladen wiederhergestellt.
+- Klassik- und Touch-Modus bieten eigene Menüoberflächen für Kontostand, Einzahlung, Auszahlung, Umsätze und Kartenrückgabe. Karte, PIN und Geldbeträge lassen sich in beiden Modi per Mausklick bedienen.
+- Phosphor Icons werden als versionierte Frontend-Abhängigkeit gebündelt. Die drei Referenzbilder werden nicht ausgeliefert.
+- 119 Pest-Tests mit 817 Assertions waren erfolgreich; fünf PostgreSQL-Szenarien wurden im SQLite-Standardlauf wie vorgesehen übersprungen. Vier Playwright-Abläufe waren in lokalem Google Chrome erfolgreich.
+- Der neue Browserablauf meldet sich in beiden Oberflächen an, öffnet Menübereiche, prüft das schreibgeschützte Betragsfeld samt Bildschirm-Nummernfeld, beendet die Sitzung und bestätigt bei 375 Pixeln Breite fehlenden horizontalen Überlauf.
+- Produktionsbuild einschließlich TypeScript-Prüfung und Pint waren erfolgreich. Die visuelle Browserprüfung bei 1280 × 720 zeigte keine Konsolenwarnungen oder -fehler.
+- Der bildbasierte Vergleich mit den drei bereitgestellten Referenzen ist in [`design-qa.md`](../design-qa.md) dokumentiert und mit `final result: passed` abgeschlossen.
+
+Die beiden neuen Modi ändern ausschließlich Frontend-Navigation und Darstellung. Buchungen, Filter, Sitzungsprüfung und Fehlerbehandlung verwenden weiterhin dieselben serverseitigen Routen und Regeln. Der optionale Verwendungszweck benötigt weiterhin eine Texteingabe; „nur mit Mausklicks“ bezieht sich auf klassische Menüführung, Karten-/PIN-Auswahl und Geldbeträge.
+
+---
+
+# Historisches Prüfprotokoll — v1.0
 
 Lokal und öffentlich geprüft am 21. und 22. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
 

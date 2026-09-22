@@ -1,4 +1,4 @@
-# LERN-Bank Mein Geldautomat — v1.0
+# LERN-Bank Mein Geldautomat — v1.1
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -17,7 +17,8 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - Unter PostgreSQL geprüfte Sperren für konkurrierende Auszahlungen und idempotente Wiederholungen.
 - Automatisierter Chrome-Hauptablauf mit isolierter Browser-Testdatenbank.
 - Sicherheitsheader und verständliche Fehlerseiten bei deaktiviertem Debug-Modus.
-- Helle, dunkle und optionale Retro-Darstellung mit dauerhaft gespeicherter Auswahl.
+- Fünf dauerhaft gespeicherte Darstellungen: hell, dunkel, Retro sowie ein klassischer Geldautomat und eine großflächige Touchscreen-Oberfläche.
+- Klassik- und Touch-Modus führen nach der Anmeldung über klickbare Menüs zu Kontostand, Ein-/Auszahlung und Umsätzen; PIN und Geldbeträge lassen sich vollständig über Nummernfelder eingeben.
 - Toast-Benachrichtigungen für erfolgreiche Aktionen und verzögertes Lade-Overlay bei längeren Seitenwechseln.
 - Direkte Links zum Projekt auf GitHub und zum Portfolio; `PORTFOLIO_URL` setzt die Portfolio-Adresse zur Laufzeit.
 - Explizit aktivierbarer öffentlicher Demo-Modus mit sichtbaren Demo-PINs, Reset und ungültig werdenden alten Sitzungen.

@@ -178,3 +178,11 @@ Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKI
 - Zwölf parallele Kaltstart-Anfragen benötigten 23,39 bis 24,05 Sekunden, warme Anfragen 0,13 bis 1,18 Sekunden. Der kostenlose Schlafmodus und wechselnde Aufwachzeiten werden als sichtbare Produkteinschränkung akzeptiert.
 - DNS, verwaltetes TLS, HSTS, CSP, sichere Cookies, Proxyverhalten und der öffentliche ATM-Ablauf sind abgenommen. GitHub Actions prüft zusätzlich SQLite, PostgreSQL-Mehrprozessfälle, Chromium und das Produktionsimage.
 - Der veröffentlichte Stand ist `v1.0.0`. Damit ist der vereinbarte Umfang abgeschlossen; daraus folgt keine Eignung für echte Bankdaten, reale Zahlungen, hohe Last oder zugesicherte Verfügbarkeit.
+
+## v1.1: Klassik-ATM und Touchscreen
+
+- Zwei zusätzliche Darstellungen verändern neben Farben und Formen auch die Bedienstruktur. Der Klassik-Modus orientiert sich an einem eingefassten Automatenbildschirm mit paarweise angeordneten Funktionstasten; der Touch-Modus verwendet große farbige Kacheln.
+- Beide Modi nutzen dieselben Laravel-Routen, Formulare und serverseitigen Geschäftsregeln wie die Standardansicht. Eine separate Buchungslogik pro Skin wird bewusst vermieden.
+- Nach der PIN-Anmeldung erscheint zunächst ein Hauptmenü für Kontostand, Einzahlung, Auszahlung, Umsätze und Kartenrückgabe. Beträge und PIN lassen sich per Bildschirmtastatur eingeben. Der optionale freie Verwendungszweck bleibt als Texteingabe verfügbar.
+- Phosphor Icons liefert die funktionalen Symbole. Die drei bereitgestellten Bilder dienen ausschließlich als visuelle Referenz und werden nicht in die Anwendung oder das Repository kopiert.
+- Der Stand wird als `v1.1.0` geführt.

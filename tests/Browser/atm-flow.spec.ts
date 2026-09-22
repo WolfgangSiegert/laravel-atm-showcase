@@ -83,3 +83,45 @@ test('switches and persists themes and exposes showcase links', async ({ page })
     await page.getByRole('button', { name: 'Retro-Darstellung' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'retro');
 });
+
+test('offers classic ATM and touchscreen menu interfaces', async ({ page }) => {
+    await page.goto('/atm');
+    await page.getByRole('button', { name: 'Klassik-ATM-Darstellung' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'classic');
+    await expect(page.getByText('KLASSISCHER GELDAUTOMAT')).toBeVisible();
+
+    await page.getByRole('link', { name: 'Karte auswählen' }).click();
+    await page.getByRole('radio', { name: /DEMO-001/ }).click();
+    for (const digit of ['1', '2', '3', '4']) {
+        await page.getByRole('button', { name: `Ziffer ${digit}` }).click();
+    }
+    await page.getByRole('button', { name: 'Sitzung starten' }).click();
+    await expect(page.getByRole('heading', { name: 'Was möchtest du tun?' })).toBeVisible();
+    await page.getByRole('button', { name: /Kontostand/ }).click();
+    await expect(page.getByRole('heading', { name: 'Dein Kontostand' })).toBeVisible();
+    await page.getByRole('button', { name: 'Hauptmenü' }).click();
+    await page.getByRole('button', { name: /Geld einzahlen/ }).click();
+    await expect(page.getByLabel('Betrag in Euro', { exact: true })).toHaveAttribute('readonly', '');
+    await expect(page.getByRole('group', { name: 'Einzahlungsbetrag eingeben' })).toBeVisible();
+    await page.getByRole('button', { name: 'Hauptmenü' }).click();
+    await page.getByRole('button', { name: /Karte zurück/ }).click();
+
+    await page.getByRole('button', { name: 'Touchscreen-Darstellung' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'touch');
+    await page.getByRole('radio', { name: /DEMO-002/ }).click();
+    for (const digit of ['0', '0', '4', '2']) {
+        await page.getByRole('button', { name: `Ziffer ${digit}` }).click();
+    }
+    await page.getByRole('button', { name: 'Sitzung starten' }).click();
+    await page.getByRole('button', { name: /Umsätze/ }).click();
+    await expect(page.getByRole('heading', { name: 'Buchungshistorie' })).toBeVisible();
+    await page.getByRole('button', { name: 'Hauptmenü' }).click();
+    await page.getByRole('button', { name: /Karte zurück/ }).click();
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    for (const themeName of ['Klassik-ATM-Darstellung', 'Touchscreen-Darstellung']) {
+        await page.getByRole('button', { name: themeName }).click();
+        const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
+        expect(widths.document).toBe(widths.viewport);
+    }
+});
