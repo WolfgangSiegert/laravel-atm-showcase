@@ -22,7 +22,7 @@
         "vue-tsc": "^3.0.0"
     },
     "name": "atm-showcase",
-    "version": "1.0.0-rc.2",
+    "version": "1.0.0",
     "engines": {
         "node": "^24.0.0"
     },

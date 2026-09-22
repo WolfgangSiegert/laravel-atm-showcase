@@ -1,4 +1,4 @@
-# LERN-Bank Mein Geldautomat — v1.0 Release Candidate 2
+# LERN-Bank Mein Geldautomat — v1.0
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -24,7 +24,7 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - GitHub-CI für SQLite, PostgreSQL, Browser und Produktionscontainer; Docker-Deployment mit PHP 8.4.
 - Customer, Account, Card, Transaction, ATM und CashInventory als einfache Eloquent-Modelle mit Migrationen und lokalem Demo-Seeding.
 
-Die öffentliche Demo läuft auf Render Free mit Neon PostgreSQL und wird nach DNS-Verifizierung unter **https://atm.tiny-bits.org** erreichbar; die technische Render-Adresse bleibt als Rückfalladresse erhalten. HTTPS, Sicherheitsheader, Proxyverhalten, Kaltstart und der vollständige ATM-Ablauf sind am Render-Zielhost geprüft. **Noch offen für v1.0:** Speicherverbrauch nach der Apache-Worker-Anpassung und die abschließende TLS-Abnahme der eigenen Subdomain. Tageslimits und Scheinannahme bleiben außerhalb des Umfangs. Einzahlungen sind reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
+Die öffentliche Demo läuft unter **https://atm.tiny-bits.org** auf Render Free mit Neon PostgreSQL; die technische Render-Adresse bleibt als Rückfalladresse erhalten. HTTPS, Sicherheitsheader, Proxyverhalten, Kaltstart, Speicherbedarf und der vollständige ATM-Ablauf wurden am Zielhost geprüft. Tageslimits und Scheinannahme bleiben außerhalb des Umfangs. Einzahlungen sind reine Kontobuchungen und erhöhen den Bargeldbestand nicht. Neue Demo-Konten starten bei 0 Cent.
 
 ## Lokal starten
 
@@ -115,7 +115,7 @@ In CI wird Chromium über Playwright installiert und mit `PLAYWRIGHT_BROWSER=chr
 
 Der öffentliche Modus wird ausschließlich für eine dedizierte fiktive Datenbank mit `PUBLIC_DEMO_ENABLED=true` aktiviert. Besucher sehen die veröffentlichten PINs direkt auf der Anmeldeseite und einen Hinweis auf gemeinsam genutzte Konten. Nach 24 Stunden greift bei der nächsten ATM-Anfrage ein atomarer Reset: Demo-Salden auf 0 €, alte Demo-Buchungen entfernen, Kartensperren aufheben, Scheine auffüllen und alte Kartensitzungen ungültig machen. Lokal ist dieser Modus standardmäßig deaktiviert. Ein manueller Reset benötigt zusätzlich `php artisan atm:demo-reset --force` und löscht fiktive Daten.
 
-[Deployment-Anleitung](docs/deployment.md) beschreibt Render Free/Neon Free, Secrets, sicheren Betreiberzugang, Abnahme und Wiederherstellung. Die Version bleibt bis zur Speichermessung ein Release Candidate. Lizenz: [MIT](LICENSE).
+[Deployment-Anleitung](docs/deployment.md) beschreibt Render Free/Neon Free, Secrets, sicheren Betreiberzugang, Abnahme und Wiederherstellung. Lizenz: [MIT](LICENSE).
 
 ## Struktur und Routing
 
@@ -162,6 +162,6 @@ Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kei
 
 ## Weiterentwicklung
 
-Als Nächstes folgt die Prüfung der öffentlichen Showcase-Instanz und danach die v1.0-Freigabe. Siehe [Roadmap](docs/roadmap.md), [Deployment](docs/deployment.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
+Der v1.0-Umfang ist abgeschlossen. Mögliche spätere Erweiterungen und bewusst gesetzte Grenzen stehen in [Roadmap](docs/roadmap.md), [Deployment](docs/deployment.md), [Hosting-Empfehlung](docs/hosting.md) sowie [Entscheidungen](docs/decisions.md).
 
 Offizielle Referenzen: [Laravel 13](https://laravel.com/framework/docs/releases), [Inertia-Setup](https://inertiajs.com/docs/v3/installation/server-side-setup), [Laravel Rate Limiting](https://github.com/laravel/docs/blob/13.x/rate-limiting.md), [Inertia History Encryption](https://inertiajs.com/docs/v3/security/history-encryption).

@@ -1,6 +1,6 @@
 # Hosting-Empfehlung für den öffentlichen Showcase
 
-Stand: 20. September 2026. Kostenlose Tarife können sich ändern und müssen vor späteren Neuaufsetzungen erneut geprüft werden.
+Stand: 22. September 2026. Kostenlose Tarife können sich ändern und müssen vor späteren Neuaufsetzungen erneut geprüft werden.
 
 ## Empfehlung
 
@@ -25,7 +25,7 @@ Koyeb war zunächst vorgesehen, scheidet für eine kostenlose Neuinstallation ab
 - Render kann Free-Dienste neu starten und bietet dafür kein Produktions-SLA. Neon Free hat ebenfalls Anbieterquoten und kein Produktions-SLA.
 - Eine eigene Domain kann Registrierungsgebühren verursachen. Für den kostenlosen Start genügt die bereitgestellte `onrender.com`-Adresse.
 
-Diese Kombination ist für einen Portfolio-Showcase vertretbar, aber keine Garantie dauerhaft unveränderter kostenloser Bedingungen. Veröffentlichung, Datenbankverbindung, Proxyverhalten und ein Kaltstart von ungefähr 28 Sekunden sind geprüft; der Speicherverbrauch muss noch gemessen werden.
+Diese Kombination ist für einen Portfolio-Showcase vertretbar, aber keine Garantie dauerhaft unveränderter kostenloser Bedingungen. Veröffentlichung, Datenbankverbindung, Proxyverhalten und Kaltstarts von ungefähr 23 bis 28 Sekunden sind geprüft. Der höchste während der zweiminütigen Startmessung beobachtete Containerverbrauch lag bei rund 58,1 MiB von 512 MiB; diese kurze Stichprobe ist kein Dauerlasttest.
 
 Der vorbereitete Container und die Abnahme stehen in [deployment.md](deployment.md). Der Demo-Reset erfolgt beim ersten Besucher nach Ablauf des 24-Stunden-Intervalls und benötigt keinen Worker oder externen Keepalive-Dienst.
 

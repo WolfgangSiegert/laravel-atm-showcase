@@ -1,17 +1,20 @@
-# Prüfprotokoll — v1.0-rc.2
+# Prüfprotokoll — v1.0
 
-Lokal geprüft am 21. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
+Lokal und öffentlich geprüft am 21. und 22. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
 
 - Helle, dunkle und pixel-inspirierte Retro-Darstellung funktionieren ohne zusätzliche Abhängigkeiten. Die Auswahl bleibt über `localStorage` erhalten; ohne gespeicherte Wahl folgt die App der Systempräferenz für dunkle Darstellung.
 - Erfolgreiche Servermeldungen erscheinen als zugänglicher, schließbarer Toast und verschwinden nach sechs Sekunden. Bei Inertia-Navigationen, die länger als 180 Millisekunden dauern, erscheint ein blockierendes Lade-Overlay; die Verzögerung vermeidet Flackern bei schnellen Antworten.
-- Footer-Links führen zum öffentlichen Projekt-Repository und zum Portfolio. Solange `PORTFOLIO_URL` leer ist, wird der funktionierende Portfolio-Quellcode verlinkt, weil die gefundene Portfolio-Domain derzeit kein gültiges TLS-Zertifikat für ihren Hostnamen liefert.
+- Footer-Links führen zum öffentlichen Projekt-Repository und zum Portfolio unter `https://tiny-bits.org/portfolio/`; ohne `PORTFOLIO_URL` bleibt das Portfolio-Repository der sichere Rückfallwert.
 - Produktionsbuild einschließlich TypeScript-Prüfung, Pint, strikte Composer-Validierung und Plattformanforderungen waren erfolgreich.
 - 119 Pest-Tests mit 817 Assertions waren erfolgreich; fünf PostgreSQL-Szenarien wurden im SQLite-Standardlauf wie vorgesehen übersprungen. Drei Playwright-Abläufe waren in lokalem Google Chrome erfolgreich.
 - Der dritte Browserablauf prüft GitHub-/Portfolio-Link, Theme-Wechsel, gespeicherte dunkle Darstellung und Retro-Auswahl. Der Hauptablauf prüft zusätzlich Anzeige und manuelles Schließen des Einzahlungs-Toasts.
 - Visuell geprüft wurden die drei Darstellungen auf der Startseite sowie Retro bei 375 × 812 Pixeln. Die Dokumentbreite blieb exakt 375 Pixel; Browserprotokoll ohne Warnungen oder Fehler.
 - Nach einer Ruhephase am 21. September beantworteten zwölf gleichzeitig gestartete `/up`-Anfragen den Kaltstart vollständig mit HTTP 200 nach 23,39 bis 24,05 Sekunden. Zwölf unmittelbar folgende warme Anfragen antworteten ebenfalls vollständig mit HTTP 200 nach 0,13 bis 1,18 Sekunden. Die gebündelten Kaltstartzeiten beschreiben dasselbe Aufwachen und sind kein Lasttest mit zwölf bereits laufenden Worker-Prozessen.
+- Der Container protokollierte während der ersten zwei Minuten zwölf cgroup-Stichproben im Abstand von zehn Sekunden. Der aktuelle Verbrauch lag zwischen rund 50 und 56 MiB, der höchste beobachtete Wert bei 58,1 MiB von 512 MiB (etwa 11,4 %). Während der Messung antworteten zwölf parallele `/up`-Anfragen mit HTTP 200 in 0,21 bis 1,01 Sekunden.
+- Nach der Erhöhung auf vier Apache-Worker trat in den Render-Logs unter erneuter paralleler Last keine weitere `AH00161`-Warnung auf. Eine ältere Warnung vor dieser Änderung bleibt historisch sichtbar.
+- Die [GitHub-CI für Commit `47d398a`](https://github.com/WolfgangSiegert/laravel-atm-showcase/actions/runs/35623632237) ist einschließlich SQLite-, PostgreSQL-, Chromium- und Containerprüfung vollständig grün.
 
-Der Ladezustand ist absichtlich erst nach 180 Millisekunden sichtbar und daher nicht mit einem künstlich verlangsamten E2E-Test gekoppelt. Die Retro-Darstellung ist ein CSS-Skin und kein vollständig neu gezeichneter ATM-Ablauf. Die reale Portfolio-Website bleibt offen, bis eine funktionierende HTTPS-Adresse bekannt ist. Der Render-Speicherverbrauch bleibt die letzte dokumentierte Freigabebedingung für v1.0.
+Der Ladezustand ist absichtlich erst nach 180 Millisekunden sichtbar und daher nicht mit einem künstlich verlangsamten E2E-Test gekoppelt. Die Retro-Darstellung ist ein CSS-Skin und kein vollständig neu gezeichneter ATM-Ablauf. Die Speicherstichprobe und die parallelen Healthchecks ersetzen keinen Dauerlasttest. Render Free kann nach Inaktivität schlafen; deshalb bleibt der deutlich sichtbare Kaltstart eine bekannte Einschränkung des öffentlichen Showcases.
 
 ---
 

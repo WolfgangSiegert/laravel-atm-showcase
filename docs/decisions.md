@@ -170,3 +170,11 @@ Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKI
 - Eine Inertia-Navigation zeigt erst nach 180 Millisekunden ein Lade-Overlay. Dadurch erhalten langsame Kaltstart- oder Netzwerkantworten eine klare Rückmeldung, während warme Antworten nicht durch kurzes Flackern unruhig wirken.
 - GitHub verweist direkt auf das Showcase-Repository. `PORTFOLIO_URL` ist eine Laufzeitkonfiguration; ohne gesetzten Wert heißt der Link ausdrücklich „Portfolio-Code“ und verweist auf das Portfolio-Repository. Die lokal gefundene Domain `tiny-bits.org` wurde nicht fest eingetragen, weil ihre HTTPS-Zertifikatsprüfung derzeit fehlschlägt.
 - Der Stand wird als `v1.0.0-rc.2` geführt. Die UI-Arbeit ändert die offene Freigabebedingung zur realen Render-Speichermessung nicht.
+
+## v1.0: Öffentliche Freigabe
+
+- Die Showcase-Adresse ist `https://atm.tiny-bits.org`; die Render-Subdomain bleibt als technische Rückfalladresse aktiv. Die Hauptdomain und das Portfolio verbleiben unverändert bei GitHub Pages.
+- Render Free und Neon Free genügen für den vereinbarten Showcase. Der höchste während der zweiminütigen Startmessung beobachtete Containerverbrauch betrug 58,1 MiB von 512 MiB. Vier Apache-Worker bleiben deshalb bestehen; die kurze Messung ist keine Aussage über Dauerlast.
+- Zwölf parallele Kaltstart-Anfragen benötigten 23,39 bis 24,05 Sekunden, warme Anfragen 0,13 bis 1,18 Sekunden. Der kostenlose Schlafmodus und wechselnde Aufwachzeiten werden als sichtbare Produkteinschränkung akzeptiert.
+- DNS, verwaltetes TLS, HSTS, CSP, sichere Cookies, Proxyverhalten und der öffentliche ATM-Ablauf sind abgenommen. GitHub Actions prüft zusätzlich SQLite, PostgreSQL-Mehrprozessfälle, Chromium und das Produktionsimage.
+- Der veröffentlichte Stand ist `v1.0.0`. Damit ist der vereinbarte Umfang abgeschlossen; daraus folgt keine Eignung für echte Bankdaten, reale Zahlungen, hohe Last oder zugesicherte Verfügbarkeit.

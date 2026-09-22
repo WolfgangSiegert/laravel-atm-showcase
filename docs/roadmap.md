@@ -15,9 +15,9 @@ Ein Besucher kann eine Demo-Karte wählen, sich mit einer veröffentlichten Demo
 | v0.7 ✓ | Audit und Betreiberbereich | Relevante Ereignisse werden datensparsam gespeichert. Authentifizierte Betreiber können Bestand und Automatenstatus verwalten; jede Änderung wird protokolliert. |
 | v0.8 ✓ | PostgreSQL und Nebenläufigkeit | Migrationen und parallele Auszahlungen sind auf PostgreSQL geprüft; Doppelbelastung und negativer Bestand werden verhindert. |
 | v0.9 ✓ | Qualität und Härtung | Der Hauptablauf ist im Browser automatisiert, per Tastatur bedienbar und für typische Fehlerzustände verständlich. Produktionswerte und Security-Header sind geprüft. |
-| v1.0 | Veröffentlichung | CI, reproduzierbare Installation, Demo-Reset, Lizenz, Deployment-Dokumentation und öffentlich erreichbare Showcase-Instanz sind fertig. |
+| v1.0 ✓ | Veröffentlichung | CI, reproduzierbare Installation, Demo-Reset, Lizenz, Deployment-Dokumentation und öffentlich erreichbare Showcase-Instanz sind fertig. |
 
-v1.0-rc.1 ergänzt CI, opt-in Demo-Reset, MIT-Lizenz und einen Produktionscontainer mit Deployment-Anleitung. Die öffentliche Instanz und ihre Abnahme sind noch offen; v1.0 ist deshalb nicht abgeschlossen.
+v1.0 ergänzt CI, opt-in Demo-Reset, MIT-Lizenz und einen Produktionscontainer mit Deployment-Anleitung. Die öffentliche Render-/Neon-Instanz, die eigene HTTPS-Domain, Kaltstart und Speicherbedarf wurden abgenommen. Die Anwendung bleibt eine Demo ohne Verfügbarkeitszusage.
 
 ## Durch das öffentliche Showcase verpflichtend
 
@@ -29,7 +29,7 @@ v1.0-rc.1 ergänzt CI, opt-in Demo-Reset, MIT-Lizenz und einen Produktionscontai
 - Produktionskonfiguration ohne Debug-Ausgaben, mit passenden Security-Headern, Fehlerseiten, Logging und Verfügbarkeitsprüfung.
 - Automatisierte CI-Prüfung und dokumentierter Deployment- und Wiederherstellungsweg.
 
-Die Hosting-Empfehlung ist GitHub für Repository und CI, Render Free für den Laravel-Webdienst und Neon Free für PostgreSQL. Grenzen und Alternativen stehen in [hosting.md](hosting.md). Die lokale PostgreSQL-Semantik ist bestätigt; Anbietergrenzen und Deployment werden im Veröffentlichungsprototyp geprüft.
+Die umgesetzte Hosting-Lösung verwendet GitHub für Repository und CI, Render Free für den Laravel-Webdienst und Neon Free für PostgreSQL. Grenzen und Alternativen stehen in [hosting.md](hosting.md). PostgreSQL-Semantik, Anbieterbetrieb und Deployment wurden für den vorgesehenen Showcase geprüft.
 
 ## Zusätzliche Buchungsfunktionen
 
