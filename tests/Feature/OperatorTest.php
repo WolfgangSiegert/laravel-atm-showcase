@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Account;
 use App\Models\Atm;
 use App\Models\AuditEvent;
 use App\Models\CashInventory;
@@ -43,11 +44,71 @@ it('authenticates an operator, rotates the session and does not flash the passwo
 
     expect(session()->getId())->not->toBe($previousId);
     $this->assertAuthenticatedAs($this->operator);
+    expect($this->operator->operator_role)->toBe(User::OPERATOR_ROLE_SUPERADMIN)
+        ->and($this->operator->canManageAdministration())->toBeTrue();
     $this->assertDatabaseHas('audit_events', [
         'event_type' => 'operator.login',
         'outcome' => 'success',
         'actor_user_id' => $this->operator->id,
     ]);
+});
+
+it('offers an explicitly enabled one click guest login with read only dashboard access', function () {
+    config(['demo.enabled' => true, 'demo.admin_guest_enabled' => true]);
+    $this->artisan('atm:demo-provision')->assertExitCode(0);
+
+    $this->get('/admin/login')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Operator/Login')
+        ->where('guestAccessEnabled', true));
+
+    $this->post('/admin/guest-session')->assertRedirect(route('operator.dashboard'));
+    $guest = User::where('email', config('demo.admin_guest_email'))->firstOrFail();
+    $this->assertAuthenticatedAs($guest);
+    $this->get('/admin')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->where('operatorRole', User::OPERATOR_ROLE_VIEWER)
+        ->where('canManage', false));
+    $this->assertDatabaseHas('audit_events', [
+        'event_type' => 'operator.guest_login',
+        'actor_user_id' => $guest->id,
+    ]);
+});
+
+it('keeps every management route forbidden for the read only guest', function () {
+    config(['demo.enabled' => true, 'demo.admin_guest_enabled' => true]);
+    $this->artisan('atm:demo-provision')->assertExitCode(0);
+    $guest = User::where('email', config('demo.admin_guest_email'))->firstOrFail();
+    $account = Account::firstOrFail();
+    $card = $account->cards()->firstOrFail();
+    $inventory = CashInventory::where('atm_id', $this->atm->id)->firstOrFail();
+
+    $this->actingAs($guest)->patch('/admin/atm/status', ['status' => 'maintenance'])->assertForbidden();
+    $this->post("/admin/inventory/{$inventory->id}/adjust", ['adjustment' => 1])->assertForbidden();
+    $this->post('/admin/accounts', [])->assertForbidden();
+    $this->patch("/admin/accounts/{$account->id}/status", ['status' => 'blocked'])->assertForbidden();
+    $this->post("/admin/accounts/{$account->id}/cards", [])->assertForbidden();
+    $this->patch("/admin/cards/{$card->id}/status", ['status' => 'blocked'])->assertForbidden();
+    $this->post("/admin/cards/{$card->id}/reset-lock")->assertForbidden();
+
+    expect($this->atm->fresh()->status)->toBe('active')
+        ->and($inventory->fresh()->quantity)->not->toBe($inventory->quantity + 1)
+        ->and($account->fresh()->status)->toBe('active')
+        ->and($card->fresh()->status)->toBe('active');
+});
+
+it('keeps public guest login disabled by default', function () {
+    $this->get('/admin/login')->assertInertia(fn (Assert $page) => $page->where('guestAccessEnabled', false));
+    $this->post('/admin/guest-session')->assertNotFound();
+});
+
+it('creates private operators exclusively as superadmins', function () {
+    $this->artisan('atm:operator-create', ['email' => 'owner@example.test'])
+        ->expectsQuestion('Neues Betreiberpasswort (mindestens 16 Zeichen)', 'a-unique-password-123')
+        ->expectsOutput('Superadmin angelegt.')
+        ->assertExitCode(0);
+
+    $created = User::where('email', 'owner@example.test')->firstOrFail();
+    expect($created->operator_role)->toBe(User::OPERATOR_ROLE_SUPERADMIN)
+        ->and($created->canManageAdministration())->toBeTrue();
 });
 
 it('rejects invalid credentials and rate limits repeated attempts', function () {

@@ -18,6 +18,8 @@ type Activity = { date: string; label: string; count: number; amountMinor: numbe
 
 const props = defineProps<{
     operatorName: string;
+    operatorRole: 'superadmin' | 'viewer';
+    canManage: boolean;
     metrics: { accounts: number; activeCards: number; transactions: number; todayVolumeMinor: number };
     atm: { code: string; label: string; status: string; currency: string; totalMinor: number; inventory: Inventory[] };
     activity: Activity[];
@@ -138,7 +140,7 @@ function cardStatus(card: AccountCard) {
     return 'Aktiv';
 }
 function eventLabel(type: string) {
-    return ({ 'operator.login': 'Admin-Anmeldung', 'operator.logout': 'Admin-Abmeldung', 'atm.status_changed': 'Automatenstatus geändert', 'atm.inventory_adjusted': 'Bargeldbestand geändert', 'account.created': 'Konto angelegt', 'account.status_changed': 'Kontostatus geändert', 'card.created': 'Karte angelegt', 'card.status_changed': 'Kartenstatus geändert', 'card.lock_reset': 'Kartensperre zurückgesetzt', 'atm_session.login': 'Kartensitzung gestartet', 'atm_session.logout': 'Kartensitzung beendet', 'atm_session.invalidated': 'Kartensitzung ungültig', 'transaction.deposit': 'Einzahlung', 'transaction.withdrawal': 'Auszahlung' } as Record<string, string>)[type] ?? type;
+    return ({ 'operator.login': 'Admin-Anmeldung', 'operator.guest_login': 'Showcase-Gastzugang', 'operator.logout': 'Admin-Abmeldung', 'atm.status_changed': 'Automatenstatus geändert', 'atm.inventory_adjusted': 'Bargeldbestand geändert', 'account.created': 'Konto angelegt', 'account.status_changed': 'Kontostatus geändert', 'card.created': 'Karte angelegt', 'card.status_changed': 'Kartenstatus geändert', 'card.lock_reset': 'Kartensperre zurückgesetzt', 'atm_session.login': 'Kartensitzung gestartet', 'atm_session.logout': 'Kartensitzung beendet', 'atm_session.invalidated': 'Kartensitzung ungültig', 'transaction.deposit': 'Einzahlung', 'transaction.withdrawal': 'Auszahlung' } as Record<string, string>)[type] ?? type;
 }
 function transactionLabel(type: string) {
     return ({ deposit: 'Einzahlung', withdrawal: 'Auszahlung', opening: 'Eröffnung' } as Record<string, string>)[type] ?? type;
@@ -147,11 +149,12 @@ function transactionLabel(type: string) {
 
 <template>
     <Head title="Admin Dashboard" />
-    <AdminShell :operator-name="operatorName" :active-section="activeSection" :logging-out="logout.processing" @navigate="navigate" @logout="logout.delete('/admin/session')">
+    <AdminShell :operator-name="operatorName" :operator-role="operatorRole" :active-section="activeSection" :logging-out="logout.processing" @navigate="navigate" @logout="logout.delete('/admin/session')">
+        <div v-if="!canManage" class="admin-readonly-banner" role="status"><PhShieldCheck :size="21" weight="duotone" /><div><strong>Öffentliche Leseansicht</strong><span>Du kannst Dashboard, Tabellen, Filter und Audit ansehen. Änderungen sind für diesen Zugang gesperrt.</span></div></div>
         <section v-if="activeSection === 'overview'" aria-labelledby="admin-overview-heading">
             <div class="admin-page-heading">
                 <div><p class="admin-eyebrow">Dashboard</p><h1 id="admin-overview-heading" tabindex="-1">Guten Tag.</h1><p>Hier ist der aktuelle Zustand deines Demo-Geldautomaten.</p></div>
-                <button type="button" class="admin-button admin-button--primary" @click="openStatusDialog"><PhGearSix :size="19" /> Automat verwalten</button>
+                <button v-if="canManage" type="button" class="admin-button admin-button--primary" @click="openStatusDialog"><PhGearSix :size="19" /> Automat verwalten</button>
             </div>
 
             <div class="admin-metrics">
@@ -171,7 +174,7 @@ function transactionLabel(type: string) {
                 <section class="admin-card admin-machine" aria-labelledby="machine-heading">
                     <div class="admin-card__header"><div><p class="admin-eyebrow">Automat</p><h2 id="machine-heading">{{ atm.label }}</h2></div><span class="admin-status" :class="`admin-status--${atm.status}`"><i></i>{{ atm.status === 'active' ? 'Aktiv' : 'Wartung' }}</span></div>
                     <dl class="admin-machine__details"><div><dt>Kennung</dt><dd>{{ atm.code }}</dd></div><div><dt>Währung</dt><dd>{{ atm.currency }}</dd></div><div><dt>Gesamtbestand</dt><dd>{{ money(atm.totalMinor) }}</dd></div></dl>
-                    <button type="button" class="admin-text-button" @click="openStatusDialog">Status bearbeiten <PhCaretRight :size="18" /></button>
+                    <button v-if="canManage" type="button" class="admin-text-button" @click="openStatusDialog">Status bearbeiten <PhCaretRight :size="18" /></button>
                 </section>
                 <section class="admin-card admin-card--wide" aria-labelledby="inventory-heading">
                     <div class="admin-card__header"><div><p class="admin-eyebrow">Cash Management</p><h2 id="inventory-heading">Bargeldkassetten</h2></div><span v-if="page.props.errors.adjustment" class="admin-inline-error"><PhWarning :size="17" /> {{ page.props.errors.adjustment }}</span></div>
@@ -180,7 +183,7 @@ function transactionLabel(type: string) {
                         <Column field="quantity" header="Bestand" sortable><template #body="{ data }">{{ data.quantity }} Scheine</template></Column>
                         <Column header="Wert" sortable sort-field="denominationMinor"><template #body="{ data }">{{ money(data.denominationMinor * data.quantity) }}</template></Column>
                         <Column field="quantity" header="Status" sortable><template #body="{ data }"><span class="admin-status" :class="data.quantity < 10 ? 'admin-status--warning' : 'admin-status--active'"><i></i>{{ data.quantity < 10 ? 'Niedrig' : 'Ausreichend' }}</span></template></Column>
-                        <Column header="Aktionen" frozen align-frozen="right"><template #body="{ data }"><span class="admin-table__action"><button type="button" aria-label="Bestand bearbeiten" @click="openInventoryDrawer(data)"><PhPencilSimple :size="19" /></button></span></template></Column>
+                        <Column v-if="canManage" header="Aktionen" frozen align-frozen="right"><template #body="{ data }"><span class="admin-table__action"><button type="button" aria-label="Bestand bearbeiten" @click="openInventoryDrawer(data)"><PhPencilSimple :size="19" /></button></span></template></Column>
                         <template #empty>Keine Bargeldkassetten vorhanden.</template>
                     </DataTable>
                 </section>
@@ -188,7 +191,7 @@ function transactionLabel(type: string) {
         </section>
 
         <section v-else-if="activeSection === 'accounts'" aria-labelledby="admin-accounts-heading">
-            <div class="admin-page-heading"><div><p class="admin-eyebrow">Kundenverwaltung</p><h1 id="admin-accounts-heading" tabindex="-1">Konten & Karten</h1><p>Demo-Konten anlegen, Karten ausgeben und Zugänge sperren.</p></div><div class="admin-heading-actions"><button type="button" class="admin-button admin-button--quiet" :disabled="accounts.length === 0" @click="openCardDialog()"><PhCreditCard :size="18" /> Neue Karte</button><button type="button" class="admin-button admin-button--primary" @click="openAccountDialog"><PhUserPlus :size="18" /> Neues Konto</button></div></div>
+            <div class="admin-page-heading"><div><p class="admin-eyebrow">Kundenverwaltung</p><h1 id="admin-accounts-heading" tabindex="-1">Konten & Karten</h1><p>{{ canManage ? 'Demo-Konten anlegen, Karten ausgeben und Zugänge sperren.' : 'Demo-Konten, Karten und Zugangsstatus ansehen.' }}</p></div><div v-if="canManage" class="admin-heading-actions"><button type="button" class="admin-button admin-button--quiet" :disabled="accounts.length === 0" @click="openCardDialog()"><PhCreditCard :size="18" /> Neue Karte</button><button type="button" class="admin-button admin-button--primary" @click="openAccountDialog"><PhUserPlus :size="18" /> Neues Konto</button></div></div>
             <div class="admin-toolbar"><label class="admin-search"><PhMagnifyingGlass :size="20" /><span class="sr-only">Konten durchsuchen</span><input v-model="accountFilters.global.value" type="search" placeholder="Name, Konto oder Karte suchen …"></label><label class="admin-filter"><PhFunnel :size="19" /><span class="sr-only">Kontostatus filtern</span><select v-model="accountFilters.status.value"><option :value="null">Alle Status</option><option value="active">Aktiv</option><option value="blocked">Gesperrt</option></select></label><span class="admin-count-badge">{{ accounts.length }} Konten</span></div>
             <section class="admin-card admin-card--table">
                 <DataTable v-model:filters="accountFilters" :value="accountRows" data-key="id" :global-filter-fields="['customer', 'reference', 'searchText']" filter-display="menu" paginator :rows="10" :rows-per-page-options="[5, 10, 25]" removable-sort sort-mode="multiple" scrollable scroll-height="min(54vh, 34rem)" state-storage="session" state-key="admin-accounts-v2" class="admin-data-table" table-style="min-width: 62rem">
@@ -197,7 +200,7 @@ function transactionLabel(type: string) {
                     <Column header="Karten"><template #body="{ data }"><div class="admin-card-stack"><span v-for="card in data.cards" :key="card.id" class="admin-card-reference"><PhCreditCard :size="18" /> {{ card.reference }}<small :class="{ 'admin-card-reference__warning': card.status !== 'active' || card.failedAttempts }">{{ cardStatus(card) }}<template v-if="card.failedAttempts"> · {{ card.failedAttempts }} Fehlversuch(e)</template></small></span></div></template></Column>
                     <Column field="balanceMinor" header="Saldo" sortable><template #body="{ data }"><strong>{{ money(data.balanceMinor, data.currency) }}</strong></template></Column>
                     <Column field="status" header="Status" sortable filter><template #body="{ data }"><span class="admin-status" :class="data.status === 'active' ? 'admin-status--active' : 'admin-status--blocked'"><i></i>{{ data.status === 'active' ? 'Aktiv' : 'Gesperrt' }}</span></template></Column>
-                    <Column header="Aktionen" frozen align-frozen="right"><template #body="{ data }"><span class="admin-table__action"><button type="button" :aria-label="`${data.reference} verwalten`" @click="openAccountDrawer(data)"><PhPencilSimple :size="19" /></button></span></template></Column>
+                    <Column v-if="canManage" header="Aktionen" frozen align-frozen="right"><template #body="{ data }"><span class="admin-table__action"><button type="button" :aria-label="`${data.reference} verwalten`" @click="openAccountDrawer(data)"><PhPencilSimple :size="19" /></button></span></template></Column>
                     <template #empty>Keine passenden Konten gefunden.</template>
                 </DataTable>
             </section>

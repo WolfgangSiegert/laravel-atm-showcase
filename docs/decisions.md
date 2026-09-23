@@ -213,3 +213,11 @@ Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKI
 - Suche und fachliche Auswahlfilter bleiben oberhalb der Tabellen sichtbar. Konten filtern nach Status, Transaktionen nach Buchungstyp und Audit-Ereignisse nach Ergebnis. PrimeVue verwaltet den tatsächlichen Filter- und Seitenzustand für die laufende Browser-Sitzung.
 - Die Komponente wird nur mit der lazy geladenen Admin-Seite ausgeliefert. Das Admin-Bundle wächst dadurch merklich; der öffentliche ATM-Ablauf erhält diesen Code nicht.
 - Der Stand wird als `v1.4.0` geführt.
+
+## v1.5: Öffentlicher Read-only-Admin-Showcase
+
+- Der Betreiberbereich unterscheidet `superadmin` und `viewer`. Bestehende Betreiber werden bei der Migration zu Superadmins; `atm:operator-create` erzeugt ausschließlich private Superadmins.
+- Die öffentliche Demo aktiviert über `PUBLIC_ADMIN_GUEST_ENABLED=true` einen technischen Showcase-Gast ohne bekanntes Passwort. Die Loginseite startet diese Sitzung per Ein-Klick-Aktion. Wird die Option deaktiviert, entzieht der nächste Containerstart dem Gast die Betreiberberechtigung.
+- Read-only wird auf zwei Ebenen erzwungen: Die Oberfläche entfernt alle Bearbeitungsaktionen, und eine eigene Middleware verweigert jede schreibende Admin- und Legacy-Operator-Route mit HTTP 403. Der Gast kann Dashboard, Konten, Karten, Transaktionen, Audit, Filter, Sortierung und Pagination ansehen.
+- Gastanmeldung und Abmeldung werden auditiert. Der Gast sieht weiterhin ausschließlich die fiktiven Showcase-Daten; Audit-Antworten enthalten keine Betreiber-E-Mail oder Passworthashes.
+- Der Stand wird als `v1.5.0` geführt.

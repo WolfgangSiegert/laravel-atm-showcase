@@ -1,4 +1,4 @@
-# LERN-Bank Mein Geldautomat — v1.4
+# LERN-Bank Mein Geldautomat — v1.5
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -16,6 +16,7 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - Automatenstatus wird in einem Dialog, der Bargeldbestand in einer seitlichen Bearbeitungsleiste geändert; beide Aktionen bleiben serverseitig validiert und protokolliert.
 - Admins können Demo-Konten samt erster Karte anlegen, zusätzliche Karten ausgeben, Konten oder einzelne Karten sperren und reaktivieren sowie PIN-Fehlversuche und temporäre Kartensperren zurücksetzen.
 - Alle Admin-Tabellen verwenden PrimeVue DataTable mit eigenem Scrollbereich, fester Kopfzeile, Pagination, Mehrspalten-Sortierung, Suche und fachlichen Filtern. Der Tabellenzustand bleibt während der Browser-Sitzung erhalten.
+- Der öffentliche Admin-Showcase besitzt einen Ein-Klick-Gastzugang. Gäste sehen Dashboard, Tabellen, Filter und Audit schreibgeschützt; Superadmins behalten exklusiv alle Änderungsfunktionen.
 - Konto- und Kartensperren invalidieren laufende Sitzungen. Gesperrte oder abgelaufene Zugänge erscheinen nicht in der öffentlichen Kartenauswahl; PINs werden ausschließlich gehasht gespeichert.
 - Datensparsames, unveränderliches Audit für Anmeldungen, Sitzungsabläufe, Geldbewegungen und Betreiberänderungen.
 - Unter PostgreSQL geprüfte Sperren für konkurrierende Auszahlungen und idempotente Wiederholungen.
@@ -51,7 +52,7 @@ Diese PINs sind absichtlich öffentlich bekannte Lernzugänge. Niemals persönli
 
 Nach fünf falschen PINs wird die Karte 15 Minuten gesperrt; danach kann wieder versucht werden. Zusätzlich höchstens zehn Anmeldeversuche je IP in einer Minute. Die Sitzung läuft nach fünf Minuten ohne serverseitige Aktivität ab. Eine Mausbewegung verlängert sie nicht. Werte stehen in `config/atm.php`. Diese Regeln sind vorläufige Lernprojekt-Entscheidungen, keine Sicherheitszusage für Banking.
 
-Der lokale Admin-Zugang liegt unter `/admin`: `operator@example.test` mit Passwort `local-demo-operator`. Beide Werte sind über `DEMO_OPERATOR_EMAIL` und `DEMO_OPERATOR_PASSWORD` änderbar. Dieser bekannte Zugang wird ausschließlich in `local` und `testing` angelegt; Produktion muss einen eigenen Betreiber sicher bereitstellen. Die bisherigen `/operator`-Routen bleiben vorerst kompatibel.
+Der lokale Superadmin-Zugang liegt unter `/admin`: `operator@example.test` mit Passwort `local-demo-operator`. Beide Werte sind über `DEMO_OPERATOR_EMAIL` und `DEMO_OPERATOR_PASSWORD` änderbar. Dieser bekannte Zugang wird ausschließlich in `local` und `testing` angelegt. In der öffentlichen Demo öffnet `PUBLIC_ADMIN_GUEST_ENABLED=true` einen passwortlosen, serverseitig schreibgeschützten Showcase-Gastzugang; ein privater Produktions-Superadmin wird weiterhin separat mit `php artisan atm:operator-create` angelegt. Die bisherigen `/operator`-Routen bleiben vorerst kompatibel.
 
 ## Geldbewegungen
 

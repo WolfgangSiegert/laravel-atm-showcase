@@ -116,3 +116,18 @@ it('provisions only public identities without creating additional operators', fu
     $this->artisan('atm:demo-provision')->assertExitCode(0);
     expect(Card::count())->toBe(2)->and(User::count())->toBe(1);
 });
+
+it('provisions the public admin guest only after explicit opt in', function () {
+    config(['demo.enabled' => true, 'demo.admin_guest_enabled' => true]);
+    $this->artisan('atm:demo-provision')->assertExitCode(0);
+    $this->artisan('atm:demo-provision')->assertExitCode(0);
+
+    $guest = User::where('email', config('demo.admin_guest_email'))->firstOrFail();
+    expect($guest->is_operator)->toBeTrue()
+        ->and($guest->operator_role)->toBe(User::OPERATOR_ROLE_VIEWER)
+        ->and(User::where('email', config('demo.admin_guest_email'))->count())->toBe(1);
+
+    config(['demo.admin_guest_enabled' => false]);
+    $this->artisan('atm:demo-provision')->assertExitCode(0);
+    expect($guest->fresh()->is_operator)->toBeFalse();
+});

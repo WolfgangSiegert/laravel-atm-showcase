@@ -5,7 +5,7 @@ import LoadingOverlay from '../components/LoadingOverlay.vue';
 import ToastNotice from '../components/ToastNotice.vue';
 
 type Section = 'overview' | 'accounts' | 'transactions' | 'audit';
-defineProps<{ operatorName: string; activeSection: Section; loggingOut?: boolean }>();
+defineProps<{ operatorName: string; operatorRole: 'superadmin' | 'viewer'; activeSection: Section; loggingOut?: boolean }>();
 const emit = defineEmits<{ navigate: [section: Section]; logout: [] }>();
 
 const navigation = [
@@ -32,7 +32,7 @@ const navigation = [
             </nav>
             <div class="admin-sidebar__footer">
                 <div class="admin-user-avatar">{{ operatorName.charAt(0).toUpperCase() }}</div>
-                <div class="admin-sidebar__user"><strong>{{ operatorName }}</strong><small>Administrator</small></div>
+                <div class="admin-sidebar__user"><strong>{{ operatorName }}</strong><small>{{ operatorRole === 'superadmin' ? 'Superadmin' : 'Read-only-Gast' }}</small></div>
                 <button type="button" :disabled="loggingOut" aria-label="Abmelden" @click="emit('logout')"><PhSignOut :size="21" /></button>
             </div>
         </aside>

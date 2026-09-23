@@ -1,4 +1,18 @@
-# Prüfprotokoll — v1.4
+# Prüfprotokoll — v1.5
+
+Geprüft am 24. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
+
+- Bestehende Betreiber werden als Superadmins migriert. Der öffentliche Showcase-Gast wird nur bei expliziter Konfiguration idempotent provisioniert und beim Abschalten der Option wieder deaktiviert.
+- Der Ein-Klick-Gastzugang öffnet dasselbe Dashboard mit sichtbarer Read-only-Kennzeichnung. Bearbeitungsaktionen fehlen in der Oberfläche; alle sieben schreibenden Verwaltungsrouten verweigern Gastanfragen zusätzlich serverseitig mit HTTP 403.
+- Gastanmeldung und Abmeldung erscheinen im Audit. Ein privates Superadmin-Passwort wird weder provisioniert noch veröffentlicht.
+- 131 Pest-Tests liefen mit 941 Assertions erfolgreich; fünf PostgreSQL-Szenarien wurden im SQLite-Standardlauf wie vorgesehen übersprungen. Alle sechs Chrome-Abläufe einschließlich des Read-only-Gastzugangs waren erfolgreich.
+- Produktionsbuild mit TypeScript-Prüfung, Pint, strikte Composer-Validierung und Plattformanforderungen unter PHP 8.4.25 waren erfolgreich.
+
+Grenzen: Es gibt noch keine Oberfläche zur Verwaltung mehrerer Superadmins, keine Zwei-Faktor-Anmeldung und keinen integrierten Passwortwechsel. Der öffentliche Gast darf das Audit-Protokoll der fiktiven Demo lesen; dort werden keine Betreiber-E-Mail-Adressen oder Zugangsdaten ausgeliefert.
+
+---
+
+# Historisches Prüfprotokoll — v1.4
 
 Geprüft am 23. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
 

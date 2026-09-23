@@ -9,7 +9,7 @@ class UpdateAdminResourceStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_operator;
+        return (bool) $this->user()?->canManageAdministration();
     }
 
     public function rules(): array

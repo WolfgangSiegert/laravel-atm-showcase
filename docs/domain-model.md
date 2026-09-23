@@ -34,7 +34,7 @@ Präzisierung: Jedes Account gehört zunächst genau einem Customer. Jede Card g
 | CashInventory | Scheine je Automat und Stückelung | `id`, `atm_id`, `denomination_minor`, `quantity` | Unique auf `(atm_id, denomination_minor)`. Stückelung positiv, Anzahl ganzzahlig und ≥ 0. Geldbestand = Summe aus Stückelung × Anzahl. |
 | AuditEvent | Datensparsame technische Nachvollziehbarkeit | `id`, `event_type`, `outcome`, optionale Referenzen auf User, Account, Card und ATM, optional `reason_code`, begrenzter JSON-Kontext, `created_at` | Append-only auf Eloquent-Ebene. Keine PIN, Passwörter, IP-Adressen oder Verwendungszwecke. Abgewiesene Anmeldungen und Geschäftsregeln erzeugen keine Transaction, aber ein AuditEvent. |
 
-`ATM` ist der fachliche Name; die PHP-Klasse heißt `Atm` und verwendet die Laravel-konforme Tabelle `atms`. IDs sind konventionelle Laravel-Bigints; es gibt keine abstrakten Identifier-Objekte. `User` repräsentiert in v0.8 ausschließlich Betreiber und ist **keine** Identitätszuordnung für Customer oder Card.
+`ATM` ist der fachliche Name; die PHP-Klasse heißt `Atm` und verwendet die Laravel-konforme Tabelle `atms`. IDs sind konventionelle Laravel-Bigints; es gibt keine abstrakten Identifier-Objekte. `User` repräsentiert ausschließlich Betreiberzugänge und ist **keine** Identitätszuordnung für Customer oder Card. Betreiber besitzen die Rolle `superadmin` oder `viewer`; nur Superadmins dürfen Verwaltungsdaten verändern.
 
 ## Ablauf einer Auszahlung
 

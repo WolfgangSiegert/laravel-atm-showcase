@@ -18,6 +18,7 @@ class DemoOperatorSeeder extends Seeder
             'name' => 'Lokaler Demo-Betrieb',
             'password' => config('atm.demo_operator_password'),
             'is_operator' => true,
+            'operator_role' => User::OPERATOR_ROLE_SUPERADMIN,
             'email_verified_at' => now(),
         ]);
     }

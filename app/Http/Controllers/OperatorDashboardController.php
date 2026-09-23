@@ -43,6 +43,8 @@ class OperatorDashboardController extends Controller
 
         return Inertia::render('Operator/Dashboard', [
             'operatorName' => $request->user()->name,
+            'operatorRole' => $request->user()->operator_role,
+            'canManage' => $request->user()->canManageAdministration(),
             'metrics' => [
                 'accounts' => $accounts->count(),
                 'activeCards' => Card::where('status', 'active')->count(),

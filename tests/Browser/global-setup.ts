@@ -10,4 +10,9 @@ export default function globalSetup() {
         env: { ...process.env, ...browserEnvironment },
         stdio: 'inherit',
     });
+    execFileSync('php', ['artisan', 'atm:demo-provision'], {
+        cwd: process.cwd(),
+        env: { ...process.env, ...browserEnvironment },
+        stdio: 'inherit',
+    });
 }

@@ -11,6 +11,7 @@ export const browserEnvironment = {
     SESSION_DRIVER: 'file',
     BCRYPT_ROUNDS: '4',
     PUBLIC_DEMO_ENABLED: 'true',
+    PUBLIC_ADMIN_GUEST_ENABLED: 'true',
 };
 
 export default defineConfig({

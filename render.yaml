@@ -47,6 +47,8 @@ services:
         value: sync
       - key: PUBLIC_DEMO_ENABLED
         value: "true"
+      - key: PUBLIC_ADMIN_GUEST_ENABLED
+        value: "true"
       - key: SECURITY_HEADERS_ENABLED
         value: "true"
       - key: TRUSTED_PROXIES

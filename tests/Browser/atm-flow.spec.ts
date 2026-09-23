@@ -190,3 +190,23 @@ test('operates the admin dashboard, tables and edit surfaces', async ({ page }) 
     const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
     expect(widths.document).toBe(widths.viewport);
 });
+
+test('opens the public admin showcase as a read only guest', async ({ page }) => {
+    await page.goto('/admin/login');
+    await expect(page.getByText('Dashboard schreibgeschützt ansehen')).toBeVisible();
+    await page.getByRole('button', { name: 'Als Gast ansehen' }).click();
+
+    await expect(page).toHaveURL('/admin');
+    await expect(page.getByText('Öffentliche Leseansicht')).toBeVisible();
+    await expect(page.getByText('Read-only-Gast')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Automat verwalten' })).toBeHidden();
+
+    await page.getByRole('button', { name: 'Konten & Karten' }).first().click();
+    await expect(page.getByRole('button', { name: 'Neues Konto' })).toBeHidden();
+    await page.getByPlaceholder('Name, Konto oder Karte suchen …').fill('Sam');
+    await expect(page.getByRole('row', { name: /Sam Beispiel/ })).toBeVisible();
+    await expect(page.getByRole('row', { name: /Alex Demo/ })).toBeHidden();
+
+    await page.getByRole('button', { name: 'Abmelden' }).click();
+    await expect(page).toHaveURL('/admin/login');
+});

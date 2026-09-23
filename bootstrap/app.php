@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RequireAdminWriteAccess;
 use App\Http\Middleware\RequireOperator;
 use App\Http\Middleware\ResetPublicDemo;
 use Illuminate\Foundation\Application;
@@ -19,7 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [ResetPublicDemo::class, HandleInertiaRequests::class, AddSecurityHeaders::class]);
-        $middleware->alias(['operator' => RequireOperator::class]);
+        $middleware->alias([
+            'operator' => RequireOperator::class,
+            'admin.write' => RequireAdminWriteAccess::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->dontFlash(['pin', 'password']);

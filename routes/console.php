@@ -22,7 +22,21 @@ Artisan::command('atm:demo-provision', function () {
     (new DemoCustomerSeeder)->run();
     (new DemoAtmSeeder)->run();
     DB::table('demo_reset_state')->insertOrIgnore(['id' => 1, 'last_reset_at' => now()]);
-    $this->info('Demo-Karten und Automat eingerichtet; bestehende Salden bleiben erhalten. Kein Betreiber angelegt.');
+    $guest = User::where('email', config('demo.admin_guest_email'))->first();
+    if (config('demo.admin_guest_enabled')) {
+        $guest ??= new User([
+            'email' => config('demo.admin_guest_email'),
+            'password' => Str::random(64),
+        ]);
+        $guest->fill([
+            'name' => config('demo.admin_guest_name'),
+            'is_operator' => true,
+            'operator_role' => User::OPERATOR_ROLE_VIEWER,
+        ])->save();
+    } elseif ($guest?->isReadOnlyOperator()) {
+        $guest->update(['is_operator' => false]);
+    }
+    $this->info('Demo-Karten und Automat eingerichtet; bestehende Salden bleiben erhalten.'.(config('demo.admin_guest_enabled') ? ' Read-only-Gast aktiviert.' : ' Kein öffentlicher Betreiber aktiviert.'));
 })->purpose('Richtet ausschließlich die öffentlichen fiktiven Demo-Daten ein');
 
 Artisan::command('atm:demo-reset {--force : Bestätigt das Löschen fiktiver Buchungen} {--if-due : Nur bei abgelaufenem Intervall}', function () {
@@ -48,9 +62,15 @@ Artisan::command('atm:operator-create {email}', function () {
 
         return 1;
     }
-    User::create(['name' => 'Showcase-Betrieb', 'email' => $email, 'password' => $password, 'is_operator' => true]);
-    $this->info('Betreiber angelegt.');
-})->purpose('Legt einen Betreiber mit verdeckter Passworteingabe an');
+    User::create([
+        'name' => 'Showcase-Betrieb',
+        'email' => $email,
+        'password' => $password,
+        'is_operator' => true,
+        'operator_role' => User::OPERATOR_ROLE_SUPERADMIN,
+    ]);
+    $this->info('Superadmin angelegt.');
+})->purpose('Legt einen Superadmin mit verdeckter Passworteingabe an');
 
 Artisan::command('atm:deployment-check', function () {
     $checks = [

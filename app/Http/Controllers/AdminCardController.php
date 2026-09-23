@@ -53,7 +53,7 @@ class AdminCardController extends Controller
 
     public function resetLock(Request $request, Card $card, AuditLogger $audit): RedirectResponse
     {
-        abort_unless($request->user()?->is_operator, 403);
+        abort_unless($request->user()?->canManageAdministration(), 403);
 
         DB::transaction(function () use ($request, $card, $audit): void {
             $lockedCard = Card::lockForUpdate()->findOrFail($card->id);
