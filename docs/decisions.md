@@ -205,3 +205,11 @@ Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKI
 - Löschen wird nicht angeboten. Buchungen und Audit-Ereignisse referenzieren Konten und Karten absichtlich mit restriktiven Fremdschlüsseln; Sperren erhält die Historie und ist reversibel.
 - Alle Erzeugungs-, Status- und Entsperraktionen werden mit Admin, Zielobjekt und minimalem Vorher-/Nachher-Kontext auditiert. Namen, PINs und Passwörter bleiben aus dem Audit-Kontext ausgeschlossen.
 - Der Stand wird als `v1.3.0` geführt.
+
+## v1.4: Interaktive Admin-Tabellen
+
+- Die Tabellen für Bargeldkassetten, Konten, Transaktionen und Audit-Ereignisse verwenden PrimeVue DataTable 4.5.5. Diese MIT-lizenzierte Komponente übernimmt Pagination, Sortierung, Filterzustand sowie horizontales und vertikales Scrollen; eigene Tabellenlogik bleibt auf fachliche Darstellung und Aktionen begrenzt.
+- Jeder Tabellenkörper scrollt innerhalb der jeweiligen Karte und behält die Kopfzeile sichtbar. Pagination bietet je nach Datenmenge 5, 10, 25 oder 50 Zeilen pro Seite. Sortierungen lassen sich entfernen und mit gedrückter Meta-Taste über mehrere Spalten kombinieren.
+- Suche und fachliche Auswahlfilter bleiben oberhalb der Tabellen sichtbar. Konten filtern nach Status, Transaktionen nach Buchungstyp und Audit-Ereignisse nach Ergebnis. PrimeVue verwaltet den tatsächlichen Filter- und Seitenzustand für die laufende Browser-Sitzung.
+- Die Komponente wird nur mit der lazy geladenen Admin-Seite ausgeliefert. Das Admin-Bundle wächst dadurch merklich; der öffentliche ATM-Ablauf erhält diesen Code nicht.
+- Der Stand wird als `v1.4.0` geführt.

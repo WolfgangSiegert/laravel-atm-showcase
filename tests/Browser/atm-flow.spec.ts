@@ -144,6 +144,8 @@ test('operates the admin dashboard, tables and edit surfaces', async ({ page }) 
     await page.getByRole('button', { name: 'Seitenleiste schließen' }).click();
 
     await page.getByRole('button', { name: 'Konten & Karten' }).first().click();
+    await expect(page.locator('.admin-data-table .p-paginator')).toBeVisible();
+    await expect(page.locator('.admin-data-table .p-datatable-table-container')).toHaveCSS('overflow-y', 'auto');
     await page.getByPlaceholder('Name, Konto oder Karte suchen …').fill('Sam');
     await expect(page.getByRole('row', { name: /Sam Beispiel/ })).toBeVisible();
     await expect(page.getByRole('row', { name: /Alex Demo/ })).toBeHidden();
@@ -177,9 +179,10 @@ test('operates the admin dashboard, tables and edit surfaces', async ({ page }) 
     await page.getByRole('button', { name: 'Seitenleiste schließen' }).click();
 
     await page.getByRole('button', { name: 'Transaktionen' }).first().click();
-    const typeFilter = page.getByRole('combobox');
+    const typeFilter = page.getByLabel('Typ filtern');
     await typeFilter.selectOption('withdrawal');
     await expect(typeFilter).toHaveValue('withdrawal');
+    await page.getByRole('columnheader', { name: /Betrag/ }).click();
 
     await page.setViewportSize({ width: 375, height: 812 });
     await page.reload();

@@ -1,4 +1,18 @@
-# Prüfprotokoll — v1.3
+# Prüfprotokoll — v1.4
+
+Geprüft am 23. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
+
+- Alle vier Admin-Tabellen verwenden PrimeVue DataTable 4.5.5 mit internem vertikalem und horizontalem Scrollbereich, fester Kopfzeile, Pagination, wählbarer Seitengröße und entfernbarer Mehrspalten-Sortierung.
+- Kontensuche und Statusfilter, Transaktionssuche und Typfilter sowie Auditsuche und Ergebnisfilter werden durch das Filtermodell der Tabellenkomponente verarbeitet. Seiten-, Sortier- und Filterzustand werden für die Browser-Sitzung gespeichert.
+- Der Browserablauf bestätigt sichtbare Paginatoren, den eigenen vertikalen Scrollcontainer, Suche, fachlichen Typfilter, Sortierinteraktion sowie die weiterhin überlauffreie mobile Ansicht.
+- 126 Pest-Tests liefen mit 877 Assertions erfolgreich; fünf PostgreSQL-Szenarien wurden im SQLite-Standardlauf wie vorgesehen übersprungen. Alle fünf Chrome-Abläufe waren erfolgreich.
+- Produktionsbuild mit TypeScript-Prüfung, Pint, strikte Composer-Validierung und Plattformanforderungen unter PHP 8.4.25 waren erfolgreich.
+
+Grenzen: Die Daten werden weiterhin als höchstens 50 aktuelle Transaktionen beziehungsweise Audit-Ereignisse vom Server geladen und anschließend im Browser paginiert. Für deutlich größere oder echte Produktionsdaten wäre serverseitige Pagination notwendig. PrimeVue vergrößert das separat geladene Admin-Bundle auf rund 571 kB minifiziert; die öffentliche ATM-Seite lädt dieses Bundle nicht.
+
+---
+
+# Historisches Prüfprotokoll — v1.3
 
 Geprüft am 23. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
 

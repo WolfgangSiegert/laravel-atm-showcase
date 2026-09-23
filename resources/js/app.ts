@@ -12,8 +12,23 @@ createInertiaApp({
         `./pages/${name}.vue`,
         import.meta.glob<DefineComponent>('./pages/**/*.vue'),
     ),
-    setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) }).use(plugin).mount(el);
+    async setup({ el, App, props, plugin }) {
+        const app = createApp({ render: () => h(App, props) }).use(plugin);
+
+        if (props.initialPage.component.startsWith('Operator/')) {
+            const [{ default: PrimeVue }, { default: Aura }] = await Promise.all([
+                import('primevue/config'),
+                import('@primeuix/themes/aura'),
+            ]);
+            app.use(PrimeVue, {
+                theme: {
+                    preset: Aura,
+                    options: { darkModeSelector: false },
+                },
+            });
+        }
+
+        app.mount(el);
     },
     progress: { color: '#b9f277' },
 });

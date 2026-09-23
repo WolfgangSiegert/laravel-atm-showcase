@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', fn () => to_route('atm.index'))->name('home');
-Route::get('/atm', fn () => Inertia::render('Atm/Welcome', ['version' => '1.3.0']))->name('atm.index');
+Route::get('/atm', fn () => Inertia::render('Atm/Welcome', ['version' => '1.4.0']))->name('atm.index');
 Route::get('/atm/cards', [AtmSessionController::class, 'create'])->name('atm.cards');
 Route::post('/atm/session', [AtmSessionController::class, 'store'])->name('atm.login');
 Route::get('/atm/session', [AtmSessionController::class, 'show'])->middleware(RequireAtmSession::class)->name('atm.session');

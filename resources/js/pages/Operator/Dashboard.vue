@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
+import { FilterMatchMode } from '@primevue/core/api';
 import { PhArrowDown, PhArrowUp, PhBank, PhCaretRight, PhCheckCircle, PhCoins, PhCreditCard, PhCurrencyEur, PhFunnel, PhGearSix, PhKey, PhLock, PhLockOpen, PhMagnifyingGlass, PhPencilSimple, PhPlus, PhReceipt, PhShieldCheck, PhTrendUp, PhUserPlus, PhUsers, PhWarning, PhX } from '@phosphor-icons/vue';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
 import { computed, nextTick, ref } from 'vue';
 import AdminShell from '../../layouts/AdminShell.vue';
 
@@ -26,8 +29,18 @@ const props = defineProps<{
 
 const page = usePage<{ errors: Record<string, string> }>();
 const activeSection = ref<Section>('overview');
-const search = ref('');
-const transactionType = ref('all');
+const accountFilters = ref({
+    global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+    status: { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
+});
+const transactionFilters = ref({
+    global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+    type: { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
+});
+const auditFilters = ref({
+    global: { value: null as string | null, matchMode: FilterMatchMode.CONTAINS },
+    outcome: { value: null as string | null, matchMode: FilterMatchMode.EQUALS },
+});
 const statusDialog = ref<HTMLDialogElement | null>(null);
 const inventoryDrawer = ref<HTMLDialogElement | null>(null);
 const accountDialog = ref<HTMLDialogElement | null>(null);
@@ -47,14 +60,16 @@ const date = (value: string) => new Intl.DateTimeFormat('de-DE', { dateStyle: 's
 const maxActivity = computed(() => Math.max(...props.activity.map(item => item.count), 1));
 const inventoryTotal = computed(() => props.atm.inventory.reduce((sum, item) => sum + item.quantity, 0));
 const lowInventoryCount = computed(() => props.atm.inventory.filter(item => item.quantity < 10).length);
-const normalizedSearch = computed(() => search.value.trim().toLowerCase());
-const filteredAccounts = computed(() => props.accounts.filter(account => !normalizedSearch.value || [account.reference, account.customer, ...account.cards.map(card => card.reference)].some(value => value.toLowerCase().includes(normalizedSearch.value))));
-const filteredTransactions = computed(() => props.transactions.filter(transaction => (transactionType.value === 'all' || transaction.type === transactionType.value) && (!normalizedSearch.value || [transaction.receiptReference, transaction.accountReference, transaction.customer, transaction.purpose ?? ''].some(value => value.toLowerCase().includes(normalizedSearch.value)))));
-const filteredAudit = computed(() => props.auditEvents.filter(event => !normalizedSearch.value || [event.event_type, event.outcome, event.reason_code ?? ''].some(value => value.toLowerCase().includes(normalizedSearch.value))));
+const accountRows = computed(() => props.accounts.map(account => ({
+    ...account,
+    searchText: [account.customer, account.reference, ...account.cards.map(card => card.reference)].join(' '),
+})));
 
 function navigate(section: Section) {
     activeSection.value = section;
-    search.value = '';
+    accountFilters.value.global.value = null;
+    transactionFilters.value.global.value = null;
+    auditFilters.value.global.value = null;
     nextTick(() => document.querySelector<HTMLElement>('#admin-content h1')?.focus());
 }
 function openStatusDialog() {
@@ -160,36 +175,63 @@ function transactionLabel(type: string) {
                 </section>
                 <section class="admin-card admin-card--wide" aria-labelledby="inventory-heading">
                     <div class="admin-card__header"><div><p class="admin-eyebrow">Cash Management</p><h2 id="inventory-heading">Bargeldkassetten</h2></div><span v-if="page.props.errors.adjustment" class="admin-inline-error"><PhWarning :size="17" /> {{ page.props.errors.adjustment }}</span></div>
-                    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Stückelung</th><th>Bestand</th><th>Wert</th><th>Status</th><th><span class="sr-only">Aktionen</span></th></tr></thead><tbody><tr v-for="item in atm.inventory" :key="item.id"><td><strong>{{ money(item.denominationMinor) }}</strong></td><td>{{ item.quantity }} Scheine</td><td>{{ money(item.denominationMinor * item.quantity) }}</td><td><span class="admin-status" :class="item.quantity < 10 ? 'admin-status--warning' : 'admin-status--active'"><i></i>{{ item.quantity < 10 ? 'Niedrig' : 'Ausreichend' }}</span></td><td class="admin-table__action"><button type="button" aria-label="Bestand bearbeiten" @click="openInventoryDrawer(item)"><PhPencilSimple :size="19" /></button></td></tr></tbody></table></div>
+                    <DataTable :value="atm.inventory" data-key="id" paginator :rows="5" :rows-per-page-options="[5, 10]" removable-sort scrollable scroll-height="18rem" class="admin-data-table" table-style="min-width: 46rem">
+                        <Column field="denominationMinor" header="Stückelung" sortable><template #body="{ data }"><strong>{{ money(data.denominationMinor) }}</strong></template></Column>
+                        <Column field="quantity" header="Bestand" sortable><template #body="{ data }">{{ data.quantity }} Scheine</template></Column>
+                        <Column header="Wert" sortable sort-field="denominationMinor"><template #body="{ data }">{{ money(data.denominationMinor * data.quantity) }}</template></Column>
+                        <Column field="quantity" header="Status" sortable><template #body="{ data }"><span class="admin-status" :class="data.quantity < 10 ? 'admin-status--warning' : 'admin-status--active'"><i></i>{{ data.quantity < 10 ? 'Niedrig' : 'Ausreichend' }}</span></template></Column>
+                        <Column header="Aktionen" frozen align-frozen="right"><template #body="{ data }"><span class="admin-table__action"><button type="button" aria-label="Bestand bearbeiten" @click="openInventoryDrawer(data)"><PhPencilSimple :size="19" /></button></span></template></Column>
+                        <template #empty>Keine Bargeldkassetten vorhanden.</template>
+                    </DataTable>
                 </section>
             </div>
         </section>
 
         <section v-else-if="activeSection === 'accounts'" aria-labelledby="admin-accounts-heading">
             <div class="admin-page-heading"><div><p class="admin-eyebrow">Kundenverwaltung</p><h1 id="admin-accounts-heading" tabindex="-1">Konten & Karten</h1><p>Demo-Konten anlegen, Karten ausgeben und Zugänge sperren.</p></div><div class="admin-heading-actions"><button type="button" class="admin-button admin-button--quiet" :disabled="accounts.length === 0" @click="openCardDialog()"><PhCreditCard :size="18" /> Neue Karte</button><button type="button" class="admin-button admin-button--primary" @click="openAccountDialog"><PhUserPlus :size="18" /> Neues Konto</button></div></div>
-            <div class="admin-toolbar"><label class="admin-search"><PhMagnifyingGlass :size="20" /><span class="sr-only">Konten durchsuchen</span><input v-model="search" type="search" placeholder="Name, Konto oder Karte suchen …"></label><span class="admin-count-badge">{{ filteredAccounts.length }} Konten</span></div>
-            <section class="admin-card admin-card--table"><div class="admin-table-wrap"><table class="admin-table admin-account-table"><thead><tr><th>Kundin/Kunde</th><th>Konto</th><th>Karten</th><th>Saldo</th><th>Status</th><th><span class="sr-only">Aktionen</span></th></tr></thead><tbody>
-                <tr v-for="account in filteredAccounts" :key="account.id"><td><div class="admin-person"><span>{{ account.customer.charAt(0) }}</span><strong>{{ account.customer }}</strong></div></td><td><strong>{{ account.reference }}</strong><small>{{ account.currency }} · Demo-Konto</small></td><td><div class="admin-card-stack"><span v-for="card in account.cards" :key="card.id" class="admin-card-reference"><PhCreditCard :size="18" /> {{ card.reference }}<small :class="{ 'admin-card-reference__warning': card.status !== 'active' || card.failedAttempts }">{{ cardStatus(card) }}<template v-if="card.failedAttempts"> · {{ card.failedAttempts }} Fehlversuch(e)</template></small></span></div></td><td><strong>{{ money(account.balanceMinor, account.currency) }}</strong></td><td><span class="admin-status" :class="account.status === 'active' ? 'admin-status--active' : 'admin-status--blocked'"><i></i>{{ account.status === 'active' ? 'Aktiv' : 'Gesperrt' }}</span></td><td class="admin-table__action"><button type="button" :aria-label="`${account.reference} verwalten`" @click="openAccountDrawer(account)"><PhPencilSimple :size="19" /></button></td></tr>
-                <tr v-if="filteredAccounts.length === 0"><td colspan="6" class="admin-empty">Keine passenden Konten gefunden.</td></tr>
-            </tbody></table></div></section>
+            <div class="admin-toolbar"><label class="admin-search"><PhMagnifyingGlass :size="20" /><span class="sr-only">Konten durchsuchen</span><input v-model="accountFilters.global.value" type="search" placeholder="Name, Konto oder Karte suchen …"></label><label class="admin-filter"><PhFunnel :size="19" /><span class="sr-only">Kontostatus filtern</span><select v-model="accountFilters.status.value"><option :value="null">Alle Status</option><option value="active">Aktiv</option><option value="blocked">Gesperrt</option></select></label><span class="admin-count-badge">{{ accounts.length }} Konten</span></div>
+            <section class="admin-card admin-card--table">
+                <DataTable v-model:filters="accountFilters" :value="accountRows" data-key="id" :global-filter-fields="['customer', 'reference', 'searchText']" filter-display="menu" paginator :rows="10" :rows-per-page-options="[5, 10, 25]" removable-sort sort-mode="multiple" scrollable scroll-height="min(54vh, 34rem)" state-storage="session" state-key="admin-accounts-v2" class="admin-data-table" table-style="min-width: 62rem">
+                    <Column field="customer" header="Kundin/Kunde" sortable><template #body="{ data }"><div class="admin-person"><span>{{ data.customer.charAt(0) }}</span><strong>{{ data.customer }}</strong></div></template></Column>
+                    <Column field="reference" header="Konto" sortable><template #body="{ data }"><strong>{{ data.reference }}</strong><small>{{ data.currency }} · Demo-Konto</small></template></Column>
+                    <Column header="Karten"><template #body="{ data }"><div class="admin-card-stack"><span v-for="card in data.cards" :key="card.id" class="admin-card-reference"><PhCreditCard :size="18" /> {{ card.reference }}<small :class="{ 'admin-card-reference__warning': card.status !== 'active' || card.failedAttempts }">{{ cardStatus(card) }}<template v-if="card.failedAttempts"> · {{ card.failedAttempts }} Fehlversuch(e)</template></small></span></div></template></Column>
+                    <Column field="balanceMinor" header="Saldo" sortable><template #body="{ data }"><strong>{{ money(data.balanceMinor, data.currency) }}</strong></template></Column>
+                    <Column field="status" header="Status" sortable filter><template #body="{ data }"><span class="admin-status" :class="data.status === 'active' ? 'admin-status--active' : 'admin-status--blocked'"><i></i>{{ data.status === 'active' ? 'Aktiv' : 'Gesperrt' }}</span></template></Column>
+                    <Column header="Aktionen" frozen align-frozen="right"><template #body="{ data }"><span class="admin-table__action"><button type="button" :aria-label="`${data.reference} verwalten`" @click="openAccountDrawer(data)"><PhPencilSimple :size="19" /></button></span></template></Column>
+                    <template #empty>Keine passenden Konten gefunden.</template>
+                </DataTable>
+            </section>
         </section>
 
         <section v-else-if="activeSection === 'transactions'" aria-labelledby="admin-transactions-heading">
-            <div class="admin-page-heading"><div><p class="admin-eyebrow">Buchungen</p><h1 id="admin-transactions-heading" tabindex="-1">Transaktionen</h1><p>Die letzten 50 Buchungen über alle Demo-Konten.</p></div><span class="admin-count-badge">{{ filteredTransactions.length }} Einträge</span></div>
-            <div class="admin-toolbar"><label class="admin-search"><PhMagnifyingGlass :size="20" /><span class="sr-only">Transaktionen durchsuchen</span><input v-model="search" type="search" placeholder="Beleg, Konto, Name oder Zweck …"></label><label class="admin-filter"><PhFunnel :size="19" /><span class="sr-only">Typ filtern</span><select v-model="transactionType"><option value="all">Alle Typen</option><option value="deposit">Einzahlungen</option><option value="withdrawal">Auszahlungen</option><option value="opening">Eröffnungen</option></select></label></div>
-            <section class="admin-card admin-card--table"><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Datum</th><th>Typ</th><th>Konto</th><th>Verwendungszweck</th><th class="admin-table__number">Betrag</th><th class="admin-table__number">Saldo danach</th></tr></thead><tbody>
-                <tr v-for="transaction in filteredTransactions" :key="transaction.id"><td>{{ date(transaction.createdAt) }}<small>{{ transaction.receiptReference }}</small></td><td><span class="admin-transaction-type" :class="`admin-transaction-type--${transaction.type}`"><component :is="transaction.type === 'withdrawal' ? PhArrowUp : PhArrowDown" :size="16" />{{ transactionLabel(transaction.type) }}</span></td><td><strong>{{ transaction.customer }}</strong><small>{{ transaction.accountReference }}</small></td><td>{{ transaction.purpose || '—' }}</td><td class="admin-table__number"><strong>{{ transaction.type === 'withdrawal' ? '−' : '+' }}{{ money(transaction.amountMinor, transaction.currency) }}</strong></td><td class="admin-table__number">{{ money(transaction.balanceAfterMinor, transaction.currency) }}</td></tr>
-                <tr v-if="filteredTransactions.length === 0"><td colspan="6" class="admin-empty">Keine passenden Transaktionen gefunden.</td></tr>
-            </tbody></table></div></section>
+            <div class="admin-page-heading"><div><p class="admin-eyebrow">Buchungen</p><h1 id="admin-transactions-heading" tabindex="-1">Transaktionen</h1><p>Die letzten 50 Buchungen über alle Demo-Konten.</p></div><span class="admin-count-badge">{{ transactions.length }} Einträge</span></div>
+            <div class="admin-toolbar"><label class="admin-search"><PhMagnifyingGlass :size="20" /><span class="sr-only">Transaktionen durchsuchen</span><input v-model="transactionFilters.global.value" type="search" placeholder="Beleg, Konto, Name oder Zweck …"></label><label class="admin-filter"><PhFunnel :size="19" /><span class="sr-only">Typ filtern</span><select v-model="transactionFilters.type.value"><option :value="null">Alle Typen</option><option value="deposit">Einzahlungen</option><option value="withdrawal">Auszahlungen</option><option value="opening">Eröffnungen</option></select></label></div>
+            <section class="admin-card admin-card--table">
+                <DataTable v-model:filters="transactionFilters" :value="transactions" data-key="id" :global-filter-fields="['receiptReference', 'accountReference', 'customer', 'cardReference', 'purpose']" filter-display="menu" paginator :rows="10" :rows-per-page-options="[5, 10, 25, 50]" removable-sort sort-mode="multiple" scrollable scroll-height="min(54vh, 34rem)" state-storage="session" state-key="admin-transactions-v2" class="admin-data-table" table-style="min-width: 68rem">
+                    <Column field="createdAt" header="Datum" sortable><template #body="{ data }">{{ date(data.createdAt) }}<small>{{ data.receiptReference }}</small></template></Column>
+                    <Column field="type" header="Typ" sortable filter><template #body="{ data }"><span class="admin-transaction-type" :class="`admin-transaction-type--${data.type}`"><component :is="data.type === 'withdrawal' ? PhArrowUp : PhArrowDown" :size="16" />{{ transactionLabel(data.type) }}</span></template></Column>
+                    <Column field="customer" header="Konto" sortable><template #body="{ data }"><strong>{{ data.customer }}</strong><small>{{ data.accountReference }}</small></template></Column>
+                    <Column field="purpose" header="Verwendungszweck" sortable><template #body="{ data }">{{ data.purpose || '—' }}</template></Column>
+                    <Column field="amountMinor" header="Betrag" sortable><template #body="{ data }"><strong>{{ data.type === 'withdrawal' ? '−' : '+' }}{{ money(data.amountMinor, data.currency) }}</strong></template></Column>
+                    <Column field="balanceAfterMinor" header="Saldo danach" sortable><template #body="{ data }">{{ money(data.balanceAfterMinor, data.currency) }}</template></Column>
+                    <template #empty>Keine passenden Transaktionen gefunden.</template>
+                </DataTable>
+            </section>
         </section>
 
         <section v-else aria-labelledby="admin-audit-heading">
-            <div class="admin-page-heading"><div><p class="admin-eyebrow">Sicherheit</p><h1 id="admin-audit-heading" tabindex="-1">Audit-Protokoll</h1><p>Unveränderbare System- und Verwaltungsereignisse ohne sensible Zugangsdaten.</p></div><span class="admin-count-badge"><PhShieldCheck :size="18" /> {{ filteredAudit.length }} Ereignisse</span></div>
-            <div class="admin-toolbar"><label class="admin-search"><PhMagnifyingGlass :size="20" /><span class="sr-only">Audit-Ereignisse durchsuchen</span><input v-model="search" type="search" placeholder="Ereignis, Ergebnis oder Fehlercode …"></label></div>
-            <section class="admin-card admin-card--table"><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Zeitpunkt</th><th>Ereignis</th><th>Ergebnis</th><th>Fehlercode</th><th>Kontext</th></tr></thead><tbody>
-                <tr v-for="event in filteredAudit" :key="event.id"><td>{{ date(event.created_at) }}</td><td><strong>{{ eventLabel(event.event_type) }}</strong><small>{{ event.event_type }}</small></td><td><span class="admin-status" :class="event.outcome === 'success' ? 'admin-status--active' : 'admin-status--error'"><i></i>{{ event.outcome === 'success' ? 'Erfolgreich' : 'Abgewiesen' }}</span></td><td>{{ event.reason_code || '—' }}</td><td><code v-if="event.context">{{ JSON.stringify(event.context) }}</code><span v-else>—</span></td></tr>
-                <tr v-if="filteredAudit.length === 0"><td colspan="5" class="admin-empty">Keine passenden Audit-Ereignisse gefunden.</td></tr>
-            </tbody></table></div></section>
+            <div class="admin-page-heading"><div><p class="admin-eyebrow">Sicherheit</p><h1 id="admin-audit-heading" tabindex="-1">Audit-Protokoll</h1><p>Unveränderbare System- und Verwaltungsereignisse ohne sensible Zugangsdaten.</p></div><span class="admin-count-badge"><PhShieldCheck :size="18" /> {{ auditEvents.length }} Ereignisse</span></div>
+            <div class="admin-toolbar"><label class="admin-search"><PhMagnifyingGlass :size="20" /><span class="sr-only">Audit-Ereignisse durchsuchen</span><input v-model="auditFilters.global.value" type="search" placeholder="Ereignis, Ergebnis oder Fehlercode …"></label><label class="admin-filter"><PhFunnel :size="19" /><span class="sr-only">Ergebnis filtern</span><select v-model="auditFilters.outcome.value"><option :value="null">Alle Ergebnisse</option><option value="success">Erfolgreich</option><option value="rejected">Abgewiesen</option></select></label></div>
+            <section class="admin-card admin-card--table">
+                <DataTable v-model:filters="auditFilters" :value="auditEvents" data-key="id" :global-filter-fields="['event_type', 'outcome', 'reason_code']" filter-display="menu" paginator :rows="10" :rows-per-page-options="[5, 10, 25, 50]" removable-sort sort-mode="multiple" scrollable scroll-height="min(54vh, 34rem)" state-storage="session" state-key="admin-audit-v2" class="admin-data-table" table-style="min-width: 62rem">
+                    <Column field="created_at" header="Zeitpunkt" sortable><template #body="{ data }">{{ date(data.created_at) }}</template></Column>
+                    <Column field="event_type" header="Ereignis" sortable><template #body="{ data }"><strong>{{ eventLabel(data.event_type) }}</strong><small>{{ data.event_type }}</small></template></Column>
+                    <Column field="outcome" header="Ergebnis" sortable filter><template #body="{ data }"><span class="admin-status" :class="data.outcome === 'success' ? 'admin-status--active' : 'admin-status--error'"><i></i>{{ data.outcome === 'success' ? 'Erfolgreich' : 'Abgewiesen' }}</span></template></Column>
+                    <Column field="reason_code" header="Fehlercode" sortable><template #body="{ data }">{{ data.reason_code || '—' }}</template></Column>
+                    <Column header="Kontext"><template #body="{ data }"><code v-if="data.context">{{ JSON.stringify(data.context) }}</code><span v-else>—</span></template></Column>
+                    <template #empty>Keine passenden Audit-Ereignisse gefunden.</template>
+                </DataTable>
+            </section>
         </section>
 
         <dialog ref="accountDialog" class="admin-dialog admin-dialog--wide" aria-labelledby="account-dialog-title" @click.self="accountDialog?.close()">

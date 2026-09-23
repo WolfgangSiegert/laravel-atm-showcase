@@ -22,7 +22,7 @@ const hasPortfolioWebsite = Boolean(page.props.portfolioUrl);
                 </Link>
                 <nav aria-label="Hauptnavigation" class="flex flex-wrap items-center justify-end gap-4 text-sm sm:gap-6">
                     <Link href="/atm" :aria-current="page.url === '/atm' ? 'page' : undefined" class="font-semibold underline decoration-lime-600 underline-offset-8">Automat</Link>
-                    <Link href="/admin/login" :aria-current="page.url.startsWith('/admin') ? 'page' : undefined" class="text-stone-600 hover:text-stone-950">Admin</Link>
+                    <a href="/admin/login" :aria-current="page.url.startsWith('/admin') ? 'page' : undefined" class="text-stone-600 hover:text-stone-950">Admin</a>
                     <Link href="/atm#ausblick" class="text-stone-600 hover:text-stone-950">Ausblick ↗</Link>
                     <ThemeSwitcher />
                 </nav>

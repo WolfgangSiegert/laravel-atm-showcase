@@ -1,4 +1,4 @@
-# LERN-Bank Mein Geldautomat — v1.3
+# LERN-Bank Mein Geldautomat — v1.4
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -15,6 +15,7 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - Getrennter Admin-Zugang mit Dashboard, Kennzahlen, Aktivitätsdiagramm und Tabellen für Konten, Karten, Transaktionen, Bargeldbestand und Audit-Ereignisse.
 - Automatenstatus wird in einem Dialog, der Bargeldbestand in einer seitlichen Bearbeitungsleiste geändert; beide Aktionen bleiben serverseitig validiert und protokolliert.
 - Admins können Demo-Konten samt erster Karte anlegen, zusätzliche Karten ausgeben, Konten oder einzelne Karten sperren und reaktivieren sowie PIN-Fehlversuche und temporäre Kartensperren zurücksetzen.
+- Alle Admin-Tabellen verwenden PrimeVue DataTable mit eigenem Scrollbereich, fester Kopfzeile, Pagination, Mehrspalten-Sortierung, Suche und fachlichen Filtern. Der Tabellenzustand bleibt während der Browser-Sitzung erhalten.
 - Konto- und Kartensperren invalidieren laufende Sitzungen. Gesperrte oder abgelaufene Zugänge erscheinen nicht in der öffentlichen Kartenauswahl; PINs werden ausschließlich gehasht gespeichert.
 - Datensparsames, unveränderliches Audit für Anmeldungen, Sitzungsabläufe, Geldbewegungen und Betreiberänderungen.
 - Unter PostgreSQL geprüfte Sperren für konkurrierende Auszahlungen und idempotente Wiederholungen.
