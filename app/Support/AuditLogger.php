@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Account;
 use App\Models\Atm;
 use App\Models\AuditEvent;
 use App\Models\Card;
@@ -14,6 +15,7 @@ class AuditLogger
         string $eventType,
         string $outcome,
         ?Card $card = null,
+        ?Account $account = null,
         ?Atm $atm = null,
         ?User $actor = null,
         ?string $reasonCode = null,
@@ -23,7 +25,7 @@ class AuditLogger
             'event_type' => $eventType,
             'outcome' => $outcome,
             'actor_user_id' => $actor?->id,
-            'account_id' => $card?->account_id,
+            'account_id' => $account?->id ?? $card?->account_id,
             'card_id' => $card?->id,
             'atm_id' => $atm?->id,
             'reason_code' => $reasonCode,

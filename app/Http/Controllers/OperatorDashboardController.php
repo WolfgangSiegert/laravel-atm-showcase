@@ -9,6 +9,7 @@ use App\Models\Atm;
 use App\Models\AuditEvent;
 use App\Models\Card;
 use App\Models\CashInventory;
+use App\Models\Customer;
 use App\Models\Transaction;
 use App\Support\AuditLogger;
 use Illuminate\Http\RedirectResponse;
@@ -84,7 +85,12 @@ class OperatorDashboardController extends Controller
                     'status' => $card->status,
                     'failedAttempts' => $card->failed_attempts,
                     'lockedUntil' => $card->locked_until?->toIso8601String(),
+                    'expiresAt' => $card->expires_at?->toDateString(),
                 ])->values(),
+            ]),
+            'customers' => Customer::orderBy('display_name')->get(['id', 'display_name'])->map(fn (Customer $customer) => [
+                'id' => $customer->id,
+                'name' => $customer->display_name,
             ]),
             'transactions' => $transactions->map(fn (Transaction $transaction) => [
                 'id' => $transaction->id,

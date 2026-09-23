@@ -21,7 +21,11 @@ class AtmSessionController extends Controller
     public function create(): Response
     {
         return Inertia::render('Atm/SignIn', [
-            'cards' => Card::orderBy('demo_reference')->get(['id', 'demo_reference']),
+            'cards' => Card::where('status', 'active')
+                ->whereHas('account', fn ($query) => $query->where('status', 'active'))
+                ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+                ->orderBy('demo_reference')
+                ->get(['id', 'demo_reference']),
             'pinLength' => config('atm.pin_length'),
             'demoAccess' => config('demo.enabled') ? config('demo.cards') : null,
         ]);

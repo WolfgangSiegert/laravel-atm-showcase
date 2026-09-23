@@ -1,4 +1,18 @@
-# Prüfprotokoll — v1.2
+# Prüfprotokoll — v1.3
+
+Geprüft am 23. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
+
+- Kontoanlage unterstützt neue und vorhandene Personen, erzeugt atomar die erste aktive Karte und startet immer mit 0 Cent. Zusätzliche Karten können mit optionalem Ablaufdatum ausgegeben werden.
+- Konto- und Kartenstatus lassen sich getrennt sperren beziehungsweise reaktivieren. Jede Änderung invalidiert vorhandene Kartensitzungen. Ein eigener Vorgang setzt PIN-Fehlversuche und temporäre Zeitsperren zurück.
+- Gesperrte Konten, gesperrte Karten und abgelaufene Karten werden nicht mehr in der öffentlichen Kartenauswahl angeboten. PINs werden gehasht und erscheinen weder in Antworten noch im Audit.
+- 126 Pest-Tests liefen mit 877 Assertions erfolgreich; fünf PostgreSQL-Szenarien wurden im SQLite-Standardlauf wie vorgesehen übersprungen. Alle fünf Chrome-Abläufe waren erfolgreich, einschließlich Kontoanlage, Konto-Sperre und -Reaktivierung, zusätzlicher Kartenausgabe sowie der mobilen Ansicht ohne horizontalen Überlauf.
+- Produktionsbuild mit TypeScript-Prüfung, Pint, strikte Composer-Validierung und Plattformanforderungen unter PHP 8.4.25 waren erfolgreich.
+
+Grenzen: Es gibt weiterhin keine Löschfunktion, PIN-Anzeige oder freie Saldoänderung. Eine PIN-Neuvergabe, feinere Admin-Rollen, serverseitige Tabellenpagination und Exportfunktionen bleiben mögliche spätere Erweiterungen.
+
+---
+
+# Historisches Prüfprotokoll — v1.2
 
 Geprüft am 23. September 2026 mit PHP 8.4.25, Node 24.20.0 und dem integrierten Browser.
 

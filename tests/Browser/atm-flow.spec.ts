@@ -147,6 +147,34 @@ test('operates the admin dashboard, tables and edit surfaces', async ({ page }) 
     await page.getByPlaceholder('Name, Konto oder Karte suchen …').fill('Sam');
     await expect(page.getByRole('row', { name: /Sam Beispiel/ })).toBeVisible();
     await expect(page.getByRole('row', { name: /Alex Demo/ })).toBeHidden();
+    await page.getByPlaceholder('Name, Konto oder Karte suchen …').fill('');
+
+    await page.getByRole('button', { name: 'Neues Konto' }).click();
+    const accountDialog = page.getByRole('dialog', { name: 'Neues Konto anlegen' });
+    await accountDialog.getByLabel('Name der neuen Person').fill('Browser Admin');
+    await accountDialog.getByLabel('Kontoreferenz').fill('BROWSER-003');
+    await accountDialog.getByLabel('Erste Kartenreferenz').fill('BROWSER-CARD-003');
+    await accountDialog.getByLabel('Vierstellige PIN').fill('1357');
+    await accountDialog.getByRole('button', { name: 'Konto anlegen' }).click();
+    await expect(page.getByRole('status')).toContainText('Konto und erste Karte wurden angelegt.');
+    await expect(page.getByRole('row', { name: /Browser Admin/ })).toBeVisible();
+
+    await page.getByRole('button', { name: 'BROWSER-003 verwalten' }).click();
+    await page.getByRole('button', { name: 'Konto sperren' }).click();
+    await expect(page.getByRole('row', { name: /BROWSER-003.*Gesperrt/ })).toBeVisible();
+    await page.getByRole('button', { name: 'BROWSER-003 verwalten' }).click();
+    await page.getByRole('button', { name: 'Konto reaktivieren' }).click();
+
+    await page.getByRole('button', { name: 'Neue Karte' }).click();
+    const cardDialog = page.getByRole('dialog', { name: 'Neue Karte anlegen' });
+    await cardDialog.getByLabel('Konto').selectOption({ label: 'BROWSER-003 · Browser Admin' });
+    await cardDialog.getByLabel('Kartenreferenz').fill('BROWSER-CARD-004');
+    await cardDialog.getByLabel('Vierstellige PIN').fill('2468');
+    await cardDialog.getByRole('button', { name: 'Karte anlegen' }).click();
+    await expect(page.getByRole('status')).toContainText('Neue Karte wurde angelegt.');
+    await page.getByRole('button', { name: 'BROWSER-003 verwalten' }).click();
+    await expect(page.getByRole('dialog', { name: 'BROWSER-003' })).toContainText('BROWSER-CARD-004');
+    await page.getByRole('button', { name: 'Seitenleiste schließen' }).click();
 
     await page.getByRole('button', { name: 'Transaktionen' }).first().click();
     const typeFilter = page.getByRole('combobox');

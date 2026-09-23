@@ -1,4 +1,4 @@
-# LERN-Bank Mein Geldautomat — v1.2
+# LERN-Bank Mein Geldautomat — v1.3
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -14,6 +14,8 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - PIN-Sperre, Anfragelimit, Ablauf nach Inaktivität und Abmeldung.
 - Getrennter Admin-Zugang mit Dashboard, Kennzahlen, Aktivitätsdiagramm und Tabellen für Konten, Karten, Transaktionen, Bargeldbestand und Audit-Ereignisse.
 - Automatenstatus wird in einem Dialog, der Bargeldbestand in einer seitlichen Bearbeitungsleiste geändert; beide Aktionen bleiben serverseitig validiert und protokolliert.
+- Admins können Demo-Konten samt erster Karte anlegen, zusätzliche Karten ausgeben, Konten oder einzelne Karten sperren und reaktivieren sowie PIN-Fehlversuche und temporäre Kartensperren zurücksetzen.
+- Konto- und Kartensperren invalidieren laufende Sitzungen. Gesperrte oder abgelaufene Zugänge erscheinen nicht in der öffentlichen Kartenauswahl; PINs werden ausschließlich gehasht gespeichert.
 - Datensparsames, unveränderliches Audit für Anmeldungen, Sitzungsabläufe, Geldbewegungen und Betreiberänderungen.
 - Unter PostgreSQL geprüfte Sperren für konkurrierende Auszahlungen und idempotente Wiederholungen.
 - Automatisierter Chrome-Hauptablauf mit isolierter Browser-Testdatenbank.
@@ -158,6 +160,11 @@ Der öffentliche Modus wird ausschließlich für eine dedizierte fiktive Datenba
 | GET/HEAD | `/admin` | Geschütztes Dashboard mit Verwaltungsansichten |
 | PATCH | `/admin/atm/status` | Geschützte Statusänderung |
 | POST | `/admin/inventory/{id}/adjust` | Geschützte Bestandsänderung |
+| POST | `/admin/accounts` | Demo-Konto mit erster Karte anlegen |
+| PATCH | `/admin/accounts/{id}/status` | Konto sperren oder reaktivieren |
+| POST | `/admin/accounts/{id}/cards` | Zusätzliche Karte ausgeben |
+| PATCH | `/admin/cards/{id}/status` | Karte sperren oder reaktivieren |
+| POST | `/admin/cards/{id}/reset-lock` | PIN-Fehlversuche und Zeitsperre zurücksetzen |
 | DELETE | `/admin/session` | Admin-Sitzung beenden |
 | GET/HEAD | `/up` | Laravel-Healthcheck |
 

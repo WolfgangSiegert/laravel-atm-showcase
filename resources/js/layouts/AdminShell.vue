@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { PhBank, PhChartPieSlice, PhCreditCard, PhListChecks, PhReceipt, PhSignOut } from '@phosphor-icons/vue';
+import LoadingOverlay from '../components/LoadingOverlay.vue';
+import ToastNotice from '../components/ToastNotice.vue';
 
 type Section = 'overview' | 'accounts' | 'transactions' | 'audit';
 defineProps<{ operatorName: string; activeSection: Section; loggingOut?: boolean }>();
@@ -44,5 +46,7 @@ const navigation = [
             </nav>
             <main id="admin-content" tabindex="-1" class="admin-content"><slot /></main>
         </div>
+        <ToastNotice />
+        <LoadingOverlay />
     </div>
 </template>

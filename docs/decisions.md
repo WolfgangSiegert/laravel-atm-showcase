@@ -195,3 +195,13 @@ Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKI
 - Der Admin-Bereich verwendet eine eigene Material-inspirierte Oberfläche auf Basis der vorhandenen Tailwind-CSS-Pipeline und Phosphor Icons. Er übernimmt die ATM-Skins nicht, damit die Verwaltungsoberfläche visuell konsistent und vorhersehbar bleibt.
 - Alte `/operator`-Endpunkte bleiben aus Kompatibilitätsgründen erreichbar; neue Oberflächen und Formulare verwenden `/admin`.
 - Der Stand wird als `v1.2.0` geführt.
+
+## v1.3: Konto- und Kartenverwaltung
+
+- Ein Admin kann ein Konto entweder für eine bestehende Person oder zusammen mit einer neuen Person anlegen. Jedes neue Konto erhält unmittelbar eine erste Karte und startet mit 0 Cent; ein frei gesetzter Eröffnungssaldo würde die unveränderliche Buchungshistorie umgehen und wird deshalb nicht angeboten.
+- Zusätzliche Karten werden einem vorhandenen Konto zugeordnet. Kartenreferenzen und Kontoreferenzen sind eindeutig, werden normalisiert und erlauben nur Großbuchstaben, Ziffern und Bindestriche. PINs bestehen weiterhin aus vier Ziffern und werden ausschließlich über Laravels Hash-Cast gespeichert.
+- Konten und Karten können getrennt zwischen `active` und `blocked` wechseln. Jede Statusänderung erhöht die Sitzungsversion betroffener Karten; dadurch können vorher gestartete Sitzungen auch nach einer späteren Reaktivierung nicht weiterverwendet werden.
+- PIN-Fehlversuche und eine temporäre Zeitsperre lassen sich gemeinsam zurücksetzen. Die PIN selbst wird nicht angezeigt, exportiert oder ins Audit geschrieben. Eine PIN-Neuvergabe bleibt wegen der höheren Missbrauchsfolgen außerhalb dieser Version.
+- Löschen wird nicht angeboten. Buchungen und Audit-Ereignisse referenzieren Konten und Karten absichtlich mit restriktiven Fremdschlüsseln; Sperren erhält die Historie und ist reversibel.
+- Alle Erzeugungs-, Status- und Entsperraktionen werden mit Admin, Zielobjekt und minimalem Vorher-/Nachher-Kontext auditiert. Namen, PINs und Passwörter bleiben aus dem Audit-Kontext ausgeschlossen.
+- Der Stand wird als `v1.3.0` geführt.
