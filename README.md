@@ -1,4 +1,4 @@
-# LERN-Bank Mein Geldautomat — v1.1
+# LERN-Bank Mein Geldautomat — v1.2
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -12,7 +12,8 @@ Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne 
 - Stabile Belegreferenzen, kontogebundene Belegansicht und druckfreundliche Darstellung.
 - Optionaler Verwendungszweck sowie nach Typ filter- und nach Datum oder Betrag sortierbare Historie.
 - PIN-Sperre, Anfragelimit, Ablauf nach Inaktivität und Abmeldung.
-- Getrennter Betreiberzugang für Automatenstatus und Bargeldbestand.
+- Getrennter Admin-Zugang mit Dashboard, Kennzahlen, Aktivitätsdiagramm und Tabellen für Konten, Karten, Transaktionen, Bargeldbestand und Audit-Ereignisse.
+- Automatenstatus wird in einem Dialog, der Bargeldbestand in einer seitlichen Bearbeitungsleiste geändert; beide Aktionen bleiben serverseitig validiert und protokolliert.
 - Datensparsames, unveränderliches Audit für Anmeldungen, Sitzungsabläufe, Geldbewegungen und Betreiberänderungen.
 - Unter PostgreSQL geprüfte Sperren für konkurrierende Auszahlungen und idempotente Wiederholungen.
 - Automatisierter Chrome-Hauptablauf mit isolierter Browser-Testdatenbank.
@@ -47,7 +48,7 @@ Diese PINs sind absichtlich öffentlich bekannte Lernzugänge. Niemals persönli
 
 Nach fünf falschen PINs wird die Karte 15 Minuten gesperrt; danach kann wieder versucht werden. Zusätzlich höchstens zehn Anmeldeversuche je IP in einer Minute. Die Sitzung läuft nach fünf Minuten ohne serverseitige Aktivität ab. Eine Mausbewegung verlängert sie nicht. Werte stehen in `config/atm.php`. Diese Regeln sind vorläufige Lernprojekt-Entscheidungen, keine Sicherheitszusage für Banking.
 
-Der lokale Betreiberzugang liegt unter `/operator`: `operator@example.test` mit Passwort `local-demo-operator`. Beide Werte sind über `DEMO_OPERATOR_EMAIL` und `DEMO_OPERATOR_PASSWORD` änderbar. Dieser bekannte Zugang wird ausschließlich in `local` und `testing` angelegt; Produktion muss einen eigenen Betreiber sicher bereitstellen.
+Der lokale Admin-Zugang liegt unter `/admin`: `operator@example.test` mit Passwort `local-demo-operator`. Beide Werte sind über `DEMO_OPERATOR_EMAIL` und `DEMO_OPERATOR_PASSWORD` änderbar. Dieser bekannte Zugang wird ausschließlich in `local` und `testing` angelegt; Produktion muss einen eigenen Betreiber sicher bereitstellen. Die bisherigen `/operator`-Routen bleiben vorerst kompatibel.
 
 ## Geldbewegungen
 
@@ -131,10 +132,11 @@ Der öffentliche Modus wird ausschließlich für eine dedizierte fiktive Datenba
 | `app/Http/Requests/DepositRequest.php` | Betragsvalidierung und Umrechnung in Cent |
 | `app/Http/Middleware/RequireAtmSession.php` | Gültigkeit und Inaktivitätsgrenze auf geschützten Routen |
 | `app/Http/Middleware/AddSecurityHeaders.php` | Sicherheitsheader und produktionsabhängige CSP/HSTS-Antworten |
-| `app/Http/Controllers/OperatorDashboardController.php` | Geschützte Status- und Bestandsverwaltung |
+| `app/Http/Controllers/OperatorDashboardController.php` | Geschützte Dashboard-Daten, Status- und Bestandsverwaltung |
 | `app/Support/AuditLogger.php` | Zentral begrenzte Erzeugung von Audit-Ereignissen |
 | `resources/js/pages/Atm/` | Welcome, SignIn und Session mit Kontoübersicht |
-| `resources/js/pages/Operator/` | Betreiberanmeldung und Dashboard |
+| `resources/js/pages/Operator/` | Admin-Anmeldung und Material-inspiriertes Dashboard |
+| `resources/js/layouts/AdminShell.vue` | Eigenständige Admin-Navigation für Desktop und Mobilgeräte |
 | `resources/js/layouts/AppShell.vue` | Gemeinsamer Rahmen und Statusmeldungen |
 | `database/migrations/` | Laravel-Infrastruktur sowie Identitätstabellen und Buchungen |
 | `tests/Feature/` | Pest-Integrationstests |
@@ -152,11 +154,11 @@ Der öffentliche Modus wird ausschließlich für eine dedizierte fiktive Datenba
 | POST | `/atm/deposits` | Geschützte simulierte Einzahlung |
 | POST | `/atm/withdrawals` | Geschützte simulierte Auszahlung |
 | DELETE | `/atm/session` | Sitzung und CSRF-Token erneuern, abmelden |
-| GET/HEAD | `/operator/login` | Betreiberanmeldung |
-| GET/HEAD | `/operator` | Geschützte Bestands-, Status- und Auditansicht |
-| PATCH | `/operator/atm/status` | Geschützte Statusänderung |
-| POST | `/operator/inventory/{id}/adjust` | Geschützte Bestandsänderung |
-| DELETE | `/operator/session` | Betreibersitzung beenden |
+| GET/HEAD | `/admin/login` | Admin-Anmeldung |
+| GET/HEAD | `/admin` | Geschütztes Dashboard mit Verwaltungsansichten |
+| PATCH | `/admin/atm/status` | Geschützte Statusänderung |
+| POST | `/admin/inventory/{id}/adjust` | Geschützte Bestandsänderung |
+| DELETE | `/admin/session` | Admin-Sitzung beenden |
 | GET/HEAD | `/up` | Laravel-Healthcheck |
 
 Konventionelles Laravel mit Vue 3, TypeScript, Inertia 3, Vite und Tailwind. Kein zusätzlicher Client-Router, kein SSR, keine Repository-/DDD-Schichten. ATM-Kartensitzungen bleiben unabhängig vom Laravel-User des Betreiberbereichs. Das öffentliche GitHub-Repository und das Render-Deployment sind eingerichtet.

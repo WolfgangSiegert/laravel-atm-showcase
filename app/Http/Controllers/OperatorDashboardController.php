@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AdjustCashInventoryRequest;
 use App\Http\Requests\UpdateAtmStatusRequest;
+use App\Models\Account;
 use App\Models\Atm;
 use App\Models\AuditEvent;
+use App\Models\Card;
 use App\Models\CashInventory;
+use App\Models\Transaction;
 use App\Support\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,8 +25,29 @@ class OperatorDashboardController extends Controller
         $atm = Atm::with(['cashInventories' => fn ($query) => $query->orderByDesc('denomination_minor')])
             ->where('code', config('atm.code'))->firstOrFail();
 
+        $transactions = Transaction::query()
+            ->with(['account.customer', 'card'])
+            ->latest('id')
+            ->limit(50)
+            ->get();
+        $accounts = Account::query()
+            ->with(['customer', 'cards'])
+            ->orderBy('reference')
+            ->get();
+        $activityStart = now()->startOfDay()->subDays(6);
+        $activity = Transaction::query()
+            ->where('created_at', '>=', $activityStart)
+            ->get(['type', 'amount_minor', 'created_at'])
+            ->groupBy(fn (Transaction $transaction) => $transaction->created_at->toDateString());
+
         return Inertia::render('Operator/Dashboard', [
             'operatorName' => $request->user()->name,
+            'metrics' => [
+                'accounts' => $accounts->count(),
+                'activeCards' => Card::where('status', 'active')->count(),
+                'transactions' => Transaction::count(),
+                'todayVolumeMinor' => Transaction::where('created_at', '>=', now()->startOfDay())->sum('amount_minor'),
+            ],
             'atm' => [
                 'code' => $atm->code,
                 'label' => $atm->label,
@@ -36,6 +60,45 @@ class OperatorDashboardController extends Controller
                     'quantity' => $item->quantity,
                 ])->values(),
             ],
+            'activity' => collect(range(0, 6))->map(function (int $offset) use ($activity, $activityStart) {
+                $date = $activityStart->copy()->addDays($offset);
+                $items = $activity->get($date->toDateString(), collect());
+
+                return [
+                    'date' => $date->toDateString(),
+                    'label' => $date->translatedFormat('D'),
+                    'count' => $items->count(),
+                    'amountMinor' => $items->sum('amount_minor'),
+                ];
+            }),
+            'accounts' => $accounts->map(fn (Account $account) => [
+                'id' => $account->id,
+                'reference' => $account->reference,
+                'customer' => $account->customer->display_name,
+                'currency' => $account->currency,
+                'balanceMinor' => $account->balance_minor,
+                'status' => $account->status,
+                'cards' => $account->cards->map(fn (Card $card) => [
+                    'id' => $card->id,
+                    'reference' => $card->demo_reference,
+                    'status' => $card->status,
+                    'failedAttempts' => $card->failed_attempts,
+                    'lockedUntil' => $card->locked_until?->toIso8601String(),
+                ])->values(),
+            ]),
+            'transactions' => $transactions->map(fn (Transaction $transaction) => [
+                'id' => $transaction->id,
+                'receiptReference' => $transaction->receipt_reference,
+                'accountReference' => $transaction->account->reference,
+                'customer' => $transaction->account->customer->display_name,
+                'cardReference' => $transaction->card?->demo_reference,
+                'type' => $transaction->type,
+                'purpose' => $transaction->purpose,
+                'amountMinor' => $transaction->amount_minor,
+                'balanceAfterMinor' => $transaction->balance_after_minor,
+                'currency' => $transaction->currency,
+                'createdAt' => $transaction->created_at->toIso8601String(),
+            ]),
             'auditEvents' => AuditEvent::latest('id')->limit(50)->get([
                 'id', 'event_type', 'outcome', 'reason_code', 'context', 'created_at',
             ]),

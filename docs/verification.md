@@ -1,4 +1,18 @@
-# Prüfprotokoll — v1.1
+# Prüfprotokoll — v1.2
+
+Geprüft am 23. September 2026 mit PHP 8.4.25, Node 24.20.0 und dem integrierten Browser.
+
+- Der neue Admin-Bereich unter `/admin` verwendet die vorhandene Betreiber-Authentifizierung und zeigt reale Kennzahlen, eine Sieben-Tage-Aktivität, Bargeldkassetten, Konten/Karten, die letzten 50 Transaktionen und die letzten 50 Audit-Ereignisse.
+- Konten-, Transaktions- und Audit-Tabellen sind durchsuchbar; Transaktionen lassen sich zusätzlich nach Typ filtern. Statusänderung und Bestandskorrektur öffnen als Modal beziehungsweise Seitenleiste und verwenden die bereits atomar geprüften Serveraktionen.
+- Die Browserprüfung bestätigte Anmeldung, Navigation durch alle vier Bereiche, Suche, Transaktionsfilter, Statusdialog und Bestandsseitenleiste. Bei 375 × 812 Pixeln blieb die Dokumentbreite exakt 375 Pixel; die mobile Navigation ist horizontal erreichbar. Das Browserprotokoll blieb ohne Warnungen und Fehler.
+- 125 Pest-Tests liefen mit 830 Assertions erfolgreich; fünf PostgreSQL-Szenarien wurden im SQLite-Standardlauf wie vorgesehen übersprungen. Alle fünf Chrome-Abläufe einschließlich des neuen eigenständig ausführbaren Admin-Tests waren erfolgreich.
+- Produktionsbuild mit TypeScript-Prüfung, Pint, strikte Composer-Validierung und Plattformanforderungen unter PHP 8.4.25 waren erfolgreich.
+
+Grenzen: Konten und Karten sind in dieser ersten Version reine Leseansichten. Tabellen verwenden für höchstens 50 Ereignisse beziehungsweise Buchungen clientseitige Filter und noch keine serverseitige Pagination oder Exportfunktion. Das Dashboard ist für die Demo-Verwaltung ausgelegt, nicht für reale Bankdaten oder mehrere Rollenstufen.
+
+---
+
+# Historisches Prüfprotokoll — v1.1
 
 Geprüft am 22. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
 

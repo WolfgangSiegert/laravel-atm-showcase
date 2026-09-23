@@ -75,7 +75,18 @@ it('shows the configured ATM and recent audit events', function () {
         ->where('atm.code', config('atm.code'))
         ->where('atm.label', 'LERN-Bank Mein Geldautomat')
         ->has('atm.inventory', 4)
+        ->where('metrics.accounts', 2)
+        ->where('metrics.activeCards', 2)
+        ->has('activity', 7)
+        ->has('accounts', 2)
+        ->has('transactions')
         ->where('auditEvents.0.event_type', 'test.event'));
+});
+
+it('serves the new admin routes and keeps the operator dashboard compatible', function () {
+    $this->get('/admin')->assertRedirect(route('operator.login'));
+    $this->actingAs($this->operator)->get('/admin')->assertOk();
+    $this->get('/operator')->assertOk();
 });
 
 it('changes ATM status and records the operator and before-after values', function () {

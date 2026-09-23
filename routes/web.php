@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', fn () => to_route('atm.index'))->name('home');
-Route::get('/atm', fn () => Inertia::render('Atm/Welcome', ['version' => '1.1.0']))->name('atm.index');
+Route::get('/atm', fn () => Inertia::render('Atm/Welcome', ['version' => '1.2.0']))->name('atm.index');
 Route::get('/atm/cards', [AtmSessionController::class, 'create'])->name('atm.cards');
 Route::post('/atm/session', [AtmSessionController::class, 'store'])->name('atm.login');
 Route::get('/atm/session', [AtmSessionController::class, 'show'])->middleware(RequireAtmSession::class)->name('atm.session');
@@ -24,11 +24,17 @@ Route::get('/atm/receipts/{receiptReference}', ReceiptController::class)
     ->where('receiptReference', 'ATM-[0-9A-HJKMNP-TV-Z]{26}')
     ->name('atm.receipt');
 
-Route::get('/operator/login', [OperatorSessionController::class, 'create'])->name('operator.login');
-Route::post('/operator/session', [OperatorSessionController::class, 'store'])->name('operator.session.store');
+Route::get('/operator/login', fn () => to_route('operator.login'));
+Route::post('/operator/session', [OperatorSessionController::class, 'store']);
+Route::get('/admin/login', [OperatorSessionController::class, 'create'])->name('operator.login');
+Route::post('/admin/session', [OperatorSessionController::class, 'store'])->name('operator.session.store');
 Route::middleware('operator')->group(function () {
-    Route::get('/operator', [OperatorDashboardController::class, 'show'])->name('operator.dashboard');
-    Route::patch('/operator/atm/status', [OperatorDashboardController::class, 'updateStatus'])->name('operator.atm.status');
-    Route::post('/operator/inventory/{cashInventory}/adjust', [OperatorDashboardController::class, 'adjustInventory'])->name('operator.inventory.adjust');
-    Route::delete('/operator/session', [OperatorSessionController::class, 'destroy'])->name('operator.session.destroy');
+    Route::get('/admin', [OperatorDashboardController::class, 'show'])->name('operator.dashboard');
+    Route::get('/operator', [OperatorDashboardController::class, 'show']);
+    Route::patch('/admin/atm/status', [OperatorDashboardController::class, 'updateStatus'])->name('operator.atm.status');
+    Route::post('/admin/inventory/{cashInventory}/adjust', [OperatorDashboardController::class, 'adjustInventory'])->name('operator.inventory.adjust');
+    Route::delete('/admin/session', [OperatorSessionController::class, 'destroy'])->name('operator.session.destroy');
+    Route::patch('/operator/atm/status', [OperatorDashboardController::class, 'updateStatus']);
+    Route::post('/operator/inventory/{cashInventory}/adjust', [OperatorDashboardController::class, 'adjustInventory']);
+    Route::delete('/operator/session', [OperatorSessionController::class, 'destroy']);
 });

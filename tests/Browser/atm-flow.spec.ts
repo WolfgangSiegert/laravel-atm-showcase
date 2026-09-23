@@ -125,3 +125,37 @@ test('offers classic ATM and touchscreen menu interfaces', async ({ page }) => {
         expect(widths.document).toBe(widths.viewport);
     }
 });
+
+test('operates the admin dashboard, tables and edit surfaces', async ({ page }) => {
+    await page.goto('/admin/login');
+    await page.getByLabel('E-Mail-Adresse').fill('operator@example.test');
+    await page.getByLabel('Passwort').fill('local-demo-operator');
+    await page.getByRole('button', { name: 'Sicher anmelden' }).click();
+    await expect(page).toHaveURL('/admin');
+    await expect(page.getByRole('heading', { name: /Guten Tag/ })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Bargeldkassetten' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Automat verwalten' }).click();
+    await expect(page.getByRole('dialog', { name: 'Betriebsstatus ändern' })).toBeVisible();
+    await page.getByRole('button', { name: 'Dialog schließen' }).click();
+
+    await page.getByRole('button', { name: 'Bestand bearbeiten' }).first().click();
+    await expect(page.getByRole('dialog', { name: /Kassette/ })).toBeVisible();
+    await page.getByRole('button', { name: 'Seitenleiste schließen' }).click();
+
+    await page.getByRole('button', { name: 'Konten & Karten' }).first().click();
+    await page.getByPlaceholder('Name, Konto oder Karte suchen …').fill('Sam');
+    await expect(page.getByRole('row', { name: /Sam Beispiel/ })).toBeVisible();
+    await expect(page.getByRole('row', { name: /Alex Demo/ })).toBeHidden();
+
+    await page.getByRole('button', { name: 'Transaktionen' }).first().click();
+    const typeFilter = page.getByRole('combobox');
+    await typeFilter.selectOption('withdrawal');
+    await expect(typeFilter).toHaveValue('withdrawal');
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.reload();
+    await expect(page.getByRole('navigation', { name: 'Mobile Admin-Navigation' })).toBeVisible();
+    const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
+    expect(widths.document).toBe(widths.viewport);
+});

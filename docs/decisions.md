@@ -186,3 +186,12 @@ Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKI
 - Nach der PIN-Anmeldung erscheint zunächst ein Hauptmenü für Kontostand, Einzahlung, Auszahlung, Umsätze und Kartenrückgabe. Beträge und PIN lassen sich per Bildschirmtastatur eingeben. Der optionale freie Verwendungszweck bleibt als Texteingabe verfügbar.
 - Phosphor Icons liefert die funktionalen Symbole. Die drei bereitgestellten Bilder dienen ausschließlich als visuelle Referenz und werden nicht in die Anwendung oder das Repository kopiert.
 - Der Stand wird als `v1.1.0` geführt.
+
+## v1.2: Admin Control Center
+
+- Der vorhandene geschützte Betreiberzugang wird unter `/admin` zu einem eigenständigen Admin-Bereich ausgebaut. Die bestehende `is_operator`-Berechtigung bleibt erhalten; ein zusätzliches Rollenpaket wäre für weiterhin genau eine Verwaltungsrolle unnötig.
+- Das Dashboard liest dieselben Eloquent-Modelle wie der ATM und zeigt Kennzahlen, eine Sieben-Tage-Aktivität sowie höchstens 50 aktuelle Transaktionen und Audit-Ereignisse. Tabellenfilter laufen in dieser ersten Version im Browser; serverseitige Pagination ist bei der kleinen Demo-Datenmenge noch nicht notwendig.
+- Schreibzugriffe bleiben bewusst auf den vorhandenen Umfang begrenzt: Automatenstatus und Stückzahl vorhandener Bargeldkassetten. Statusänderungen erscheinen als Modal, Bestandskorrekturen als seitliche Bearbeitungsleiste. Konten, Karten, Transaktionen und Audit-Ereignisse bleiben lesbar, aber nicht editierbar.
+- Der Admin-Bereich verwendet eine eigene Material-inspirierte Oberfläche auf Basis der vorhandenen Tailwind-CSS-Pipeline und Phosphor Icons. Er übernimmt die ATM-Skins nicht, damit die Verwaltungsoberfläche visuell konsistent und vorhersehbar bleibt.
+- Alte `/operator`-Endpunkte bleiben aus Kompatibilitätsgründen erreichbar; neue Oberflächen und Formulare verwenden `/admin`.
+- Der Stand wird als `v1.2.0` geführt.
