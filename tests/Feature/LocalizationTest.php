@@ -2,6 +2,10 @@
 
 use Inertia\Testing\AssertableInertia as Assert;
 
+beforeEach(function () {
+    $this->withoutVite();
+});
+
 it('uses German by default and shares supported locales', function () {
     $this->get('/atm')
         ->assertOk()
