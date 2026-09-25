@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { onBeforeUnmount, ref } from 'vue';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 
 const visible = ref(false);
 let delay: ReturnType<typeof setTimeout> | null = null;
@@ -24,10 +27,10 @@ onBeforeUnmount(() => {
 
 <template>
     <Transition name="loading">
-        <div v-if="visible" class="loading-overlay" role="status" aria-live="polite" aria-label="Seite wird geladen">
+        <div v-if="visible" class="loading-overlay" role="status" aria-live="polite" :aria-label="t('Seite wird geladen')">
             <div class="loading-overlay__panel">
                 <span class="loading-spinner" aria-hidden="true"></span>
-                <span>Bitte einen Moment …</span>
+                <span>{{ t('Bitte einen Moment …') }}</span>
             </div>
         </div>
     </Transition>

@@ -7,7 +7,7 @@ import { initializeTheme } from './composables/useTheme';
 initializeTheme();
 
 createInertiaApp({
-    title: (title) => `${title} · LERN-Bank Mein Geldautomat`,
+    title: (title) => `${title} · ${document.documentElement.lang === 'en' ? 'LERN-Bank My ATM' : 'LERN-Bank Mein Geldautomat'}`,
     resolve: (name) => resolvePageComponent(
         `./pages/${name}.vue`,
         import.meta.glob<DefineComponent>('./pages/**/*.vue'),

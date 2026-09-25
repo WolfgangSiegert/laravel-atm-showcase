@@ -25,9 +25,9 @@ class DepositRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'amount.*' => 'Bitte einen Betrag mit höchstens zwei Nachkommastellen eingeben, zum Beispiel 25,50.',
-            'purpose.*' => 'Der Verwendungszweck darf höchstens 140 Zeichen enthalten und keine Steuerzeichen verwenden.',
-            'idempotency_key.*' => 'Bitte lade die Seite neu und versuche es erneut.',
+            'amount.*' => __('Bitte einen Betrag mit höchstens zwei Nachkommastellen eingeben, zum Beispiel 25,50.'),
+            'purpose.*' => __('Der Verwendungszweck darf höchstens 140 Zeichen enthalten und keine Steuerzeichen verwenden.'),
+            'idempotency_key.*' => __('Bitte lade die Seite neu und versuche es erneut.'),
         ];
     }
 

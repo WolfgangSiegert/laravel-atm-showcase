@@ -32,10 +32,10 @@ class StoreAdminCardRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'card_reference.unique' => 'Diese Kartenreferenz ist bereits vergeben.',
-            'card_reference.regex' => 'Die Kartenreferenz darf nur Großbuchstaben, Ziffern und Bindestriche enthalten.',
-            'pin.regex' => 'Die PIN muss aus genau '.config('atm.pin_length').' Ziffern bestehen.',
-            'expires_at.*' => 'Das Ablaufdatum muss in der Zukunft liegen.',
+            'card_reference.unique' => __('Diese Kartenreferenz ist bereits vergeben.'),
+            'card_reference.regex' => __('Die Kartenreferenz darf nur Großbuchstaben, Ziffern und Bindestriche enthalten.'),
+            'pin.regex' => __('Die PIN muss aus genau :count Ziffern bestehen.', ['count' => config('atm.pin_length')]),
+            'expires_at.*' => __('Das Ablaufdatum muss in der Zukunft liegen.'),
         ];
     }
 }

@@ -36,13 +36,13 @@ class StoreAdminAccountRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'customer_name.required_without' => 'Bitte wähle eine bestehende Person oder gib einen neuen Namen ein.',
-            'customer_name.*' => 'Der Name muss zwischen 2 und 80 Zeichen lang sein.',
-            'account_reference.unique' => 'Diese Kontoreferenz ist bereits vergeben.',
-            'account_reference.regex' => 'Die Kontoreferenz darf nur Großbuchstaben, Ziffern und Bindestriche enthalten.',
-            'card_reference.unique' => 'Diese Kartenreferenz ist bereits vergeben.',
-            'card_reference.regex' => 'Die Kartenreferenz darf nur Großbuchstaben, Ziffern und Bindestriche enthalten.',
-            'pin.regex' => 'Die PIN muss aus genau '.config('atm.pin_length').' Ziffern bestehen.',
+            'customer_name.required_without' => __('Bitte wähle eine bestehende Person oder gib einen neuen Namen ein.'),
+            'customer_name.*' => __('Der Name muss zwischen 2 und 80 Zeichen lang sein.'),
+            'account_reference.unique' => __('Diese Kontoreferenz ist bereits vergeben.'),
+            'account_reference.regex' => __('Die Kontoreferenz darf nur Großbuchstaben, Ziffern und Bindestriche enthalten.'),
+            'card_reference.unique' => __('Diese Kartenreferenz ist bereits vergeben.'),
+            'card_reference.regex' => __('Die Kartenreferenz darf nur Großbuchstaben, Ziffern und Bindestriche enthalten.'),
+            'pin.regex' => __('Die PIN muss aus genau :count Ziffern bestehen.', ['count' => config('atm.pin_length')]),
         ];
     }
 }

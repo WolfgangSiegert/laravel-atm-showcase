@@ -131,7 +131,7 @@ class OperatorDashboardController extends Controller
             ]);
         });
 
-        return to_route('operator.dashboard')->with('notice', 'Automatenstatus aktualisiert.');
+        return to_route('operator.dashboard')->with('notice', __('Automatenstatus aktualisiert.'));
     }
 
     public function adjustInventory(AdjustCashInventoryRequest $request, CashInventory $cashInventory, AuditLogger $audit): RedirectResponse
@@ -144,7 +144,7 @@ class OperatorDashboardController extends Controller
             $after = $before + $adjustment;
 
             if ($after < 0) {
-                throw ValidationException::withMessages(['adjustment' => 'Der Bestand darf nicht negativ werden.']);
+                throw ValidationException::withMessages(['adjustment' => __('Der Bestand darf nicht negativ werden.')]);
             }
 
             $inventory->update(['quantity' => $after]);
@@ -156,6 +156,6 @@ class OperatorDashboardController extends Controller
             ]);
         });
 
-        return to_route('operator.dashboard')->with('notice', 'Bargeldbestand aktualisiert.');
+        return to_route('operator.dashboard')->with('notice', __('Bargeldbestand aktualisiert.'));
     }
 }

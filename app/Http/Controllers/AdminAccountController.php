@@ -40,7 +40,7 @@ class AdminAccountController extends Controller
             ]);
         });
 
-        return to_route('operator.dashboard')->with('notice', 'Konto und erste Karte wurden angelegt.');
+        return to_route('operator.dashboard')->with('notice', __('Konto und erste Karte wurden angelegt.'));
     }
 
     public function updateStatus(UpdateAdminResourceStatusRequest $request, Account $account, AuditLogger $audit): RedirectResponse
@@ -61,6 +61,6 @@ class AdminAccountController extends Controller
             ]);
         });
 
-        return to_route('operator.dashboard')->with('notice', 'Kontostatus wurde aktualisiert.');
+        return to_route('operator.dashboard')->with('notice', __('Kontostatus wurde aktualisiert.'));
     }
 }

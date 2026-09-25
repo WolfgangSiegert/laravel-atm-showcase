@@ -25,9 +25,9 @@ class WithdrawalRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'withdrawal_amount.*' => 'Bitte einen ganzen Eurobetrag ohne Trennzeichen eingeben.',
-            'purpose.*' => 'Der Verwendungszweck darf höchstens 140 Zeichen enthalten und keine Steuerzeichen verwenden.',
-            'idempotency_key.*' => 'Bitte lade die Seite neu und versuche es erneut.',
+            'withdrawal_amount.*' => __('Bitte einen ganzen Eurobetrag ohne Trennzeichen eingeben.'),
+            'purpose.*' => __('Der Verwendungszweck darf höchstens 140 Zeichen enthalten und keine Steuerzeichen verwenden.'),
+            'idempotency_key.*' => __('Bitte lade die Seite neu und versuche es erneut.'),
         ];
     }
 

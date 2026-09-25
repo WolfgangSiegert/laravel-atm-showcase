@@ -18,6 +18,6 @@ class AdjustCashInventoryRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['adjustment.*' => 'Die Änderung muss zwischen −100 und 100 Scheinen liegen und darf nicht null sein.'];
+        return ['adjustment.*' => __('Die Änderung muss zwischen −100 und 100 Scheinen liegen und darf nicht null sein.')];
     }
 }

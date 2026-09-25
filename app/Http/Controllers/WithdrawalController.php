@@ -23,6 +23,6 @@ class WithdrawalController extends Controller
         }
 
         return to_route('atm.receipt', $transaction->receipt_reference)
-            ->with('notice', 'Auszahlung erfolgreich gebucht.');
+            ->with('notice', __('Auszahlung erfolgreich gebucht.'));
     }
 }

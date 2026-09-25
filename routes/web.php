@@ -9,10 +9,21 @@ use App\Http\Controllers\OperatorSessionController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Middleware\RequireAtmSession;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 Route::get('/', fn () => to_route('atm.index'))->name('home');
+Route::post('/locale', function (Request $request) {
+    $validated = $request->validate([
+        'locale' => ['required', Rule::in(config('app.supported_locales'))],
+    ]);
+
+    $request->session()->put('locale', $validated['locale']);
+
+    return back(303);
+})->name('locale.update');
 Route::get('/atm', fn () => Inertia::render('Atm/Welcome', ['version' => '1.5.0']))->name('atm.index');
 Route::get('/atm/cards', [AtmSessionController::class, 'create'])->name('atm.cards');
 Route::post('/atm/session', [AtmSessionController::class, 'store'])->name('atm.login');

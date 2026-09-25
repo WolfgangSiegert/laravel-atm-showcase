@@ -26,7 +26,7 @@ class AdminCardController extends Controller
             $audit->record('card.created', 'success', card: $card, account: $account, actor: $request->user());
         });
 
-        return to_route('operator.dashboard')->with('notice', 'Neue Karte wurde angelegt.');
+        return to_route('operator.dashboard')->with('notice', __('Neue Karte wurde angelegt.'));
     }
 
     public function updateStatus(UpdateAdminResourceStatusRequest $request, Card $card, AuditLogger $audit): RedirectResponse
@@ -48,7 +48,7 @@ class AdminCardController extends Controller
             ]);
         });
 
-        return to_route('operator.dashboard')->with('notice', 'Kartenstatus wurde aktualisiert.');
+        return to_route('operator.dashboard')->with('notice', __('Kartenstatus wurde aktualisiert.'));
     }
 
     public function resetLock(Request $request, Card $card, AuditLogger $audit): RedirectResponse
@@ -69,6 +69,6 @@ class AdminCardController extends Controller
             ]);
         });
 
-        return to_route('operator.dashboard')->with('notice', 'PIN-Fehlversuche und Zeitsperre wurden zurückgesetzt.');
+        return to_route('operator.dashboard')->with('notice', __('PIN-Fehlversuche und Zeitsperre wurden zurückgesetzt.'));
     }
 }

@@ -17,7 +17,7 @@ class DepositMoney
     {
         try {
             if ($amount < 1 || $amount > config('atm.max_deposit_minor')) {
-                throw ValidationException::withMessages(['amount' => 'Der Betrag liegt außerhalb des erlaubten Einzahlungsbereichs.']);
+                throw ValidationException::withMessages(['amount' => __('Der Betrag liegt außerhalb des erlaubten Einzahlungsbereichs.')]);
             }
 
             return DB::transaction(function () use ($sessionCard, $amount, $purpose, $key) {
@@ -25,18 +25,18 @@ class DepositMoney
                 $card = Card::lockForUpdate()->findOrFail($sessionCard->id);
                 $card->setRelation('account', $account);
                 if ($card->account_id !== $account->id || (int) $card->session_version !== (int) $sessionCard->session_version || ! $card->isUsable() || $account->currency !== 'EUR') {
-                    throw ValidationException::withMessages(['amount' => 'Karte oder Konto sind nicht für eine Einzahlung verfügbar.']);
+                    throw ValidationException::withMessages(['amount' => __('Karte oder Konto sind nicht für eine Einzahlung verfügbar.')]);
                 }
                 $existing = Transaction::where('account_id', $account->id)->where('idempotency_key', $key)->first();
                 if ($existing) {
                     if ($existing->amount_minor !== $amount || $existing->purpose !== $purpose || $existing->card_id !== $card->id || $existing->type !== 'deposit') {
-                        throw ValidationException::withMessages(['amount' => 'Diese Anfrage wurde bereits mit anderen Daten verwendet. Bitte lade die Seite neu.']);
+                        throw ValidationException::withMessages(['amount' => __('Diese Anfrage wurde bereits mit anderen Daten verwendet. Bitte lade die Seite neu.')]);
                     }
 
                     return $existing;
                 }
                 if ($account->balance_minor > config('atm.max_balance_minor') - $amount) {
-                    throw ValidationException::withMessages(['amount' => 'Das Guthabenlimit des Demo-Kontos würde überschritten.']);
+                    throw ValidationException::withMessages(['amount' => __('Das Guthabenlimit des Demo-Kontos würde überschritten.')]);
                 }
                 $account->balance_minor += $amount;
                 $account->save();

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { PhBackspace } from '@phosphor-icons/vue';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
     modelValue: string;
@@ -12,8 +15,8 @@ const props = withDefaults(defineProps<{
     allowDecimal: false,
     maxLength: 8,
     disabled: false,
-    label: 'Nummernfeld',
-    clearLabel: 'Eingabe löschen',
+    label: '',
+    clearLabel: '',
 });
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
@@ -27,13 +30,13 @@ function append(value: string) {
 </script>
 
 <template>
-    <div class="atm-keypad" role="group" :aria-label="label">
-        <button v-for="digit in digits" :key="digit" type="button" class="atm-key" :disabled="disabled || modelValue.length >= maxLength" :aria-label="`Ziffer ${digit}`" @click="append(digit)">{{ digit }}</button>
-        <button type="button" class="atm-key atm-key--muted" :disabled="disabled || !allowDecimal || modelValue.includes(',') || modelValue.includes('.')" aria-label="Komma" @click="append(',')">,</button>
-        <button type="button" class="atm-key" :disabled="disabled || modelValue.length >= maxLength" aria-label="Ziffer 0" @click="append('0')">0</button>
-        <button type="button" class="atm-key atm-key--muted" :disabled="disabled || modelValue.length === 0" aria-label="Letzte Ziffer löschen" @click="emit('update:modelValue', modelValue.slice(0, -1))">
+    <div class="atm-keypad" role="group" :aria-label="label || t('Nummernfeld')">
+        <button v-for="digit in digits" :key="digit" type="button" class="atm-key" :disabled="disabled || modelValue.length >= maxLength" :aria-label="t('Ziffer :digit', { digit })" @click="append(digit)">{{ digit }}</button>
+        <button type="button" class="atm-key atm-key--muted" :disabled="disabled || !allowDecimal || modelValue.includes(',') || modelValue.includes('.')" :aria-label="t('Komma')" @click="append(',')">,</button>
+        <button type="button" class="atm-key" :disabled="disabled || modelValue.length >= maxLength" :aria-label="t('Ziffer :digit', { digit: 0 })" @click="append('0')">0</button>
+        <button type="button" class="atm-key atm-key--muted" :disabled="disabled || modelValue.length === 0" :aria-label="t('Letzte Ziffer löschen')" @click="emit('update:modelValue', modelValue.slice(0, -1))">
             <PhBackspace :size="22" weight="bold" aria-hidden="true" />
         </button>
-        <button type="button" class="atm-key atm-key--clear" :disabled="disabled || modelValue.length === 0" :aria-label="clearLabel" @click="emit('update:modelValue', '')">{{ clearLabel }}</button>
+        <button type="button" class="atm-key atm-key--clear" :disabled="disabled || modelValue.length === 0" :aria-label="clearLabel || t('Eingabe löschen')" @click="emit('update:modelValue', '')">{{ clearLabel || t('Eingabe löschen') }}</button>
     </div>
 </template>

@@ -25,7 +25,7 @@ class RequireAtmSession
             $request->session()->regenerateToken();
             Inertia::clearHistory();
 
-            return to_route('atm.cards')->with('notice', 'Bitte melde dich an. Deine Sitzung ist abgelaufen oder nicht mehr gültig.');
+            return to_route('atm.cards')->with('notice', __('Bitte melde dich an. Deine Sitzung ist abgelaufen oder nicht mehr gültig.'));
         }
         $request->session()->put('atm_last_activity', now()->timestamp);
         $request->attributes->set('atm_card', $card);

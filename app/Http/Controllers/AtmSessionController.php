@@ -37,7 +37,7 @@ class AtmSessionController extends Controller
         $key = 'atm-login:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, config('atm.requests_per_minute'))) {
             RateLimiter::attempt($key.':audit', 1, fn () => $audit->record('atm_session.login', 'rejected', reasonCode: 'rate_limited'), 60);
-            throw ValidationException::withMessages(['pin' => 'Zu viele Versuche. Bitte warte eine Minute.'])
+            throw ValidationException::withMessages(['pin' => __('Zu viele Versuche. Bitte warte eine Minute.')])
                 ->redirectTo(route('atm.cards'));
         }
         RateLimiter::hit($key, 60);
@@ -46,11 +46,11 @@ class AtmSessionController extends Controller
                 'card_id' => ['required', 'integer'],
                 'pin' => ['required', 'string', 'regex:/\A[0-9]{'.config('atm.pin_length').'}\z/'],
             ], [
-                'card_id.required' => 'Bitte wähle eine Demo-Karte.',
-                'card_id.integer' => 'Bitte wähle eine gültige Demo-Karte.',
-                'pin.required' => 'Bitte gib deine PIN ein.',
-                'pin.regex' => 'Die PIN muss aus '.config('atm.pin_length').' Ziffern bestehen.',
-                'pin.string' => 'Bitte gib deine PIN als Ziffernfolge ein.',
+                'card_id.required' => __('Bitte wähle eine Demo-Karte.'),
+                'card_id.integer' => __('Bitte wähle eine gültige Demo-Karte.'),
+                'pin.required' => __('Bitte gib deine PIN ein.'),
+                'pin.regex' => __('Die PIN muss aus :count Ziffern bestehen.', ['count' => config('atm.pin_length')]),
+                'pin.string' => __('Bitte gib deine PIN als Ziffernfolge ein.'),
             ]);
         } catch (ValidationException $exception) {
             throw $exception->redirectTo(route('atm.cards'));
@@ -86,7 +86,7 @@ class AtmSessionController extends Controller
             $audit->record('atm_session.login', 'rejected', card: $auditCard, reasonCode: 'invalid_credentials_or_card');
             // Throw outside the transaction so failed attempts remain persisted.
             throw ValidationException::withMessages([
-                'pin' => 'Anmeldung nicht möglich. Prüfe Karte und PIN. Eine gesperrte oder abgelaufene Karte kann nicht verwendet werden.',
+                'pin' => __('Anmeldung nicht möglich. Prüfe Karte und PIN. Eine gesperrte oder abgelaufene Karte kann nicht verwendet werden.'),
             ])->redirectTo(route('atm.cards'));
         }
         $request->session()->regenerate(true);
@@ -150,6 +150,6 @@ class AtmSessionController extends Controller
         $request->session()->regenerateToken();
         Inertia::clearHistory();
 
-        return to_route('atm.cards')->with('notice', 'Deine Sitzung wurde beendet.');
+        return to_route('atm.cards')->with('notice', __('Deine Sitzung wurde beendet.'));
     }
 }

@@ -23,6 +23,6 @@ class DepositController extends Controller
         }
 
         return to_route('atm.receipt', $transaction->receipt_reference)
-            ->with('notice', 'Einzahlung erfolgreich gebucht.');
+            ->with('notice', __('Einzahlung erfolgreich gebucht.'));
     }
 }

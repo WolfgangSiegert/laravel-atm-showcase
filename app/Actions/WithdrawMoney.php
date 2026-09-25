@@ -20,7 +20,7 @@ class WithdrawMoney
     {
         try {
             if ($amount < config('atm.min_withdrawal_minor') || $amount > config('atm.max_withdrawal_minor')) {
-                throw ValidationException::withMessages(['withdrawal_amount' => 'Der Betrag liegt außerhalb des erlaubten Auszahlungsbereichs.']);
+                throw ValidationException::withMessages(['withdrawal_amount' => __('Der Betrag liegt außerhalb des erlaubten Auszahlungsbereichs.')]);
             }
 
             return DB::transaction(function () use ($sessionCard, $amount, $purpose, $key) {
@@ -29,11 +29,11 @@ class WithdrawMoney
                 $atm = Atm::where('code', config('atm.code'))->lockForUpdate()->first();
 
                 if (! $atm) {
-                    throw ValidationException::withMessages(['withdrawal_amount' => 'Der Demo-Automat ist nicht eingerichtet.']);
+                    throw ValidationException::withMessages(['withdrawal_amount' => __('Der Demo-Automat ist nicht eingerichtet.')]);
                 }
 
                 if ((int) $card->session_version !== (int) $sessionCard->session_version) {
-                    throw ValidationException::withMessages(['withdrawal_amount' => 'Die Demo wurde zurückgesetzt. Bitte melde dich erneut an.']);
+                    throw ValidationException::withMessages(['withdrawal_amount' => __('Die Demo wurde zurückgesetzt. Bitte melde dich erneut an.')]);
                 }
 
                 $existing = Transaction::where('account_id', $account->id)
@@ -46,7 +46,7 @@ class WithdrawMoney
                         || $existing->card_id !== $card->id
                         || $existing->atm_id !== $atm->id
                         || $existing->type !== 'withdrawal') {
-                        throw ValidationException::withMessages(['withdrawal_amount' => 'Diese Anfrage wurde bereits mit anderen Daten verwendet. Bitte lade die Seite neu.']);
+                        throw ValidationException::withMessages(['withdrawal_amount' => __('Diese Anfrage wurde bereits mit anderen Daten verwendet. Bitte lade die Seite neu.')]);
                     }
 
                     return $existing;
@@ -54,10 +54,10 @@ class WithdrawMoney
 
                 $card->setRelation('account', $account);
                 if (! $card->isUsable() || $atm->status !== 'active' || $account->currency !== $atm->currency) {
-                    throw ValidationException::withMessages(['withdrawal_amount' => 'Karte, Konto oder Automat sind nicht für eine Auszahlung verfügbar.']);
+                    throw ValidationException::withMessages(['withdrawal_amount' => __('Karte, Konto oder Automat sind nicht für eine Auszahlung verfügbar.')]);
                 }
                 if ($account->balance_minor < $amount) {
-                    throw ValidationException::withMessages(['withdrawal_amount' => 'Das Demo-Guthaben reicht für diese Auszahlung nicht aus.']);
+                    throw ValidationException::withMessages(['withdrawal_amount' => __('Das Demo-Guthaben reicht für diese Auszahlung nicht aus.')]);
                 }
 
                 $inventories = CashInventory::where('atm_id', $atm->id)
@@ -69,7 +69,7 @@ class WithdrawMoney
                 $breakdown = $this->cashCombination->find($amount, $available);
 
                 if (! $breakdown) {
-                    throw ValidationException::withMessages(['withdrawal_amount' => 'Der Automat kann diesen Betrag mit seinem aktuellen Scheinbestand nicht auszahlen.']);
+                    throw ValidationException::withMessages(['withdrawal_amount' => __('Der Automat kann diesen Betrag mit seinem aktuellen Scheinbestand nicht auszahlen.')]);
                 }
 
                 foreach ($inventories as $inventory) {
