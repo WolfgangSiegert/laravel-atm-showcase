@@ -39,6 +39,7 @@ it('keeps the OpenAPI document aligned with canonical application routes', funct
         'operator.session.store',
         'operator.guest-session.store',
         'operator.dashboard',
+        'operator.portfolio-traffic',
         'operator.session.destroy',
         'operator.atm.status',
         'operator.inventory.adjust',
@@ -47,6 +48,7 @@ it('keeps the OpenAPI document aligned with canonical application routes', funct
         'admin.cards.store',
         'admin.cards.status',
         'admin.cards.reset-lock',
+        'portfolio-traffic.store',
     ];
 
     $canonicalRoutes = collect(Route::getRoutes()->getRoutes())

@@ -9,7 +9,7 @@ import AdminShell from '../../layouts/AdminShell.vue';
 import { useI18n } from '../../composables/useI18n';
 import type { TranslationKey } from '../../i18n/en';
 
-type Section = 'overview' | 'accounts' | 'transactions' | 'audit';
+type Section = 'overview' | 'accounts' | 'transactions' | 'audit' | 'portfolio';
 type Inventory = { id: number; denominationMinor: number; quantity: number };
 type AccountCard = { id: number; reference: string; status: string; failedAttempts: number; lockedUntil: string | null; expiresAt: string | null };
 type Account = { id: number; reference: string; customer: string; currency: string; balanceMinor: number; status: string; cards: AccountCard[] };
@@ -72,6 +72,11 @@ const accountRows = computed(() => props.accounts.map(account => ({
 })));
 
 function navigate(section: Section) {
+    if (section === 'portfolio') {
+        router.visit('/admin/portfolio-traffic');
+        return;
+    }
+
     activeSection.value = section;
     accountFilters.value.global.value = null;
     transactionFilters.value.global.value = null;

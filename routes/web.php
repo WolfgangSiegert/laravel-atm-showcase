@@ -6,6 +6,7 @@ use App\Http\Controllers\AtmSessionController;
 use App\Http\Controllers\DepositController;
 use App\Http\Controllers\OperatorDashboardController;
 use App\Http\Controllers\OperatorSessionController;
+use App\Http\Controllers\PortfolioTrafficReportController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Middleware\RequireAtmSession;
@@ -46,6 +47,9 @@ Route::post('/admin/guest-session', [OperatorSessionController::class, 'guestSto
     ->name('operator.guest-session.store');
 Route::middleware('operator')->group(function () {
     Route::get('/admin', [OperatorDashboardController::class, 'show'])->name('operator.dashboard');
+    Route::get('/admin/portfolio-traffic', PortfolioTrafficReportController::class)
+        ->middleware('admin.write')
+        ->name('operator.portfolio-traffic');
     Route::get('/operator', [OperatorDashboardController::class, 'show']);
     Route::delete('/admin/session', [OperatorSessionController::class, 'destroy'])->name('operator.session.destroy');
     Route::delete('/operator/session', [OperatorSessionController::class, 'destroy']);

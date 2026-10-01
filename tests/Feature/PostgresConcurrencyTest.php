@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
@@ -108,6 +109,73 @@ function runConcurrentWithdrawals(array $jobs): array
     }
 }
 
+/** @return list<array{status: string}> */
+function runConcurrentPortfolioRecords(int $count): array
+{
+    $directory = sys_get_temp_dir().'/portfolio-traffic-concurrency-'.Str::uuid();
+    mkdir($directory, 0700);
+    $startFile = $directory.'/start';
+    $processes = [];
+    $environment = [
+        'APP_ENV' => 'testing',
+        'APP_KEY' => config('app.key'),
+        'DB_CONNECTION' => 'pgsql',
+        'DB_URL' => getenv('ATM_POSTGRES_TEST_URL'),
+        'CACHE_STORE' => 'array',
+        'SESSION_DRIVER' => 'array',
+        'PORTFOLIO_TRAFFIC_RETENTION_DAYS' => '90',
+    ];
+
+    foreach (range(0, $count - 1) as $index) {
+        $readyFile = $directory.'/ready-'.$index;
+        $process = new Process([
+            PHP_BINARY,
+            base_path('tests/Support/ConcurrentPortfolioTrafficWorker.php'),
+            $readyFile,
+            $startFile,
+        ], base_path(), $environment);
+        $process->setTimeout(20);
+        $process->start();
+        $processes[] = [$process, $readyFile];
+    }
+
+    try {
+        $deadline = microtime(true) + 10;
+        while (collect($processes)->contains(fn ($item) => ! file_exists($item[1]))) {
+            if (microtime(true) >= $deadline) {
+                throw new RuntimeException('Portfolio workers did not reach the concurrency barrier.');
+            }
+            usleep(10_000);
+        }
+        touch($startFile);
+
+        return collect($processes)->map(function (array $item): array {
+            $process = $item[0];
+            $process->wait();
+            if (! $process->isSuccessful()) {
+                throw new RuntimeException($process->getErrorOutput() ?: $process->getOutput());
+            }
+
+            return json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+        })->all();
+    } finally {
+        foreach ($processes as [$process, $readyFile]) {
+            if ($process->isRunning()) {
+                $process->stop();
+            }
+            if (file_exists($readyFile)) {
+                unlink($readyFile);
+            }
+        }
+        if (file_exists($startFile)) {
+            unlink($startFile);
+        }
+        if (is_dir($directory)) {
+            rmdir($directory);
+        }
+    }
+}
+
 it('serializes two withdrawals that exceed one account balance', function () {
     $card = Card::where('demo_reference', 'DEMO-001')->firstOrFail();
     $card->account->update(['balance_minor' => 15000]);
@@ -182,4 +250,30 @@ it('returns one booking for the same concurrent idempotency key', function () {
         ->and($card->account->fresh()->balance_minor)->toBe(10000)
         ->and(Transaction::where('type', 'withdrawal')->count())->toBe(1)
         ->and(CashInventory::where('atm_id', $atm->id)->where('denomination_minor', 10000)->value('quantity'))->toBe($before - 1);
+});
+
+it('creates the indexed portfolio traffic schema on PostgreSQL', function () {
+    expect(Schema::hasTable('portfolio_traffic_events'))->toBeTrue()
+        ->and(Schema::hasColumns('portfolio_traffic_events', ['occurred_at', 'site', 'path', 'visitor_hash']))->toBeTrue();
+
+    $indexes = collect(Schema::getIndexes('portfolio_traffic_events'))->pluck('columns')->map(fn (array $columns) => implode(',', $columns));
+    expect($indexes)->toContain('occurred_at')
+        ->and($indexes)->toContain('path,occurred_at')
+        ->and($indexes)->toContain('visitor_hash,occurred_at');
+});
+
+it('records portfolio traffic and prunes expired rows safely under concurrency', function () {
+    DB::table('portfolio_traffic_events')->insert([
+        'occurred_at' => now()->subDays(91),
+        'site' => 'portfolio',
+        'path' => '/',
+        'visitor_hash' => str_repeat('a', 64),
+    ]);
+
+    $results = runConcurrentPortfolioRecords(2);
+
+    expect(collect($results)->pluck('status')->all())->toBe(['success', 'success'])
+        ->and(DB::table('portfolio_traffic_events')->where('visitor_hash', str_repeat('a', 64))->exists())->toBeFalse()
+        ->and(DB::table('portfolio_traffic_events')->count())->toBe(2)
+        ->and(DB::table('portfolio_traffic_events')->distinct()->count('visitor_hash'))->toBe(1);
 });

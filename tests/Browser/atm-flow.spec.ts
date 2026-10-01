@@ -135,6 +135,12 @@ test('operates the admin dashboard, tables and edit surfaces', async ({ page }) 
     await expect(page.getByRole('heading', { name: /Guten Tag/ })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Nutzung' })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Bargeldkassetten' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Portfolio-Traffic' })).toBeVisible();
+    await page.getByRole('link', { name: 'Portfolio-Traffic' }).click();
+    await expect(page.getByRole('heading', { name: 'Portfolio-Traffic' })).toBeVisible();
+    await expect(page.getByText('Keine exakte Personenzahl')).toBeVisible();
+    await page.getByRole('button', { name: 'Übersicht' }).first().click();
+    await expect(page).toHaveURL('/admin');
 
     await page.getByRole('button', { name: 'Automat verwalten' }).click();
     await expect(page.getByRole('dialog', { name: 'Betriebsstatus ändern' })).toBeVisible();
@@ -201,6 +207,7 @@ test('opens the public admin showcase as a read only guest', async ({ page }) =>
     await expect(page.getByText('Öffentliche Leseansicht')).toBeVisible();
     await expect(page.getByText('Read-only-Gast')).toBeVisible();
     await expect(page.getByRole('region', { name: 'Nutzung' })).toBeHidden();
+    await expect(page.getByRole('link', { name: 'Portfolio-Traffic' })).toBeHidden();
     await expect(page.getByRole('button', { name: 'Automat verwalten' })).toBeHidden();
 
     await page.getByRole('button', { name: 'Konten & Karten' }).first().click();

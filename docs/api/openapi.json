@@ -3,7 +3,7 @@
   "info": {
     "title": "LERN-Bank ATM HTTP Interface",
     "version": "1.5.0",
-    "description": "Sitzungsbasierter Laravel-/Inertia-HTTP-Vertrag der Demo-Anwendung. Dies ist keine eigenständige JSON-API: Erfolgreiche Schreibzugriffe liefern Redirects, und schreibende Requests benötigen Session-Cookie plus CSRF-Header."
+    "description": "Laravel-/Inertia-HTTP-Vertrag der Demo-Anwendung. Die einzige zustandslose Schnittstelle ist der minimale Portfolio-Traffic-Endpunkt; die übrigen Schreibzugriffe benötigen Sitzungscookie und CSRF-Header und liefern Redirects."
   },
   "servers": [
     {
@@ -21,7 +21,8 @@
     { "name": "ATM session", "description": "Kartenauswahl und zustandsbehaftete ATM-Sitzung" },
     { "name": "ATM transactions", "description": "Simulierte Buchungen und Belege" },
     { "name": "Admin session", "description": "Betreiberanmeldung und -abmeldung" },
-    { "name": "Admin management", "description": "Schreibzugriffe für Superadmins" }
+    { "name": "Admin management", "description": "Schreibzugriffe für Superadmins" },
+    { "name": "Portfolio traffic", "description": "Zustandslose Erfassung und private Superadmin-Auswertung des Portfolio-Traffics" }
   ],
   "paths": {
     "/": {
@@ -30,6 +31,51 @@
         "tags": ["Pages"],
         "summary": "Zur ATM-Startseite weiterleiten",
         "responses": { "302": { "$ref": "#/components/responses/Redirect" } }
+      }
+    },
+    "/api/portfolio-traffic": {
+      "post": {
+        "operationId": "storePortfolioTraffic",
+        "tags": ["Portfolio traffic"],
+        "summary": "Minimalen Portfolio-Seitenaufruf erfassen",
+        "description": "Zustandsloser Endpoint ohne Cookie oder CSRF-Token. Der Origin-Header und ein IP-basiertes Rate-Limit reduzieren Missbrauch, sind aber kein kryptografischer Herkunftsnachweis. Offensichtliche Bots werden mit 204 beantwortet, ohne ein Ereignis zu speichern.",
+        "parameters": [
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["https://tiny-bits.org", "https://www.tiny-bits.org", "https://wolfgangsiegert.github.io"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["version", "site", "path"],
+                "properties": {
+                  "version": { "type": "string", "const": "1" },
+                  "site": { "type": "string", "const": "portfolio" },
+                  "path": {
+                    "type": "string",
+                    "enum": ["/", "/portfolio/", "/portfolio/en/", "/portfolio-vue/", "/portfolio-vue/en/"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "Anfrage akzeptiert; die Antwort enthält keinen Body und setzt keinen Cookie" },
+          "403": { "description": "Origin fehlt oder ist nicht freigegeben" },
+          "404": { "description": "Portfolio-Erfassung ist deaktiviert" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" },
+          "429": { "$ref": "#/components/responses/RateLimitFailure" }
+        }
       }
     },
     "/atm": {
@@ -412,6 +458,24 @@
           "403": { "$ref": "#/components/responses/Forbidden" },
           "404": { "$ref": "#/components/responses/NotFound" },
           "419": { "$ref": "#/components/responses/CsrfFailure" }
+        }
+      }
+    },
+    "/admin/portfolio-traffic": {
+      "get": {
+        "operationId": "showPortfolioTrafficReport",
+        "tags": ["Portfolio traffic"],
+        "summary": "Private Portfolio-Auswertung anzeigen",
+        "parameters": [
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "security": [{ "operatorSession": [] }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/InertiaPage" },
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" }
         }
       }
     },

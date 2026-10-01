@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { PhBank, PhCaretLeft, PhCaretRight, PhChartPieSlice, PhCreditCard, PhListChecks, PhReceipt, PhSignOut } from '@phosphor-icons/vue';
+import { PhBank, PhCaretLeft, PhCaretRight, PhChartPieSlice, PhCreditCard, PhGlobeHemisphereWest, PhListChecks, PhReceipt, PhSignOut } from '@phosphor-icons/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import LanguageSwitcher from '../components/LanguageSwitcher.vue';
 import LoadingOverlay from '../components/LoadingOverlay.vue';
 import ToastNotice from '../components/ToastNotice.vue';
 import { useI18n } from '../composables/useI18n';
 
-type Section = 'overview' | 'accounts' | 'transactions' | 'audit';
+type Section = 'overview' | 'accounts' | 'transactions' | 'audit' | 'portfolio';
 const props = defineProps<{ operatorName: string; operatorRole: 'superadmin' | 'viewer'; activeSection: Section; loggingOut?: boolean }>();
 const emit = defineEmits<{ navigate: [section: Section]; logout: [] }>();
 const { t } = useI18n();
@@ -59,6 +59,9 @@ const navigation = computed(() => [
     { id: 'accounts' as const, label: t('Konten & Karten'), icon: PhCreditCard },
     { id: 'transactions' as const, label: t('Transaktionen'), icon: PhReceipt },
     { id: 'audit' as const, label: t('Audit-Protokoll'), icon: PhListChecks },
+    ...(props.operatorRole === 'superadmin'
+        ? [{ id: 'portfolio' as const, label: t('Portfolio-Traffic'), icon: PhGlobeHemisphereWest, href: '/admin/portfolio-traffic' }]
+        : []),
 ]);
 </script>
 
@@ -72,9 +75,14 @@ const navigation = computed(() => [
             </div>
             <nav class="admin-nav" :aria-label="t('Admin-Navigation')">
                 <p>{{ t('Verwaltung') }}</p>
-                <button v-for="item in navigation" :key="item.id" type="button" :class="{ 'admin-nav__item--active': activeSection === item.id }" :aria-current="activeSection === item.id ? 'page' : undefined" class="admin-nav__item" @click="emit('navigate', item.id)">
-                    <component :is="item.icon" :size="21" weight="duotone" /><span>{{ item.label }}</span>
-                </button>
+                <template v-for="item in navigation" :key="item.id">
+                    <Link v-if="item.href" :href="item.href" :class="{ 'admin-nav__item--active': activeSection === item.id }" :aria-current="activeSection === item.id ? 'page' : undefined" class="admin-nav__item">
+                        <component :is="item.icon" :size="21" weight="duotone" /><span>{{ item.label }}</span>
+                    </Link>
+                    <button v-else type="button" :class="{ 'admin-nav__item--active': activeSection === item.id }" :aria-current="activeSection === item.id ? 'page' : undefined" class="admin-nav__item" @click="emit('navigate', item.id)">
+                        <component :is="item.icon" :size="21" weight="duotone" /><span>{{ item.label }}</span>
+                    </button>
+                </template>
             </nav>
             <div class="admin-sidebar__footer">
                 <div class="admin-user-avatar">{{ operatorName.charAt(0).toUpperCase() }}</div>
@@ -89,7 +97,10 @@ const navigation = computed(() => [
             </header>
             <div class="admin-mobile-nav-shell" :class="{ 'admin-mobile-nav-shell--left': canScrollLeft, 'admin-mobile-nav-shell--right': canScrollRight }">
                 <nav ref="mobileNavigation" class="admin-mobile-nav" :aria-label="t('Mobile Admin-Navigation')" @scroll.passive="updateScrollIndicators">
-                    <button v-for="item in navigation" :key="item.id" type="button" :class="{ 'admin-mobile-nav__item--active': activeSection === item.id }" :aria-current="activeSection === item.id ? 'page' : undefined" @click="emit('navigate', item.id)"><component :is="item.icon" :size="20" /><span>{{ item.label }}</span></button>
+                    <template v-for="item in navigation" :key="item.id">
+                        <Link v-if="item.href" :href="item.href" :class="{ 'admin-mobile-nav__item--active': activeSection === item.id }" :aria-current="activeSection === item.id ? 'page' : undefined"><component :is="item.icon" :size="20" /><span>{{ item.label }}</span></Link>
+                        <button v-else type="button" :class="{ 'admin-mobile-nav__item--active': activeSection === item.id }" :aria-current="activeSection === item.id ? 'page' : undefined" @click="emit('navigate', item.id)"><component :is="item.icon" :size="20" /><span>{{ item.label }}</span></button>
+                    </template>
                 </nav>
                 <button v-show="canScrollLeft" type="button" class="admin-mobile-nav__scroll admin-mobile-nav__scroll--left" :aria-label="t('Menü nach links scrollen')" @click="scrollNavigation(-1)"><PhCaretLeft :size="18" weight="bold" aria-hidden="true" /></button>
                 <button v-show="canScrollRight" type="button" class="admin-mobile-nav__scroll admin-mobile-nav__scroll--right" :aria-label="t('Menü nach rechts scrollen')" @click="scrollNavigation(1)"><PhCaretRight :size="18" weight="bold" aria-hidden="true" /></button>
