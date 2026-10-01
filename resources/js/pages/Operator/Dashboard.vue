@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { FilterMatchMode } from '@primevue/core/api';
-import { PhArrowDown, PhArrowUp, PhBank, PhCaretRight, PhCheckCircle, PhCoins, PhCreditCard, PhCurrencyEur, PhFunnel, PhGearSix, PhKey, PhLock, PhLockOpen, PhMagnifyingGlass, PhPencilSimple, PhPlus, PhReceipt, PhShieldCheck, PhTrendUp, PhUserPlus, PhUsers, PhWarning, PhX } from '@phosphor-icons/vue';
+import { PhArrowDown, PhArrowUp, PhBank, PhCaretRight, PhChartLine, PhCheckCircle, PhCoins, PhCreditCard, PhCurrencyEur, PhEye, PhFunnel, PhGearSix, PhKey, PhLock, PhLockOpen, PhMagnifyingGlass, PhPencilSimple, PhPlus, PhReceipt, PhSignIn, PhShieldCheck, PhTrendUp, PhUserPlus, PhUsers, PhWarning, PhX } from '@phosphor-icons/vue';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import { computed, nextTick, ref } from 'vue';
@@ -23,6 +23,7 @@ const props = defineProps<{
     operatorRole: 'superadmin' | 'viewer';
     canManage: boolean;
     metrics: { accounts: number; activeCards: number; transactions: number; todayVolumeMinor: number };
+    usageMetrics: { enabled: boolean; totals: { public_landing_view: number; public_page_view: number; successful_atm_login: number; successful_deposit: number; successful_withdrawal: number }; daily: Array<{ date: string; metrics: Record<string, number> }> } | null;
     atm: { code: string; label: string; status: string; currency: string; totalMinor: number; inventory: Inventory[] };
     activity: Activity[];
     accounts: Account[];
@@ -168,6 +169,20 @@ function transactionLabel(type: string) {
                 <article class="admin-metric"><span class="admin-metric__icon admin-metric__icon--cyan"><PhReceipt :size="24" weight="duotone" /></span><div><p>{{ t('Transaktionen') }}</p><strong>{{ metrics.transactions }}</strong><small>{{ t(':amount heute bewegt', { amount: money(metrics.todayVolumeMinor) }) }}</small></div></article>
                 <article class="admin-metric"><span class="admin-metric__icon" :class="lowInventoryCount ? 'admin-metric__icon--amber' : 'admin-metric__icon--green'"><PhShieldCheck :size="24" weight="duotone" /></span><div><p>{{ t('Systemstatus') }}</p><strong>{{ atm.status === 'active' ? t('Aktiv') : t('Wartung') }}</strong><small>{{ lowInventoryCount ? t(':count Bestandshinweise', { count: lowInventoryCount }) : t('Keine offenen Hinweise') }}</small></div></article>
             </div>
+
+            <section v-if="usageMetrics" class="admin-usage-overview" aria-labelledby="usage-metrics-heading">
+                <div class="admin-card__header">
+                    <div><p class="admin-eyebrow">{{ t('Aggregierte Zähler') }}</p><h2 id="usage-metrics-heading">{{ t('Nutzung') }}</h2></div>
+                    <span class="admin-chip">{{ usageMetrics.enabled ? t('Cookielos') : t('Deaktiviert') }}</span>
+                </div>
+                <p class="admin-usage-overview__note">{{ t('Tageszähler für öffentliche Aufrufe und erfolgreiche Aktionen, ohne einzelne Browser wiederzuerkennen.') }}</p>
+                <div class="admin-metrics admin-metrics--usage">
+                    <article class="admin-metric"><span class="admin-metric__icon admin-metric__icon--blue"><PhChartLine :size="24" weight="duotone" /></span><div><p>{{ t('Startaufrufe') }}</p><strong>{{ usageMetrics.totals.public_landing_view }}</strong><small>{{ t('Öffentliche Startseite') }}</small></div></article>
+                    <article class="admin-metric"><span class="admin-metric__icon admin-metric__icon--cyan"><PhEye :size="24" weight="duotone" /></span><div><p>{{ t('Seitenaufrufe') }}</p><strong>{{ usageMetrics.totals.public_page_view }}</strong><small>{{ t('Erfolgreiche öffentliche Ansichten') }}</small></div></article>
+                    <article class="admin-metric"><span class="admin-metric__icon admin-metric__icon--green"><PhSignIn :size="24" weight="duotone" /></span><div><p>{{ t('ATM-Anmeldungen') }}</p><strong>{{ usageMetrics.totals.successful_atm_login }}</strong><small>{{ t('Nur erfolgreiche Anmeldungen') }}</small></div></article>
+                    <article class="admin-metric"><span class="admin-metric__icon admin-metric__icon--violet"><PhCoins :size="24" weight="duotone" /></span><div><p>{{ t('Demo-Buchungen') }}</p><strong>{{ usageMetrics.totals.successful_deposit + usageMetrics.totals.successful_withdrawal }}</strong><small>{{ t(':deposits Einzahlungen · :withdrawals Auszahlungen', { deposits: usageMetrics.totals.successful_deposit, withdrawals: usageMetrics.totals.successful_withdrawal }) }}</small></div></article>
+                </div>
+            </section>
 
             <div class="admin-dashboard-grid">
                 <section class="admin-card admin-activity" aria-labelledby="activity-heading">

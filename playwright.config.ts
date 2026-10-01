@@ -12,6 +12,7 @@ export const browserEnvironment = {
     BCRYPT_ROUNDS: '4',
     PUBLIC_DEMO_ENABLED: 'true',
     PUBLIC_ADMIN_GUEST_ENABLED: 'true',
+    USAGE_METRICS_ENABLED: 'true',
 };
 
 export default defineConfig({

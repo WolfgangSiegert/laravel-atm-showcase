@@ -133,6 +133,7 @@ test('operates the admin dashboard, tables and edit surfaces', async ({ page }) 
     await page.getByRole('button', { name: 'Sicher anmelden' }).click();
     await expect(page).toHaveURL('/admin');
     await expect(page.getByRole('heading', { name: /Guten Tag/ })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Nutzung' })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Bargeldkassetten' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Automat verwalten' }).click();
@@ -199,6 +200,7 @@ test('opens the public admin showcase as a read only guest', async ({ page }) =>
     await expect(page).toHaveURL('/admin');
     await expect(page.getByText('Öffentliche Leseansicht')).toBeVisible();
     await expect(page.getByText('Read-only-Gast')).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Nutzung' })).toBeHidden();
     await expect(page.getByRole('button', { name: 'Automat verwalten' })).toBeHidden();
 
     await page.getByRole('button', { name: 'Konten & Karten' }).first().click();

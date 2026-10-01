@@ -7,6 +7,7 @@ use App\Http\Middleware\RequireAdminWriteAccess;
 use App\Http\Middleware\RequireOperator;
 use App\Http\Middleware\ResetPublicDemo;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\TrackUsageMetrics;
 use App\Support\RequestLogContext;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(LogRequestTraffic::class);
-        $middleware->web(append: [SetLocale::class, ResetPublicDemo::class, HandleInertiaRequests::class, AddSecurityHeaders::class]);
+        $middleware->web(append: [SetLocale::class, ResetPublicDemo::class, TrackUsageMetrics::class, HandleInertiaRequests::class, AddSecurityHeaders::class]);
         $middleware->alias([
             'operator' => RequireOperator::class,
             'admin.write' => RequireAdminWriteAccess::class,

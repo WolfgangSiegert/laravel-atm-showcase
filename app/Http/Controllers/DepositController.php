@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Actions\DepositMoney;
 use App\Http\Requests\DepositRequest;
+use App\Support\UsageMetrics;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 
 class DepositController extends Controller
 {
-    public function __invoke(DepositRequest $request, DepositMoney $deposit): RedirectResponse
+    public function __invoke(DepositRequest $request, DepositMoney $deposit, UsageMetrics $metrics): RedirectResponse
     {
         try {
             $transaction = $deposit->execute(
@@ -20,6 +21,10 @@ class DepositController extends Controller
             );
         } catch (ValidationException $exception) {
             throw $exception->redirectTo(route('atm.session'));
+        }
+
+        if ($transaction->wasRecentlyCreated) {
+            $metrics->increment(UsageMetrics::SUCCESSFUL_DEPOSIT);
         }
 
         return to_route('atm.receipt', $transaction->receipt_reference)

@@ -49,6 +49,10 @@ services:
         value: "true"
       - key: PUBLIC_ADMIN_GUEST_ENABLED
         value: "true"
+      - key: USAGE_METRICS_ENABLED
+        value: "true"
+      - key: USAGE_METRICS_RETENTION_DAYS
+        value: "400"
       - key: SECURITY_HEADERS_ENABLED
         value: "true"
       - key: TRUSTED_PROXIES

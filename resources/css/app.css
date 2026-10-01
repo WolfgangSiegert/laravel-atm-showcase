@@ -255,6 +255,10 @@ html:has(.admin-shell), body:has(.admin-shell), html:has(.admin-login), body:has
 .admin-page-heading h1 { margin-top: 0.35rem; font-size: clamp(1.75rem, 3vw, 2.35rem); font-weight: 720; letter-spacing: -0.035em; outline: 0; }
 .admin-page-heading > div > p:last-child { margin-top: 0.55rem; color: var(--admin-muted); font-size: 0.88rem; }
 .admin-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.admin-usage-overview { margin: 1.5rem 0; padding: 1.25rem; border: 1px solid #dde3dd; border-radius: 1rem; background: #fff; }
+.admin-usage-overview .admin-card__header { margin-bottom: 0.35rem; }
+.admin-usage-overview__note { max-width: 58rem; margin: 0 0 1rem; color: #667069; font-size: 0.8rem; line-height: 1.5; }
+.admin-metrics--usage { margin-bottom: 0; }
 .admin-metric { display: flex; min-height: 8.25rem; align-items: flex-start; gap: 0.9rem; padding: 1.15rem; border: 1px solid var(--admin-line); border-radius: 0.95rem; background: white; box-shadow: 0 8px 28px #34304b0a; }
 .admin-metric__icon { display: grid; width: 2.7rem; height: 2.7rem; flex: 0 0 auto; place-items: center; border-radius: 0.75rem; }
 .admin-metric__icon--violet { background: #eeedff; color: #5b55d6; }.admin-metric__icon--blue { background: #e8f0ff; color: #3971d8; }.admin-metric__icon--cyan { background: #e3f8fb; color: #16849a; }.admin-metric__icon--green { background: #e6f7ee; color: #218b5d; }.admin-metric__icon--amber { background: #fff3d8; color: #a76c08; }

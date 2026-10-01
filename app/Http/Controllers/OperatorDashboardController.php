@@ -12,6 +12,7 @@ use App\Models\CashInventory;
 use App\Models\Customer;
 use App\Models\Transaction;
 use App\Support\AuditLogger;
+use App\Support\UsageMetrics;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,7 @@ use Inertia\Response;
 
 class OperatorDashboardController extends Controller
 {
-    public function show(Request $request): Response
+    public function show(Request $request, UsageMetrics $usageMetrics): Response
     {
         $atm = Atm::with(['cashInventories' => fn ($query) => $query->orderByDesc('denomination_minor')])
             ->where('code', config('atm.code'))->firstOrFail();
@@ -51,6 +52,7 @@ class OperatorDashboardController extends Controller
                 'transactions' => Transaction::count(),
                 'todayVolumeMinor' => Transaction::where('created_at', '>=', now()->startOfDay())->sum('amount_minor'),
             ],
+            'usageMetrics' => $request->user()->canManageAdministration() ? $usageMetrics->summary() : null,
             'atm' => [
                 'code' => $atm->code,
                 'label' => $atm->label,

@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Actions\WithdrawMoney;
 use App\Http\Requests\WithdrawalRequest;
+use App\Support\UsageMetrics;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 
 class WithdrawalController extends Controller
 {
-    public function __invoke(WithdrawalRequest $request, WithdrawMoney $withdraw): RedirectResponse
+    public function __invoke(WithdrawalRequest $request, WithdrawMoney $withdraw, UsageMetrics $metrics): RedirectResponse
     {
         try {
             $transaction = $withdraw->execute(
@@ -20,6 +21,10 @@ class WithdrawalController extends Controller
             );
         } catch (ValidationException $exception) {
             throw $exception->redirectTo(route('atm.session'));
+        }
+
+        if ($transaction->wasRecentlyCreated) {
+            $metrics->increment(UsageMetrics::SUCCESSFUL_WITHDRAWAL);
         }
 
         return to_route('atm.receipt', $transaction->receipt_reference)

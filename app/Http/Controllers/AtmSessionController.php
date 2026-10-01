@@ -6,6 +6,7 @@ use App\Models\Atm;
 use App\Models\Card;
 use App\Models\Transaction;
 use App\Support\AuditLogger;
+use App\Support\UsageMetrics;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,7 @@ class AtmSessionController extends Controller
         ]);
     }
 
-    public function store(Request $request, AuditLogger $audit): RedirectResponse
+    public function store(Request $request, AuditLogger $audit, UsageMetrics $metrics): RedirectResponse
     {
         $request->session()->forget(['atm_card_id', 'atm_last_activity', 'atm_session_version']);
         $key = 'atm-login:'.$request->ip();
@@ -97,6 +98,7 @@ class AtmSessionController extends Controller
         ]);
         Inertia::clearHistory();
         $audit->record('atm_session.login', 'success', card: $card);
+        $metrics->increment(UsageMetrics::SUCCESSFUL_ATM_LOGIN);
 
         return to_route('atm.session');
     }

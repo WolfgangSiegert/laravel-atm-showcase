@@ -66,7 +66,8 @@ it('offers an explicitly enabled one click guest login with read only dashboard 
     $this->assertAuthenticatedAs($guest);
     $this->get('/admin')->assertOk()->assertInertia(fn (Assert $page) => $page
         ->where('operatorRole', User::OPERATOR_ROLE_VIEWER)
-        ->where('canManage', false));
+        ->where('canManage', false)
+        ->where('usageMetrics', null));
     $this->assertDatabaseHas('audit_events', [
         'event_type' => 'operator.guest_login',
         'actor_user_id' => $guest->id,
@@ -138,6 +139,10 @@ it('shows the configured ATM and recent audit events', function () {
         ->has('atm.inventory', 4)
         ->where('metrics.accounts', 2)
         ->where('metrics.activeCards', 2)
+        ->where('usageMetrics.enabled', false)
+        ->where('usageMetrics.totals.public_landing_view', 0)
+        ->where('usageMetrics.totals.public_page_view', 0)
+        ->where('usageMetrics.totals.successful_atm_login', 0)
         ->has('activity', 7)
         ->has('accounts', 2)
         ->has('transactions')
