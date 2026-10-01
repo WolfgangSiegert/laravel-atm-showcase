@@ -57,3 +57,5 @@ services:
         value: stderr
       - key: LOG_LEVEL
         value: warning
+      - key: TRAFFIC_LOG_CHANNEL
+        value: traffic_stderr

@@ -73,6 +73,25 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'traffic' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/traffic.log'),
+            'level' => 'info',
+            'max_files' => env('TRAFFIC_LOG_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
+        'traffic_stderr' => [
+            'driver' => 'monolog',
+            'level' => env('TRAFFIC_LOG_LEVEL', 'info'),
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => 'php://stderr',
+            ],
+            'formatter' => env('LOG_STDERR_FORMATTER'),
+            'processors' => [PsrLogMessageProcessor::class],
+        ],
+
         'monthly' => [
             'driver' => 'monthly',
             'path' => storage_path('logs/laravel.log'),
