@@ -1,4 +1,4 @@
-# LERN-Bank Mein Geldautomat — v1.5
+# LERN-Bank Mein Geldautomat
 
 Laravel-/PHP-Lernprojekt mit einer Geldautomaten-Oberfläche. **Simulation ohne echte Bankanbindung.**
 
@@ -121,9 +121,25 @@ In CI wird Chromium über Playwright installiert und mit `PLAYWRIGHT_BROWSER=chr
 
 Der öffentliche Modus wird ausschließlich für eine dedizierte fiktive Datenbank mit `PUBLIC_DEMO_ENABLED=true` aktiviert. Besucher sehen die veröffentlichten PINs direkt auf der Anmeldeseite und einen Hinweis auf gemeinsam genutzte Konten. Nach 24 Stunden greift bei der nächsten ATM-Anfrage ein atomarer Reset: Demo-Salden auf 0 €, alte Demo-Buchungen entfernen, Kartensperren aufheben, Scheine auffüllen und alte Kartensitzungen ungültig machen. Lokal ist dieser Modus standardmäßig deaktiviert. Ein manueller Reset benötigt zusätzlich `php artisan atm:demo-reset --force` und löscht fiktive Daten.
 
+Optional erfasst eine cookielose Nutzungsstatistik ausschließlich aggregierte Tageszähler für öffentliche Aufrufe, erfolgreiche ATM-Anmeldungen sowie Ein- und Auszahlungen. Sie legt keine Zeile je Browser, Sitzung oder Request an und speichert weder IP-Adresse noch User-Agent, Session-, Cookie-, Benutzer-, URL- oder Routenparameter. Damit misst sie Nutzung, keine unterschiedlichen Personen. Konfiguration und Grenzen beschreibt die [Deployment-Anleitung](docs/deployment.md#cookielose-nutzungsstatistik).
+
 [Deployment-Anleitung](docs/deployment.md) beschreibt Render Free/Neon Free, Secrets, sicheren Betreiberzugang, Abnahme und Wiederherstellung. Lizenz: [MIT](LICENSE).
 
 ## Struktur und Routing
+
+Der vollständige maschinenlesbare HTTP-Vertrag liegt als
+[OpenAPI 3.1](docs/api/openapi.json) vor und kann direkt in Postman importiert
+werden. [Hinweise zu Sessions, CSRF und dem Import](docs/api/README.md) erklären
+die Besonderheiten der Laravel-/Inertia-Endpunkte. Es handelt sich derzeit nicht
+um eine eigenständige JSON-API.
+
+Weitere Entwicklerdokumentation:
+
+- [Releases, Semantic Versioning und automatisiertes Changelog](docs/releases.md)
+- [Traffic-Logging, Request-IDs und Fehler-Reporting](docs/observability.md)
+- [Fachmodell und Grenzen](docs/domain-model.md)
+- [Architektur- und Produktentscheidungen](docs/decisions.md)
+- [Deployment und Betriebsabnahme](docs/deployment.md)
 
 | Pfad | Aufgabe |
 | --- | --- |

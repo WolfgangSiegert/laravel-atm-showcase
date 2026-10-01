@@ -25,9 +25,11 @@ Das Render-Konto muss vorab eingerichtet und mit GitHub verbunden werden. Zugang
 | `SESSION_SAME_SITE` | `lax` |
 | `PUBLIC_DEMO_ENABLED` | `true` ausschließlich für diese Demo-Datenbank |
 | `PUBLIC_ADMIN_GUEST_ENABLED` | `true` für den passwortlosen, strikt schreibgeschützten Admin-Showcase; `false` deaktiviert und entzieht den Gastzugang beim nächsten Start |
+| `USAGE_METRICS_ENABLED` / `USAGE_METRICS_RETENTION_DAYS` | `true` / `400` aktiviert cookielose Tageszähler und bewahrt ungefähr 13 Monate auf; lokal ist die Funktion standardmäßig deaktiviert |
 | `SECURITY_HEADERS_ENABLED` | `true` |
 | `TRUSTED_PROXIES` | `*`, für den ausschließlich über Render veröffentlichten Container geprüft |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` |
+| `TRAFFIC_LOG_CHANNEL` | `traffic_stderr`, damit Info-Ereignisse trotz `LOG_LEVEL=warning` nach stderr gelangen |
 | `QUEUE_CONNECTION` | `sync` (keine Hintergrundjobs vorgesehen) |
 | `PORTFOLIO_URL` | Optional: öffentliche HTTPS-Adresse des persönlichen Portfolios; ohne Wert verweist die App auf dessen GitHub-Repository. |
 
@@ -63,6 +65,14 @@ php artisan atm:demo-reset --force --if-due
 ```
 
 Diese Befehle löschen fiktive Daten. Sie gehören ausschließlich in die dedizierte Showcase-Umgebung. Es gibt keine öffentliche Reset-Route. IP-basierte Limits begrenzen Geldbewegungsanfragen auf 30 pro Minute zusätzlich zu den PIN-Limits; sie verhindern weder verteilten Missbrauch noch das vorübergehende Leeren gemeinsam genutzter Konten. Eine absolute Zeilen-/Traffic-Obergrenze ist nicht implementiert. Anbieterquoten vor Freigabe überwachen.
+
+## Cookielose Nutzungsstatistik
+
+Bei `USAGE_METRICS_ENABLED=true` erhöht die Anwendung ausschließlich Tageszähler in `usage_metrics`. Pro Datum und fest definiertem Metriknamen existiert höchstens eine Zeile. Erfasst werden öffentliche Start- und Seitenaufrufe sowie erfolgreiche ATM-Anmeldungen, Einzahlungen und Auszahlungen. Es gibt keine Wiedererkennung und keinen Consent-Cookie; die Anwendung speichert in dieser Tabelle insbesondere keine IP-Adresse, User-Agent-, Session-, Cookie- oder Benutzerkennung, URL, Querywerte oder Routenparameter.
+
+Das private Superadmin-Dashboard zeigt die aggregierte Nutzung. Der öffentliche Read-only-Gast erhält diese Werte nicht. Vorabrufe, Healthchecks, Adminseiten, fehlgeschlagene Antworten und abgelehnte Anmeldungen erhöhen die Zähler nicht. Idempotent wiederholte Ein- oder Auszahlungen werden nur einmal gezählt. Statistikfehler werden protokolliert, lassen aber weder Seitenaufrufe noch Anmeldungen oder Buchungen scheitern. Der Demo-Reset verändert die Nutzungszähler nicht.
+
+Diese Zahlen messen technische Aufrufe und erfolgreiche Aktionen, nicht unterschiedliche Personen oder Sitzungen. Bei jedem erfolgreichen Inkrement entfernt die Anwendung Tageszeilen außerhalb der konfigurierten Aufbewahrung; der Standard von 400 Tagen ermöglicht ungefähr 13 Monate Vergleich. Die cookielose Gestaltung vermeidet für diesen Vorgang das Speichern oder Auslesen einer Analysekennung auf dem Endgerät. Sie ist deshalb datensparsamer, aber weder pauschal „DSGVO-frei“ noch eine Garantie für Einwilligungsfreiheit: Hosting, kurzzeitige technische IP-Verarbeitung, Rechtsgrundlage, Zweck und Informationspflichten sind für den konkreten Betrieb weiterhin zu prüfen und in der Datenschutzerklärung transparent zu beschreiben.
 
 ## Abnahme und Wiederherstellung
 

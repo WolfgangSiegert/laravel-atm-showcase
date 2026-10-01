@@ -1,0 +1,582 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LERN-Bank ATM HTTP Interface",
+    "version": "1.5.0",
+    "description": "Sitzungsbasierter Laravel-/Inertia-HTTP-Vertrag der Demo-Anwendung. Dies ist keine eigenständige JSON-API: Erfolgreiche Schreibzugriffe liefern Redirects, und schreibende Requests benötigen Session-Cookie plus CSRF-Header."
+  },
+  "servers": [
+    {
+      "url": "{baseUrl}",
+      "variables": {
+        "baseUrl": {
+          "default": "http://127.0.0.1:8000",
+          "description": "Lokaler oder bereitgestellter Host ohne abschließenden Schrägstrich"
+        }
+      }
+    }
+  ],
+  "tags": [
+    { "name": "Pages", "description": "Öffentliche Browser-Seiten und Healthcheck" },
+    { "name": "ATM session", "description": "Kartenauswahl und zustandsbehaftete ATM-Sitzung" },
+    { "name": "ATM transactions", "description": "Simulierte Buchungen und Belege" },
+    { "name": "Admin session", "description": "Betreiberanmeldung und -abmeldung" },
+    { "name": "Admin management", "description": "Schreibzugriffe für Superadmins" }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "redirectToAtm",
+        "tags": ["Pages"],
+        "summary": "Zur ATM-Startseite weiterleiten",
+        "responses": { "302": { "$ref": "#/components/responses/Redirect" } }
+      }
+    },
+    "/atm": {
+      "get": {
+        "operationId": "showAtmLandingPage",
+        "tags": ["Pages"],
+        "summary": "ATM-Startseite anzeigen",
+        "responses": { "200": { "$ref": "#/components/responses/InertiaPage" } }
+      }
+    },
+    "/locale": {
+      "post": {
+        "operationId": "updateLocale",
+        "tags": ["Pages"],
+        "summary": "Sprache der Sitzung ändern",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["locale"],
+                "properties": { "locale": { "type": "string", "enum": ["de", "en"] } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": { "$ref": "#/components/responses/Redirect" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" }
+        }
+      }
+    },
+    "/atm/cards": {
+      "get": {
+        "operationId": "listAtmCards",
+        "tags": ["ATM session"],
+        "summary": "Kartenauswahl anzeigen und CSRF-Cookie beziehen",
+        "responses": { "200": { "$ref": "#/components/responses/InertiaPage" } }
+      }
+    },
+    "/atm/session": {
+      "get": {
+        "operationId": "showAtmSession",
+        "tags": ["ATM session"],
+        "summary": "Aktuelle ATM-Sitzung und Buchungshistorie anzeigen",
+        "parameters": [
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["deposit", "withdrawal", "opening"] } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["date", "amount"], "default": "date" } },
+          { "name": "direction", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } }
+        ],
+        "security": [{ "atmSession": [] }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/InertiaPage" },
+          "302": { "$ref": "#/components/responses/Redirect" }
+        }
+      },
+      "post": {
+        "operationId": "createAtmSession",
+        "tags": ["ATM session"],
+        "summary": "Karte und PIN prüfen und ATM-Sitzung starten",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/AtmLoginInput" }
+            }
+          }
+        },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" },
+          "429": { "$ref": "#/components/responses/RateLimitFailure" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAtmSession",
+        "tags": ["ATM session"],
+        "summary": "ATM-Sitzung beenden",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "security": [{ "atmSession": [] }],
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" }
+        }
+      }
+    },
+    "/atm/deposits": {
+      "post": {
+        "operationId": "createDeposit",
+        "tags": ["ATM transactions"],
+        "summary": "Simulierte Einzahlung buchen",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "security": [{ "atmSession": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/DepositInput" }
+            }
+          }
+        },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" },
+          "429": { "$ref": "#/components/responses/RateLimitFailure" }
+        }
+      }
+    },
+    "/atm/withdrawals": {
+      "post": {
+        "operationId": "createWithdrawal",
+        "tags": ["ATM transactions"],
+        "summary": "Simulierte Auszahlung buchen",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "security": [{ "atmSession": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/WithdrawalInput" }
+            }
+          }
+        },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" },
+          "429": { "$ref": "#/components/responses/RateLimitFailure" }
+        }
+      }
+    },
+    "/atm/receipts/{receiptReference}": {
+      "get": {
+        "operationId": "showReceipt",
+        "tags": ["ATM transactions"],
+        "summary": "Beleg des aktuellen Sitzungskontos anzeigen",
+        "parameters": [
+          {
+            "name": "receiptReference",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^ATM-[0-9A-HJKMNP-TV-Z]{26}$" }
+          }
+        ],
+        "security": [{ "atmSession": [] }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/InertiaPage" },
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/admin/login": {
+      "get": {
+        "operationId": "showAdminLogin",
+        "tags": ["Admin session"],
+        "summary": "Admin-Anmeldung anzeigen und CSRF-Cookie beziehen",
+        "responses": {
+          "200": { "$ref": "#/components/responses/InertiaPage" },
+          "302": { "$ref": "#/components/responses/Redirect" }
+        }
+      }
+    },
+    "/admin/session": {
+      "post": {
+        "operationId": "createAdminSession",
+        "tags": ["Admin session"],
+        "summary": "Betreiber anmelden",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/AdminLoginInput" }
+            }
+          }
+        },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" },
+          "429": { "$ref": "#/components/responses/RateLimitFailure" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAdminSession",
+        "tags": ["Admin session"],
+        "summary": "Betreibersitzung beenden",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "security": [{ "operatorSession": [] }],
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" }
+        }
+      }
+    },
+    "/admin/guest-session": {
+      "post": {
+        "operationId": "createAdminGuestSession",
+        "tags": ["Admin session"],
+        "summary": "Optionalen schreibgeschützten Showcase-Zugang starten",
+        "description": "Nur verfügbar, wenn PUBLIC_ADMIN_GUEST_ENABLED aktiviert ist.",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "429": { "$ref": "#/components/responses/RateLimitFailure" }
+        }
+      }
+    },
+    "/admin": {
+      "get": {
+        "operationId": "showAdminDashboard",
+        "tags": ["Admin management"],
+        "summary": "Admin-Dashboard anzeigen",
+        "security": [{ "operatorSession": [] }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/InertiaPage" },
+          "302": { "$ref": "#/components/responses/Redirect" }
+        }
+      }
+    },
+    "/admin/atm/status": {
+      "patch": {
+        "operationId": "updateAtmStatus",
+        "tags": ["Admin management"],
+        "summary": "Automatenstatus ändern",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "security": [{ "operatorSession": [] }],
+        "requestBody": { "$ref": "#/components/requestBodies/AtmStatus" },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" }
+        }
+      }
+    },
+    "/admin/inventory/{cashInventory}/adjust": {
+      "post": {
+        "operationId": "adjustCashInventory",
+        "tags": ["Admin management"],
+        "summary": "Scheinbestand korrigieren",
+        "parameters": [
+          { "$ref": "#/components/parameters/XsrfToken" },
+          { "name": "cashInventory", "in": "path", "required": true, "schema": { "type": "integer", "minimum": 1 } }
+        ],
+        "security": [{ "operatorSession": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["adjustment"],
+                "properties": { "adjustment": { "type": "integer", "minimum": -100, "maximum": 100, "not": { "const": 0 } } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" }
+        }
+      }
+    },
+    "/admin/accounts": {
+      "post": {
+        "operationId": "createAdminAccount",
+        "tags": ["Admin management"],
+        "summary": "Demo-Konto mit erster Karte anlegen",
+        "parameters": [{ "$ref": "#/components/parameters/XsrfToken" }],
+        "security": [{ "operatorSession": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/CreateAccountInput" }
+            }
+          }
+        },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" }
+        }
+      }
+    },
+    "/admin/accounts/{account}/status": {
+      "patch": {
+        "operationId": "updateAccountStatus",
+        "tags": ["Admin management"],
+        "summary": "Kontostatus ändern",
+        "parameters": [
+          { "$ref": "#/components/parameters/XsrfToken" },
+          { "$ref": "#/components/parameters/AccountId" }
+        ],
+        "security": [{ "operatorSession": [] }],
+        "requestBody": { "$ref": "#/components/requestBodies/ResourceStatus" },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" }
+        }
+      }
+    },
+    "/admin/accounts/{account}/cards": {
+      "post": {
+        "operationId": "createAdminCard",
+        "tags": ["Admin management"],
+        "summary": "Zusätzliche Karte ausgeben",
+        "parameters": [
+          { "$ref": "#/components/parameters/XsrfToken" },
+          { "$ref": "#/components/parameters/AccountId" }
+        ],
+        "security": [{ "operatorSession": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/CreateCardInput" }
+            }
+          }
+        },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" }
+        }
+      }
+    },
+    "/admin/cards/{card}/status": {
+      "patch": {
+        "operationId": "updateCardStatus",
+        "tags": ["Admin management"],
+        "summary": "Kartenstatus ändern",
+        "parameters": [
+          { "$ref": "#/components/parameters/XsrfToken" },
+          { "$ref": "#/components/parameters/CardId" }
+        ],
+        "security": [{ "operatorSession": [] }],
+        "requestBody": { "$ref": "#/components/requestBodies/ResourceStatus" },
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" },
+          "422": { "$ref": "#/components/responses/ValidationFailure" }
+        }
+      }
+    },
+    "/admin/cards/{card}/reset-lock": {
+      "post": {
+        "operationId": "resetCardLock",
+        "tags": ["Admin management"],
+        "summary": "PIN-Fehlversuche und Zeitsperre zurücksetzen",
+        "parameters": [
+          { "$ref": "#/components/parameters/XsrfToken" },
+          { "$ref": "#/components/parameters/CardId" }
+        ],
+        "security": [{ "operatorSession": [] }],
+        "responses": {
+          "302": { "$ref": "#/components/responses/Redirect" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "419": { "$ref": "#/components/responses/CsrfFailure" }
+        }
+      }
+    },
+    "/up": {
+      "get": {
+        "operationId": "healthcheck",
+        "tags": ["Pages"],
+        "summary": "Laravel-Healthcheck abrufen",
+        "responses": { "200": { "description": "Anwendung ist verfügbar" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "atmSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "laravel_session",
+        "description": "Von Laravel gesetztes Sitzungscookie mit gültiger Kartensitzung. Der Cookie-Name kann per Konfiguration abweichen."
+      },
+      "operatorSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "laravel_session",
+        "description": "Von Laravel gesetztes Sitzungscookie mit authentifiziertem Betreiber. Der Cookie-Name kann per Konfiguration abweichen."
+      }
+    },
+    "parameters": {
+      "XsrfToken": {
+        "name": "X-XSRF-TOKEN",
+        "in": "header",
+        "required": true,
+        "description": "URL-dekodierter Wert des zuvor gesetzten XSRF-TOKEN-Cookies",
+        "schema": { "type": "string" }
+      },
+      "AccountId": {
+        "name": "account",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "integer", "minimum": 1 }
+      },
+      "CardId": {
+        "name": "card",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "requestBodies": {
+      "AtmStatus": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": ["status"],
+              "properties": { "status": { "type": "string", "enum": ["active", "maintenance"] } }
+            }
+          }
+        }
+      },
+      "ResourceStatus": {
+        "required": true,
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "type": "object",
+              "required": ["status"],
+              "properties": { "status": { "type": "string", "enum": ["active", "blocked"] } }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AtmLoginInput": {
+        "type": "object",
+        "required": ["card_id", "pin"],
+        "properties": {
+          "card_id": { "type": "integer", "minimum": 1 },
+          "pin": { "type": "string", "pattern": "^[0-9]{4}$", "writeOnly": true }
+        }
+      },
+      "DepositInput": {
+        "type": "object",
+        "required": ["amount", "idempotency_key"],
+        "properties": {
+          "amount": { "type": "string", "pattern": "^[0-9]{1,5}(?:[.,][0-9]{1,2})?$", "examples": ["25,50"] },
+          "purpose": { "type": ["string", "null"], "maxLength": 140 },
+          "idempotency_key": { "type": "string", "format": "uuid", "description": "Für jeden beabsichtigten Vorgang neu erzeugen; bei sicherer Wiederholung unverändert wiederverwenden." }
+        }
+      },
+      "WithdrawalInput": {
+        "type": "object",
+        "required": ["withdrawal_amount", "idempotency_key"],
+        "properties": {
+          "withdrawal_amount": { "type": "string", "pattern": "^[0-9]{1,4}$", "examples": ["20"], "description": "Ganzer Eurobetrag; fachlich 10 bis 1000 Euro." },
+          "purpose": { "type": ["string", "null"], "maxLength": 140 },
+          "idempotency_key": { "type": "string", "format": "uuid", "description": "Für jeden beabsichtigten Vorgang neu erzeugen; bei sicherer Wiederholung unverändert wiederverwenden." }
+        }
+      },
+      "AdminLoginInput": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "maxLength": 255 },
+          "password": { "type": "string", "maxLength": 255, "writeOnly": true }
+        }
+      },
+      "CreateAccountInput": {
+        "type": "object",
+        "required": ["account_reference", "card_reference", "pin"],
+        "properties": {
+          "customer_id": { "type": ["integer", "null"], "minimum": 1, "description": "Bestehende Person; alternativ customer_name verwenden." },
+          "customer_name": { "type": ["string", "null"], "minLength": 2, "maxLength": 80, "description": "Erforderlich, wenn customer_id fehlt." },
+          "account_reference": { "type": "string", "minLength": 4, "maxLength": 32, "pattern": "^[A-Z0-9][A-Z0-9-]*$" },
+          "card_reference": { "type": "string", "minLength": 4, "maxLength": 32, "pattern": "^[A-Z0-9][A-Z0-9-]*$" },
+          "pin": { "type": "string", "pattern": "^[0-9]{4}$", "writeOnly": true }
+        },
+        "oneOf": [
+          { "required": ["customer_id"] },
+          { "required": ["customer_name"] }
+        ]
+      },
+      "CreateCardInput": {
+        "type": "object",
+        "required": ["card_reference", "pin"],
+        "properties": {
+          "card_reference": { "type": "string", "minLength": 4, "maxLength": 32, "pattern": "^[A-Z0-9][A-Z0-9-]*$" },
+          "pin": { "type": "string", "pattern": "^[0-9]{4}$", "writeOnly": true },
+          "expires_at": { "type": ["string", "null"], "format": "date", "description": "Optionales Datum nach dem heutigen Tag." }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "required": ["message", "errors"],
+        "properties": {
+          "message": { "type": "string" },
+          "errors": {
+            "type": "object",
+            "additionalProperties": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "responses": {
+      "InertiaPage": {
+        "description": "HTML-Seite oder bei korrektem Inertia-Request eine Inertia-JSON-Antwort; Props sind kein stabiler externer API-Vertrag.",
+        "content": {
+          "text/html": { "schema": { "type": "string" } },
+          "application/json": { "schema": { "type": "object", "additionalProperties": true } }
+        }
+      },
+      "Redirect": {
+        "description": "Browser-Redirect",
+        "headers": { "Location": { "schema": { "type": "string", "format": "uri-reference" } } }
+      },
+      "ValidationFailure": {
+        "description": "Validierung fehlgeschlagen. JSON wird nur bei Accept: application/json geliefert; andernfalls erfolgt ein Redirect mit Sitzungsfehlern.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } }
+      },
+      "RateLimitFailure": { "description": "Anfragelimit überschritten" },
+      "CsrfFailure": { "description": "CSRF-Token fehlt, ist ungültig oder passt nicht zur Sitzung" },
+      "Forbidden": { "description": "Authentifiziert, aber ohne Superadmin-Schreibrecht" },
+      "NotFound": { "description": "Ressource oder optionaler Endpoint nicht verfügbar" }
+    }
+  }
+}
