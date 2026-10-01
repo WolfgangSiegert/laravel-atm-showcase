@@ -1,10 +1,25 @@
 # HTTP-Schnittstelle und Postman
 
-Die Anwendung stellt aktuell **keine eigenständige JSON-API** bereit. Die in
-[`openapi.json`](openapi.json) beschriebene Schnittstelle ist der tatsächlich
-vorhandene, sitzungsbasierte Laravel-/Inertia-HTTP-Vertrag. Erfolgreiche
+Die Anwendung stellt keine allgemeine JSON-API bereit. Die in
+[`openapi.json`](openapi.json) beschriebene Schnittstelle umfasst den
+sitzungsbasierten Laravel-/Inertia-HTTP-Vertrag und genau einen zustandslosen
+Erfassungsendpunkt: `POST /api/portfolio-traffic`. Die übrigen erfolgreichen
 Schreibzugriffe antworten in der Regel mit einem Redirect und nicht mit einem
 JSON-Dokument.
+
+## Portfolio-Traffic
+
+Der statische Portfolio-Client sendet `version=1`, `site=portfolio` und einen
+allowlist-validierten `path` als `application/x-www-form-urlencoded;charset=UTF-8`.
+Er verwendet `mode: no-cors`, `credentials: omit` und `keepalive: true`; die
+erfolgreiche Antwort ist leer und hat Status 204. Dieser Endpoint verwendet
+weder Websession noch CSRF-Token und setzt keinen Cookie.
+
+Akzeptierte Origins und Pfade stehen vollständig im OpenAPI-Vertrag. Eine
+Origin-Prüfung beweist die Herkunft nicht kryptografisch: Nicht-Browser-Clients
+können den Header fälschen. Das zusätzliche Rate-Limit begrenzt nur einfache
+Fehl- oder Missbrauchsanfragen. Die serverseitige Speicherung und private
+Auswertung sind in [portfolio-traffic.md](../portfolio-traffic.md) beschrieben.
 
 Die OpenAPI-Datei ist die verbindliche maschinenlesbare Quelle für Pfade,
 Methoden und Eingabefelder. Die Routentabelle im Haupt-README bleibt nur eine
@@ -30,7 +45,9 @@ Superadmin-Sitzung; der optionale Gastzugang ist absichtlich nur lesend.
 
 ## Fehlerantworten
 
-Mit `Accept: application/json` liefert Laravel Validierungsfehler als JSON mit
+Beim Portfolio-Endpoint liefert Laravel Validierungsfehler unabhängig vom
+`Accept`-Header als JSON mit Status 422. Bei den sitzungsbasierten Routen liefert
+Laravel mit `Accept: application/json` Validierungsfehler als JSON mit
 Status `422`. Erfolgreiche Antworten bleiben dennoch Redirects, da die
 Controller den Browser- und keinen JSON-API-Vertrag implementieren. Ohne diesen
 Accept-Header werden Validierungsfehler über die Sitzung zurück zur jeweiligen

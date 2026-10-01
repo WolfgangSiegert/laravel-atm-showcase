@@ -12,6 +12,12 @@ Die Kennzahlen dürfen daher nicht als „Besucher“, „Unique Visitors“ ode
 
 Das davon getrennte Traffic- und Fehler-Logging dient kurzfristig Betrieb, Fehlersuche und Sicherheit. Seine Felder, Kanäle und Aufbewahrung sind in [observability.md](observability.md) dokumentiert. Hostinganbieter können IP-Adressen technisch verarbeiten, obwohl die Anwendung sie weder in `usage_metrics` noch in ihren strukturierten Traffic-Feldern speichert. Auftragsverarbeitung, Plattformprotokolle und Löschfristen müssen deshalb anhand der realen Hostingkonfiguration geprüft werden.
 
+## Portfolio-Traffic
+
+Die separat aktivierbare Portfolio-Erfassung hat eine reguläre Aufbewahrungsfrist von 90 Tagen. Da die Bereinigung opportunistisch beim nächsten akzeptierten Request läuft, können abgelaufene Ereignisse bei ausbleibendem Traffic physisch länger vorhanden bleiben. Pro Ereignis werden Zeitpunkt, der feste Site-Wert, ein allowlist-validierter Pfad und ein HMAC gespeichert. Der HMAC entsteht serverseitig aus der von Laravel ermittelten Client-IP und einer groben Browser-/Plattformklasse; Schlüssel ist der stabile `APP_KEY`. IP-Adresse und vollständiger User-Agent werden nicht gespeichert. Der Browser setzt dafür keinen Analyse-Cookie und sendet keine Zugangsdaten.
+
+Die Kennung ist pseudonym und deshalb datenschutzrechtlich nicht mit anonymen Summen gleichzusetzen. Sie nähert unterschiedliche Geräte beziehungsweise Personen nur an: Mehrere Menschen hinter derselben IP mit gleicher Browserklasse können zusammenfallen, während IP-, Browser- oder Plattformwechsel eine Person aufteilen können. Die private Anzeige verwendet deshalb „Kennungen“ und nicht „Personen“ oder „Unique Visitors“. Weitere technische Details stehen in [portfolio-traffic.md](portfolio-traffic.md).
+
 ## Rechtliche Unsicherheit
 
 Dass die Nutzungsmetriken keine Informationen im Endgerät speichern oder auslesen, reduziert das Einwilligungsrisiko für diesen konkreten Analysevorgang. Daraus folgt keine pauschale Ausnahme von DSGVO, TDDDG oder Informationspflichten. Die rechtliche Bewertung hängt unter anderem von tatsächlichem Zweck, Hosting, technischer Konfiguration und den veröffentlichten Datenschutzhinweisen ab.

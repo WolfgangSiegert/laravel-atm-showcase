@@ -26,6 +26,8 @@ Das Render-Konto muss vorab eingerichtet und mit GitHub verbunden werden. Zugang
 | `PUBLIC_DEMO_ENABLED` | `true` ausschließlich für diese Demo-Datenbank |
 | `PUBLIC_ADMIN_GUEST_ENABLED` | `true` für den passwortlosen, strikt schreibgeschützten Admin-Showcase; `false` deaktiviert und entzieht den Gastzugang beim nächsten Start |
 | `USAGE_METRICS_ENABLED` / `USAGE_METRICS_RETENTION_DAYS` | `true` / `400` aktiviert cookielose Tageszähler und bewahrt ungefähr 13 Monate auf; lokal ist die Funktion standardmäßig deaktiviert |
+| `PORTFOLIO_TRAFFIC_ENABLED` / `PORTFOLIO_TRAFFIC_RETENTION_DAYS` | `true` / `90` aktiviert die zustandslose Portfolio-Erfassung und deren Aufbewahrungsfrist |
+| `PORTFOLIO_TRAFFIC_RATE_LIMIT` | `60` akzeptierte oder abgewiesene Anfragen je ermittelter Client-IP und Minute |
 | `SECURITY_HEADERS_ENABLED` | `true` |
 | `TRUSTED_PROXIES` | `*`, für den ausschließlich über Render veröffentlichten Container geprüft |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` |
@@ -74,6 +76,14 @@ Das private Superadmin-Dashboard zeigt die aggregierte Nutzung. Der öffentliche
 
 Diese Zahlen messen technische Aufrufe und erfolgreiche Aktionen, nicht unterschiedliche Personen oder Sitzungen. Bei jedem erfolgreichen Inkrement entfernt die Anwendung Tageszeilen außerhalb der konfigurierten Aufbewahrung; der Standard von 400 Tagen ermöglicht ungefähr 13 Monate Vergleich. Die cookielose Gestaltung vermeidet für diesen Vorgang das Speichern oder Auslesen einer Analysekennung auf dem Endgerät. Sie ist deshalb datensparsamer, aber weder pauschal „DSGVO-frei“ noch eine Garantie für Einwilligungsfreiheit: Hosting, kurzzeitige technische IP-Verarbeitung, Rechtsgrundlage, Zweck und Informationspflichten sind für den konkreten Betrieb weiterhin zu prüfen und in der Datenschutzerklärung transparent zu beschreiben.
 
+## Portfolio-Traffic
+
+Die Portfolio-Erfassung ist fachlich und technisch von den aggregierten ATM-Zählern getrennt. Render aktiviert `PORTFOLIO_TRAFFIC_ENABLED=true`; die additive Migration legt `portfolio_traffic_events` in Neon an. Ein akzeptierter Request speichert nur UTC-Zeitpunkt, Site, freigegebenen Pfad und eine HMAC-Kennung. Rohe IP-Adresse und vollständiger User-Agent werden weder in der Tabelle noch in den strukturierten Traffic-Logs gespeichert.
+
+Bei jedem akzeptierten Request werden Ereignisse gelöscht, deren Zeitpunkt mehr als `PORTFOLIO_TRAFFIC_RETENTION_DAYS` zurückliegt. Das benötigt keinen Worker und ist bei parallelen Löschvorgängen idempotent. Ohne neue akzeptierte Requests kann die physische Löschung entsprechend später erfolgen. Die Auswertung unter `/admin/portfolio-traffic` ist ausschließlich für private Superadmins freigegeben; der öffentliche Viewer erhält HTTP 403 und keine Inertia-Props mit Portfolio-Daten.
+
+Nach einem Deployment zuerst den erfolgreichen Start samt Migration prüfen. Anschließend je einen minimalen POST mit erlaubtem und unerlaubtem Origin senden, die 204-/403-Antwort kontrollieren und die private Auswertung mit einem Superadmin prüfen. Erst danach soll das statische Portfolio den Client-Aufruf veröffentlichen. Der genaue Vertrag und die Genauigkeitsgrenzen stehen in [portfolio-traffic.md](portfolio-traffic.md).
+
 ## Abnahme und Wiederherstellung
 
 - HTTPS öffnet ohne Zertifikatsfehler; Assets werden ohne CSP-Fehler geladen.
@@ -87,7 +97,7 @@ Für ein Code-Rollback den letzten grünen Commit mit unveränderten Secrets dep
 
 ## CI und lokale Containerprüfung
 
-GitHub Actions prüft PHP 8.4, Node 24, SQLite-Tests, fünf reale PostgreSQL-Mehrprozessszenarien, Pint, TypeScript/Build und den Browserablauf in Chromium. Ein zweiter Job baut das Docker-Image und startet es gegen einen isolierten PostgreSQL-Service mit Produktionskonfiguration. Ein grüner Containerjob bestätigt Installation und HTTP-Start, aber keine Render-/Neon-Eigenschaften.
+GitHub Actions prüft PHP 8.4, Node 24, SQLite-Tests, sieben PostgreSQL-Szenarien einschließlich Schema- und Mehrprozessprüfung der Portfolio-Erfassung, Pint, TypeScript/Build und den Browserablauf in Chromium. Ein zweiter Job baut das Docker-Image und startet es gegen einen isolierten PostgreSQL-Service mit Produktionskonfiguration. Ein grüner Containerjob bestätigt Installation und HTTP-Start, aber keine Render-/Neon-Eigenschaften.
 
 Lokal lässt sich das Image mit `docker build -t atm-showcase .` bauen. Der Docker-Daemon muss laufen. Der Containerstart benötigt die oben genannten Produktionsvariablen und eine ausschließlich fiktive PostgreSQL-Datenbank. Der Laravel-Entwicklungsserver bleibt für die normale SQLite-Vorführung vorgesehen.
 

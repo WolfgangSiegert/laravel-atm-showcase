@@ -221,3 +221,12 @@ Für Produktion sind `APP_DEBUG=false`, eine HTTPS-URL und `SESSION_SECURE_COOKI
 - Read-only wird auf zwei Ebenen erzwungen: Die Oberfläche entfernt alle Bearbeitungsaktionen, und eine eigene Middleware verweigert jede schreibende Admin- und Legacy-Operator-Route mit HTTP 403. Der Gast kann Dashboard, Konten, Karten, Transaktionen, Audit, Filter, Sortierung und Pagination ansehen.
 - Gastanmeldung und Abmeldung werden auditiert. Der Gast sieht weiterhin ausschließlich die fiktiven Showcase-Daten; Audit-Antworten enthalten keine Betreiber-E-Mail oder Passworthashes.
 - Der Stand wird als `v1.5.0` geführt.
+
+## Portfolio-Traffic-Erfassung
+
+- Externe statische Portfolio-Seiten senden ausschließlich `version`, den festen Site-Wert und einen allowlist-validierten Pfad an eine zustandslose API-Route. Die Route verwendet weder Websession noch CSRF-Cookie.
+- Einzelereignisse bleiben notwendig, um unterschiedliche und wiederkehrende pseudonyme Kennungen für frei gewählte Zeiträume zu berechnen. Sie liegen deshalb bewusst getrennt von den rein aggregierten ATM-Nutzungsmetriken.
+- Die Kennung ist ein HMAC aus der von Laravel ermittelten Client-IP und einer groben Browser-/Plattformklasse mit dem stabilen `APP_KEY`. Dadurch werden Rohwerte nicht gespeichert; ein Schlüsselwechsel trennt allerdings alte und neue Kennungen.
+- Die 90-Tage-Löschung erfolgt opportunistisch und idempotent bei akzeptierten Requests. Ohne weiteren Request kann ein abgelaufener Datensatz physisch länger vorhanden bleiben; ein zusätzlicher Scheduler oder Worker wird für den kleinen Showcase nicht betrieben.
+- Nur private Superadmins sehen die Auswertung. Viewer erhalten serverseitig 403, keinen Navigationspunkt und keine versteckten Inertia-Props.
+- Origin-Allowlist, Botfilter und IP-Rate-Limit reduzieren triviale Verfälschungen, liefern aber keinen kryptografischen Herkunftsnachweis. Die angezeigten Kennungen sind ausdrücklich keine exakten Personenzahlen.

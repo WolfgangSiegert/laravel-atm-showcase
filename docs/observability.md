@@ -51,3 +51,5 @@ Tracing-Lösung. Ohne IP- und Benutzerkennung lassen sich absichtlich keine
 personenbezogenen Nutzungsprofile oder Zahlen unterschiedlicher Personen ableiten.
 
 Die persistenten Tageszähler in `usage_metrics` sind davon getrennt. Sie dienen einer langfristigen, cookielosen Nutzungsübersicht, werden nicht in den Traffic-Logkanal geschrieben und enthalten keine Request- oder Browserkennung. Aktivierung, Zählregeln und datenschutzrechtliche Grenzen stehen in [deployment.md](deployment.md#cookielose-nutzungsstatistik).
+
+Auch `portfolio_traffic_events` ist kein technischer Logkanal, sondern eine getrennte, auf 90 Tage begrenzte fachliche Erfassung. Das Request-Logging protokolliert für den API-POST weiterhin nur seine allowlist-basierten technischen Felder und übernimmt weder Origin, IP, Formularwerte noch Besucher-HMAC.

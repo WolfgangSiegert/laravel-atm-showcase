@@ -111,7 +111,7 @@ Die PostgreSQL-Tests benötigen eine ausschließlich für Tests bestimmte leere 
 ATM_POSTGRES_TEST_URL='postgresql://user:password@127.0.0.1:5432/atm_test' composer test:postgres
 ```
 
-Ohne `ATM_POSTGRES_TEST_URL` werden diese fünf Tests im normalen SQLite-Lauf übersprungen. Niemals eine Entwicklungs- oder Produktionsdatenbank als Test-URL verwenden.
+Ohne `ATM_POSTGRES_TEST_URL` werden diese sieben Tests im normalen SQLite-Lauf übersprungen. Niemals eine Entwicklungs- oder Produktionsdatenbank als Test-URL verwenden.
 
 `npm run test:browser` verwendet den lokal installierten Google Chrome, startet Laravel auf Port 8010 und legt vorübergehend `database/browser-testing.sqlite` an. Der Ablauf prüft falsche und richtige PIN, Ein- und Auszahlung, beide Belege, Kontostand, Abmeldung, Tastatureingabe und die mobile Breite. Die Datei wird danach gelöscht; die normale lokale Datenbank bleibt unverändert.
 
@@ -137,6 +137,7 @@ Weitere Entwicklerdokumentation:
 
 - [Releases, Semantic Versioning und automatisiertes Changelog](docs/releases.md)
 - [Traffic-Logging, Request-IDs und Fehler-Reporting](docs/observability.md)
+- [Portfolio-Traffic: Vertrag, Datenschutzgrenzen und private Auswertung](docs/portfolio-traffic.md)
 - [Fachmodell und Grenzen](docs/domain-model.md)
 - [Architektur- und Produktentscheidungen](docs/decisions.md)
 - [Deployment und Betriebsabnahme](docs/deployment.md)
