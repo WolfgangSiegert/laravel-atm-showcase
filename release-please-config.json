@@ -1,0 +1,57 @@
+{
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+    "bootstrap-sha": "ae4b3f3e2d7f4d9b719406a94cb1e2104cfc24a9",
+    "release-type": "node",
+    "include-component-in-tag": false,
+    "include-v-in-tag": true,
+    "changelog-sections": [
+        {
+            "type": "feat",
+            "section": "Neue Funktionen"
+        },
+        {
+            "type": "fix",
+            "section": "Fehlerbehebungen"
+        },
+        {
+            "type": "perf",
+            "section": "Performance"
+        },
+        {
+            "type": "refactor",
+            "section": "Überarbeitungen"
+        },
+        {
+            "type": "docs",
+            "section": "Dokumentation"
+        },
+        {
+            "type": "test",
+            "section": "Tests"
+        },
+        {
+            "type": "build",
+            "section": "Build und Abhängigkeiten"
+        },
+        {
+            "type": "ci",
+            "section": "Continuous Integration"
+        },
+        {
+            "type": "chore",
+            "section": "Wartung",
+            "hidden": true
+        }
+    ],
+    "packages": {
+        ".": {
+            "extra-files": [
+                {
+                    "type": "json",
+                    "path": "docs/api/openapi.json",
+                    "jsonpath": "$.info.version"
+                }
+            ]
+        }
+    }
+}

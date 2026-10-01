@@ -1,6 +1,7 @@
 <?php
 
 $renderHostname = env('RENDER_EXTERNAL_HOSTNAME');
+$package = json_decode(file_get_contents(base_path('package.json')), true, flags: JSON_THROW_ON_ERROR);
 
 return [
 
@@ -16,6 +17,8 @@ return [
     */
 
     'name' => env('APP_NAME', 'LERN-Bank Mein Geldautomat'),
+
+    'version' => $package['version'],
 
     /*
     |--------------------------------------------------------------------------
