@@ -2,8 +2,9 @@
 
 Die Anwendung stellt keine allgemeine JSON-API bereit. Die in
 [`openapi.json`](openapi.json) beschriebene Schnittstelle umfasst den
-sitzungsbasierten Laravel-/Inertia-HTTP-Vertrag und genau einen zustandslosen
-Erfassungsendpunkt: `POST /api/portfolio-traffic`. Die übrigen erfolgreichen
+sitzungsbasierten Laravel-/Inertia-HTTP-Vertrag und zwei zustandslose
+Erfassungsendpunkte: `POST /api/portfolio-traffic` und
+`POST /api/showcase-traffic`. Die übrigen erfolgreichen
 Schreibzugriffe antworten in der Regel mit einem Redirect und nicht mit einem
 JSON-Dokument.
 
@@ -20,6 +21,12 @@ Origin-Prüfung beweist die Herkunft nicht kryptografisch: Nicht-Browser-Clients
 können den Header fälschen. Das zusätzliche Rate-Limit begrenzt nur einfache
 Fehl- oder Missbrauchsanfragen. Die serverseitige Speicherung und private
 Auswertung sind in [portfolio-traffic.md](../portfolio-traffic.md) beschrieben.
+
+Der JoinSplit-Client sendet an den Showcase-Endpoint ausschließlich
+`version=1`, `site=joinsplit` und `path=/app`. Bei exakt passendem Origin wird
+nur ein anonymer Tageszähler erhöht. Das gemeinsame, nicht besucherbezogene
+Rate-Limit kann bei Missbrauch vorübergehend auch legitime JoinSplit-Aufrufe
+abweisen; es erzeugt dafür keine dauerhafte Besucherkennung.
 
 Die OpenAPI-Datei ist die verbindliche maschinenlesbare Quelle für Pfade,
 Methoden und Eingabefelder. Die Routentabelle im Haupt-README bleibt nur eine
@@ -45,7 +52,7 @@ Superadmin-Sitzung; der optionale Gastzugang ist absichtlich nur lesend.
 
 ## Fehlerantworten
 
-Beim Portfolio-Endpoint liefert Laravel Validierungsfehler unabhängig vom
+Bei beiden Traffic-Endpoints liefert Laravel Validierungsfehler unabhängig vom
 `Accept`-Header als JSON mit Status 422. Bei den sitzungsbasierten Routen liefert
 Laravel mit `Accept: application/json` Validierungsfehler als JSON mit
 Status `422`. Erfolgreiche Antworten bleiben dennoch Redirects, da die

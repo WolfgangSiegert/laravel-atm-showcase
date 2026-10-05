@@ -19,7 +19,7 @@ Customer 1 ─── n Account 1 ─── n Card
 
 Operator(User) 1 ─── n AuditEvent n ─── 0..1 Card / Account / ATM
 
-PortfolioTrafficEvent (eigenständig, ohne Beziehung zu User, Customer oder ATM)
+PortfolioTrafficEvent / ShowcaseTrafficDaily (eigenständig, ohne Beziehung zu User, Customer oder ATM)
 ```
 
 Präzisierung: Jedes Account gehört zunächst genau einem Customer. Jede Card gehört genau einem Account und erhält dessen Eigentümer indirekt. Jede ATM-Buchung gehört zu genau einem Account, einer Card und einem ATM. Ein ATM hat viele Transactions sowie je Stückelung einen CashInventory-Eintrag. Eröffnungsbestände werden gesondert definiert; sie sind keine erfundenen Kartenbuchungen.
@@ -36,6 +36,7 @@ Präzisierung: Jedes Account gehört zunächst genau einem Customer. Jede Card g
 | CashInventory | Scheine je Automat und Stückelung | `id`, `atm_id`, `denomination_minor`, `quantity` | Unique auf `(atm_id, denomination_minor)`. Stückelung positiv, Anzahl ganzzahlig und ≥ 0. Geldbestand = Summe aus Stückelung × Anzahl. |
 | AuditEvent | Datensparsame technische Nachvollziehbarkeit | `id`, `event_type`, `outcome`, optionale Referenzen auf User, Account, Card und ATM, optional `reason_code`, begrenzter JSON-Kontext, `created_at` | Append-only auf Eloquent-Ebene. Keine PIN, Passwörter, IP-Adressen oder Verwendungszwecke. Abgewiesene Anmeldungen und Geschäftsregeln erzeugen keine Transaction, aber ein AuditEvent. |
 | PortfolioTrafficEvent | Zeitlich begrenzte Nutzungserfassung externer Portfolio-Seiten | `id`, `occurred_at`, `site`, allowlist-validierter `path`, `visitor_hash` | Fachlich vollständig von ATM-Zählern und Benutzerkonten getrennt. Keine rohe IP, kein vollständiger User-Agent und keine URL-Parameter. Der HMAC ist pseudonym, keine verlässliche Personenkennung; Standardaufbewahrung 90 Tage. |
+| ShowcaseTrafficDaily | Anonyme JoinSplit-Aufrufsumme je Berliner Kalendertag | `visit_date`, `site`, feste Kategorie `path`, `view_count` | Keine Einzelereignisse oder Besucherkennung, keine IP-/User-Agent-/Referrer-/Accountdaten. Atomarer PostgreSQL-/SQLite-Upsert; dieselbe 90-Tage-Frist wie Portfolio. |
 
 `ATM` ist der fachliche Name; die PHP-Klasse heißt `Atm` und verwendet die Laravel-konforme Tabelle `atms`. IDs sind konventionelle Laravel-Bigints; es gibt keine abstrakten Identifier-Objekte. `User` repräsentiert ausschließlich Betreiberzugänge und ist **keine** Identitätszuordnung für Customer oder Card. Betreiber besitzen die Rolle `superadmin` oder `viewer`; nur Superadmins dürfen Verwaltungsdaten verändern.
 

@@ -262,7 +262,7 @@ html:has(.admin-shell), body:has(.admin-shell), html:has(.admin-login), body:has
 .portfolio-traffic-heading { align-items: flex-end; }
 .portfolio-period { display: flex; align-items: flex-end; gap: 0.65rem; }
 .portfolio-period label { display: grid; gap: 0.3rem; color: var(--admin-muted); font-size: 0.7rem; font-weight: 700; }
-.portfolio-period input { min-height: 2.75rem; padding: 0.55rem 0.7rem; border: 1px solid var(--admin-line); border-radius: 0.65rem; background: white; color: var(--admin-text); }
+.portfolio-period input, .portfolio-period select { min-height: 2.75rem; padding: 0.55rem 0.7rem; border: 1px solid var(--admin-line); border-radius: 0.65rem; background: white; color: var(--admin-text); }
 .portfolio-traffic-metrics { margin-bottom: 1rem; }
 .portfolio-traffic-grid { grid-template-columns: 1fr; }
 .portfolio-path-table { overflow-x: auto; }
@@ -271,6 +271,7 @@ html:has(.admin-shell), body:has(.admin-shell), html:has(.admin-login), body:has
 .portfolio-path-table th { color: var(--admin-muted); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; }
 .portfolio-path-table td { font-size: 0.84rem; }
 .portfolio-traffic-disclaimer { margin-top: 1rem; color: var(--admin-muted); font-size: 0.75rem; line-height: 1.55; }
+.portfolio-traffic-disclaimer--notice { padding: 0.8rem 1rem; border: 1px solid #d8e6f8; border-radius: 0.75rem; background: #f5f9ff; color: #40536d; }
 .admin-metric { display: flex; min-height: 8.25rem; align-items: flex-start; gap: 0.9rem; padding: 1.15rem; border: 1px solid var(--admin-line); border-radius: 0.95rem; background: white; box-shadow: 0 8px 28px #34304b0a; }
 .admin-metric__icon { display: grid; width: 2.7rem; height: 2.7rem; flex: 0 0 auto; place-items: center; border-radius: 0.75rem; }
 .admin-metric__icon--violet { background: #eeedff; color: #5b55d6; }.admin-metric__icon--blue { background: #e8f0ff; color: #3971d8; }.admin-metric__icon--cyan { background: #e3f8fb; color: #16849a; }.admin-metric__icon--green { background: #e6f7ee; color: #218b5d; }.admin-metric__icon--amber { background: #fff3d8; color: #a76c08; }

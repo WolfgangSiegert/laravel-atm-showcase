@@ -52,4 +52,4 @@ personenbezogenen Nutzungsprofile oder Zahlen unterschiedlicher Personen ableite
 
 Die persistenten Tageszähler in `usage_metrics` sind davon getrennt. Sie dienen einer langfristigen, cookielosen Nutzungsübersicht, werden nicht in den Traffic-Logkanal geschrieben und enthalten keine Request- oder Browserkennung. Aktivierung, Zählregeln und datenschutzrechtliche Grenzen stehen in [deployment.md](deployment.md#cookielose-nutzungsstatistik).
 
-Auch `portfolio_traffic_events` ist kein technischer Logkanal, sondern eine getrennte, auf 90 Tage begrenzte fachliche Erfassung. Das Request-Logging protokolliert für den API-POST weiterhin nur seine allowlist-basierten technischen Felder und übernimmt weder Origin, IP, Formularwerte noch Besucher-HMAC.
+Auch `portfolio_traffic_events` und `showcase_traffic_daily` sind keine technischen Logkanäle, sondern getrennte, auf 90 Tage begrenzte fachliche Erfassungen. Das Request-Logging protokolliert für die API-POSTs weiterhin nur allowlist-basierte technische Felder und übernimmt weder Origin, IP, User-Agent, Formularwerte noch Besucher-HMAC.

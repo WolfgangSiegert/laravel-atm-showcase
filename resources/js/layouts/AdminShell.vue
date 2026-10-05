@@ -60,7 +60,7 @@ const navigation = computed(() => [
     { id: 'transactions' as const, label: t('Transaktionen'), icon: PhReceipt },
     { id: 'audit' as const, label: t('Audit-Protokoll'), icon: PhListChecks },
     ...(props.operatorRole === 'superadmin'
-        ? [{ id: 'portfolio' as const, label: t('Portfolio-Traffic'), icon: PhGlobeHemisphereWest, href: '/admin/portfolio-traffic' }]
+        ? [{ id: 'portfolio' as const, label: t('Showcase-Traffic'), icon: PhGlobeHemisphereWest, href: '/admin/portfolio-traffic' }]
         : []),
 ]);
 </script>

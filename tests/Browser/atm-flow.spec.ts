@@ -135,10 +135,14 @@ test('operates the admin dashboard, tables and edit surfaces', async ({ page }) 
     await expect(page.getByRole('heading', { name: /Guten Tag/ })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Nutzung' })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Bargeldkassetten' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Portfolio-Traffic' })).toBeVisible();
-    await page.getByRole('link', { name: 'Portfolio-Traffic' }).click();
-    await expect(page.getByRole('heading', { name: 'Portfolio-Traffic' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Showcase-Traffic' })).toBeVisible();
+    await page.getByRole('link', { name: 'Showcase-Traffic' }).click();
+    await expect(page.getByRole('heading', { name: 'Showcase-Traffic' })).toBeVisible();
     await expect(page.getByText('Keine exakte Personenzahl')).toBeVisible();
+    await page.getByLabel('Projekt').selectOption('joinsplit');
+    await page.getByRole('button', { name: 'Auswahl anwenden' }).click();
+    await expect(page.getByText('JoinSplit erfasst ausschließlich anonyme, aggregierte App-Aufrufe pro Tag.')).toBeVisible();
+    await expect(page.getByText('Keine exakte Personenzahl')).toBeHidden();
     await page.getByRole('button', { name: 'Übersicht' }).first().click();
     await expect(page).toHaveURL('/admin');
 

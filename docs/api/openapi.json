@@ -3,7 +3,7 @@
   "info": {
     "title": "LERN-Bank ATM HTTP Interface",
     "version": "1.6.0",
-    "description": "Laravel-/Inertia-HTTP-Vertrag der Demo-Anwendung. Die einzige zustandslose Schnittstelle ist der minimale Portfolio-Traffic-Endpunkt; die übrigen Schreibzugriffe benötigen Sitzungscookie und CSRF-Header und liefern Redirects."
+    "description": "Laravel-/Inertia-HTTP-Vertrag der Demo-Anwendung. Die beiden zustandslosen Schnittstellen erfassen Portfolio- beziehungsweise aggregierten JoinSplit-Traffic; die übrigen Schreibzugriffe benötigen Sitzungscookie und CSRF-Header und liefern Redirects."
   },
   "servers": [
     {
@@ -39,7 +39,11 @@
     },
     {
       "name": "Portfolio traffic",
-      "description": "Zustandslose Erfassung und private Superadmin-Auswertung des Portfolio-Traffics"
+      "description": "Zustandslose pseudonyme Erfassung des Portfolio-Traffics"
+    },
+    {
+      "name": "Showcase traffic",
+      "description": "Anonyme JoinSplit-Tageszähler und private projektübergreifende Superadmin-Auswertung"
     }
   ],
   "paths": {
@@ -124,6 +128,73 @@
           },
           "404": {
             "description": "Portfolio-Erfassung ist deaktiviert"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationFailure"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitFailure"
+          }
+        }
+      }
+    },
+    "/api/showcase-traffic": {
+      "post": {
+        "operationId": "storeShowcaseTraffic",
+        "tags": [
+          "Showcase traffic"
+        ],
+        "summary": "Anonymen JoinSplit-App-Aufruf aggregieren",
+        "description": "Zustandsloser Write-only-Endpoint ohne Cookie, CSRF-Token oder Besucherkennung. Gespeichert wird nur ein atomar erhöhter Tageszähler. Der Origin-Header ist eine Missbrauchshürde, kein Herkunftsnachweis. Das gemeinsame Rate-Limit kann bei Missbrauch alle JoinSplit-Clients vorübergehend ausschließen.",
+        "parameters": [
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "const": "https://joinsplit.tiny-bits.org"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "site",
+                  "path"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "string",
+                    "const": "1"
+                  },
+                  "site": {
+                    "type": "string",
+                    "const": "joinsplit"
+                  },
+                  "path": {
+                    "type": "string",
+                    "const": "/app"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Tageszähler erhöht oder offensichtlicher Bot ignoriert; kein Body und kein Cookie"
+          },
+          "403": {
+            "description": "Origin fehlt oder stimmt nicht exakt überein"
+          },
+          "404": {
+            "description": "Zentrale Showcase-Erfassung ist deaktiviert"
           },
           "422": {
             "$ref": "#/components/responses/ValidationFailure"
@@ -914,8 +985,21 @@
         "tags": [
           "Portfolio traffic"
         ],
-        "summary": "Private Portfolio-Auswertung anzeigen",
+        "summary": "Private Showcase-Traffic-Auswertung anzeigen",
         "parameters": [
+          {
+            "name": "project",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "portfolio",
+                "joinsplit",
+                "all"
+              ],
+              "default": "portfolio"
+            }
+          },
           {
             "name": "from",
             "in": "query",
