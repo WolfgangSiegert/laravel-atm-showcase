@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Support\PortfolioTraffic;
+use App\Support\ShowcaseTraffic;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -32,6 +33,13 @@ class AppServiceProvider extends ServiceProvider
             $key = app(PortfolioTraffic::class)->rateLimitKey($request);
 
             return Limit::perMinute($limit)->by($key);
+        });
+
+        RateLimiter::for('showcase-traffic', function (): Limit {
+            $traffic = app(ShowcaseTraffic::class);
+            $limit = max(1, (int) config('showcase_traffic.rate_limit_per_minute'));
+
+            return Limit::perMinute($limit)->by($traffic->rateLimitKey());
         });
     }
 }

@@ -18,6 +18,14 @@ Die separat aktivierbare Portfolio-Erfassung hat eine reguläre Aufbewahrungsfri
 
 Die Kennung ist pseudonym und deshalb datenschutzrechtlich nicht mit anonymen Summen gleichzusetzen. Sie nähert unterschiedliche Geräte beziehungsweise Personen nur an: Mehrere Menschen hinter derselben IP mit gleicher Browserklasse können zusammenfallen, während IP-, Browser- oder Plattformwechsel eine Person aufteilen können. Die private Anzeige verwendet deshalb „Kennungen“ und nicht „Personen“ oder „Unique Visitors“. Weitere technische Details stehen in [portfolio-traffic.md](portfolio-traffic.md).
 
+JoinSplit wird davon strikt getrennt verarbeitet. Die Anwendung speichert nur
+einen Tageszähler für die feste Kategorie `/app`, ohne Einzelereignis,
+IP(-Hash), User-Agent, Besucherkennung, Cookie, Referrer, Querywert oder
+fachliche JoinSplit-Daten. Diese Summen messen App-Aufrufe und dürfen nicht als
+eindeutige oder wiederkehrende Menschen interpretiert werden. Der User-Agent
+wird ausschließlich flüchtig für den groben Botfilter betrachtet; technische
+Verarbeitung durch Hosting- und Netzwerkkomponenten bleibt davon unberührt.
+
 ## Rechtliche Unsicherheit
 
 Dass die Nutzungsmetriken keine Informationen im Endgerät speichern oder auslesen, reduziert das Einwilligungsrisiko für diesen konkreten Analysevorgang. Daraus folgt keine pauschale Ausnahme von DSGVO, TDDDG oder Informationspflichten. Die rechtliche Bewertung hängt unter anderem von tatsächlichem Zweck, Hosting, technischer Konfiguration und den veröffentlichten Datenschutzhinweisen ab.

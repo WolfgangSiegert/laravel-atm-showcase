@@ -49,6 +49,7 @@ it('keeps the OpenAPI document aligned with canonical application routes', funct
         'admin.cards.status',
         'admin.cards.reset-lock',
         'portfolio-traffic.store',
+        'showcase-traffic.store',
     ];
 
     $canonicalRoutes = collect(Route::getRoutes()->getRoutes())

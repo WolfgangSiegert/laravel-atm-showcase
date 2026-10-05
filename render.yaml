@@ -59,6 +59,14 @@ services:
         value: "90"
       - key: PORTFOLIO_TRAFFIC_RATE_LIMIT
         value: "60"
+      - key: SHOWCASE_TRAFFIC_ENABLED
+        value: "true"
+      - key: SHOWCASE_TRAFFIC_JOINSPLIT_ORIGIN
+        value: https://joinsplit.tiny-bits.org
+      - key: SHOWCASE_TRAFFIC_JOINSPLIT_PATH
+        value: /app
+      - key: SHOWCASE_TRAFFIC_RATE_LIMIT
+        value: "120"
       - key: SECURITY_HEADERS_ENABLED
         value: "true"
       - key: TRUSTED_PROXIES

@@ -28,6 +28,9 @@ Das Render-Konto muss vorab eingerichtet und mit GitHub verbunden werden. Zugang
 | `USAGE_METRICS_ENABLED` / `USAGE_METRICS_RETENTION_DAYS` | `true` / `400` aktiviert cookielose Tageszähler und bewahrt ungefähr 13 Monate auf; lokal ist die Funktion standardmäßig deaktiviert |
 | `PORTFOLIO_TRAFFIC_ENABLED` / `PORTFOLIO_TRAFFIC_RETENTION_DAYS` | `true` / `90` aktiviert die zustandslose Portfolio-Erfassung und deren Aufbewahrungsfrist |
 | `PORTFOLIO_TRAFFIC_RATE_LIMIT` | `60` akzeptierte oder abgewiesene Anfragen je ermittelter Client-IP und Minute |
+| `SHOWCASE_TRAFFIC_ENABLED` | `true` aktiviert den zentralen JoinSplit-Write-Endpoint; lokal standardmäßig `false` |
+| `SHOWCASE_TRAFFIC_JOINSPLIT_ORIGIN` / `SHOWCASE_TRAFFIC_JOINSPLIT_PATH` | `https://joinsplit.tiny-bits.org` / `/app`; exakter erlaubter Vertrag |
+| `SHOWCASE_TRAFFIC_RATE_LIMIT` | `120` Anfragen pro gemeinsamem Site-/Origin-Schlüssel und Minute; bei Missbrauch können legitime Clients gemeinsam ausgeschlossen werden |
 | `SECURITY_HEADERS_ENABLED` | `true` |
 | `TRUSTED_PROXIES` | `*`, für den ausschließlich über Render veröffentlichten Container geprüft |
 | `LOG_CHANNEL` / `LOG_LEVEL` | `stderr` / `warning` |
@@ -83,6 +86,14 @@ Die Portfolio-Erfassung ist fachlich und technisch von den aggregierten ATM-Zäh
 Bei jedem akzeptierten Request werden Ereignisse gelöscht, deren Zeitpunkt mehr als `PORTFOLIO_TRAFFIC_RETENTION_DAYS` zurückliegt. Das benötigt keinen Worker und ist bei parallelen Löschvorgängen idempotent. Ohne neue akzeptierte Requests kann die physische Löschung entsprechend später erfolgen. Die Auswertung unter `/admin/portfolio-traffic` ist ausschließlich für private Superadmins freigegeben; der öffentliche Viewer erhält HTTP 403 und keine Inertia-Props mit Portfolio-Daten.
 
 Nach einem Deployment zuerst den erfolgreichen Start samt Migration prüfen. Anschließend je einen minimalen POST mit erlaubtem und unerlaubtem Origin senden, die 204-/403-Antwort kontrollieren und die private Auswertung mit einem Superadmin prüfen. Erst danach soll das statische Portfolio den Client-Aufruf veröffentlichen. Der genaue Vertrag und die Genauigkeitsgrenzen stehen in [portfolio-traffic.md](portfolio-traffic.md).
+
+Die zentrale Showcase-Erfassung ergänzt additiv `showcase_traffic_daily`.
+JoinSplit erhöht darin ausschließlich einen anonymen Tageszähler für `/app` im
+Berichtstag `Europe/Berlin`; es werden keine Einzelereignisse, Besucher-HMACs,
+IP-/User-Agent-/Referrer- oder fachlichen JoinSplit-Daten gespeichert. Die
+Tageszeilen verwenden dieselbe 90-Tage-Frist. Vor Aktivierung des externen
+JoinSplit-Clients müssen zuerst Migration und Render-Konfiguration ausgerollt,
+danach 204/403, Zählererhöhung und Superadmin-Auswertung geprüft werden.
 
 ## Abnahme und Wiederherstellung
 
