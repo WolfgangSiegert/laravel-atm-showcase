@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "LERN-Bank ATM HTTP Interface",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "description": "Laravel-/Inertia-HTTP-Vertrag der Demo-Anwendung. Die beiden zustandslosen Schnittstellen erfassen Portfolio- beziehungsweise aggregierten JoinSplit-Traffic; die übrigen Schreibzugriffe benötigen Sitzungscookie und CSRF-Header und liefern Redirects."
   },
   "servers": [
