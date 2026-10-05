@@ -7,6 +7,13 @@ Dieses Changelog dokumentiert die für Nutzer und Betreiber relevanten Änderung
 - Deutsche und englische Oberfläche mit sprachabhängigen Texten.
 - Lokalisierungstests von bereits gebauten Frontend-Assets entkoppelt.
 
+## [1.7.0](https://github.com/WolfgangSiegert/laravel-atm-showcase/compare/v1.6.0...v1.7.0) (2026-10-05)
+
+
+### Neue Funktionen
+
+* add JoinSplit showcase traffic analytics ([#2](https://github.com/WolfgangSiegert/laravel-atm-showcase/issues/2)) ([58381a9](https://github.com/WolfgangSiegert/laravel-atm-showcase/commit/58381a9de67917c1fcce420e8cca469a2931892f))
+
 ## [1.6.0](https://github.com/WolfgangSiegert/laravel-atm-showcase/compare/v1.5.0...v1.6.0) (2026-10-01)
 
 
