@@ -34,13 +34,13 @@ jobs:
       - uses: actions/checkout@v6
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.4.27'
           extensions: pdo_sqlite, pdo_pgsql, mbstring, intl
           tools: composer:v2
           coverage: none
       - uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version-file: '.nvmrc'
           cache: npm
       - run: composer install --no-interaction --prefer-dist
       - run: cp .env.example .env && php artisan key:generate
@@ -80,7 +80,7 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v6
-      - run: docker build --tag atm-showcase:ci .
+      - run: docker build --pull --no-cache --tag atm-showcase:ci .
       - name: Start production container against isolated PostgreSQL
         run: |
           docker run --detach --name atm --network host \

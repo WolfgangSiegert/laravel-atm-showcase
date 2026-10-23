@@ -72,7 +72,7 @@ Für ein vorhandenes v0.2-Projekt: `php artisan migrate` und `npm run build`. Di
 
 ## Neue Installation
 
-Voraussetzungen: PHP **8.4.x**, Composer 2, Node **24.x**, npm, PDO/SQLite und PDO/PostgreSQL sowie die üblichen Laravel-PHP-Erweiterungen. `.php-version` dokumentiert die PHP-Version; `.nvmrc` wird von `nvm use` ausgewertet. Beide Lockfiles reproduzieren die Paketversionen.
+Voraussetzungen: PHP **8.4.27 oder neuer innerhalb 8.4.x**, Composer 2, Node **24.22.1 oder neuer innerhalb 24.x**, npm, PDO/SQLite und PDO/PostgreSQL sowie die üblichen Laravel-PHP-Erweiterungen. `.php-version` dokumentiert die PHP-Version; `.nvmrc` wird von `nvm use` ausgewertet. Beide Lockfiles reproduzieren die Paketversionen.
 
 ```sh
 composer install

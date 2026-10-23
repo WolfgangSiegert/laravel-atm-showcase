@@ -31,4 +31,10 @@ chown -R www-data:www-data storage bootstrap/cache
     done
 ) &
 
+php --version | head -n 1
+apache2 -v | head -n 1
+if [ "${SECURITY_RUNTIME_CHECK:-false}" = "true" ]; then
+    (php deploy/check-runtime.php || echo 'security-check FAILED: inspect results above') &
+fi
+
 exec apache2-foreground
