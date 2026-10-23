@@ -1,7 +1,6 @@
 <?php
 
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\TransferStats;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Http;
 
@@ -17,20 +16,18 @@ $targets = [
 ];
 $passed = true;
 foreach ($targets as $name => $url) {
+    $errno = null;
     try {
-        Http::withOptions(['verify' => true, 'allow_redirects' => false])->connectTimeout(10)->timeout(20)->get($url);
+        Http::withOptions([
+            'verify' => true,
+            'allow_redirects' => false,
+            'on_stats' => function (TransferStats $stats) use (&$errno): void {
+                $errno = $stats->getHandlerErrorData();
+            },
+        ])->connectTimeout(10)->timeout(20)->get($url);
         $result = $name === 'control' ? 'tls-ok' : 'UNSAFE-accepted';
         $passed = $passed && $name === 'control';
     } catch (Throwable $exception) {
-        $cause = $exception;
-        $errno = null;
-        do {
-            if ($cause instanceof RequestException) {
-                $errno = $cause->getHandlerContext()['errno'] ?? $errno;
-            } elseif ($cause instanceof ConnectException) {
-                $errno = $cause->getHandlerContext()['errno'] ?? $errno;
-            }
-        } while ($cause = $cause->getPrevious());
         $rejected = $errno === 60 && $name !== 'control';
         $result = $rejected ? 'certificate-rejected' : 'INCONCLUSIVE';
         $passed = $passed && $rejected;
