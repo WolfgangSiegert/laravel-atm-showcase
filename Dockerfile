@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN node --version && npm ci
 COPY resources ./resources
 COPY tsconfig.json vite.config.ts ./
 RUN npm run build
