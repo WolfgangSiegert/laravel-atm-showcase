@@ -1,4 +1,7 @@
-FROM node:24-bookworm-slim AS frontend
+FROM node:24.22.1-bookworm-slim AS frontend
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -6,9 +9,10 @@ COPY resources ./resources
 COPY tsconfig.json vite.config.ts ./
 RUN npm run build
 
-FROM php:8.4-apache-bookworm AS backend
+FROM php:8.4.27-apache-bookworm AS backend
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev libsqlite3-dev libonig-dev libicu-dev libzip-dev unzip \
+    ca-certificates libpq-dev libsqlite3-dev libonig-dev libicu-dev libzip-dev unzip \
+    && update-ca-certificates \
     && docker-php-ext-install pdo_pgsql pdo_sqlite mbstring intl zip opcache \
     && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/*
