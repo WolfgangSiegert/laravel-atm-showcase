@@ -33,6 +33,10 @@ services:
         value: pgsql
       - key: DB_URL
         sync: false
+      - key: DB_SSLMODE
+        value: verify-full
+      - key: DB_SSLROOTCERT
+        value: /etc/ssl/certs/ca-certificates.crt
       - key: SESSION_DRIVER
         value: database
       - key: SESSION_SECURE_COOKIE
