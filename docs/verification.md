@@ -1,3 +1,54 @@
+# Produktionsprüfung — Datenbank-TLS für `d1c671c`
+
+Geprüft am 24. Oktober 2026 anhand des aktiven Render-Deployments und
+öffentlicher HTTPS-Anfragen. Der Commit war bereits produktiv; bei dieser
+Prüfung wurde kein neues Deployment ausgelöst.
+
+| Nachweis | Beobachtetes Ergebnis |
+| --- | --- |
+| Anwendungscommit | [`d1c671c7a0b1bdea502579aab96a8e88f437f001`](https://github.com/WolfgangSiegert/laravel-atm-showcase/commit/d1c671c7a0b1bdea502579aab96a8e88f437f001) |
+| Render-Service | `lern-bank-geldautomat`, `srv-dao2oq3tqb8s73dm8me0`, Free, Frankfurt |
+| Aktiver Render-Deploy | [`dep-dbearspr5j6c73fml9dg`](https://dashboard.render.com/web/srv-dao2oq3tqb8s73dm8me0/deploys/dep-dbearspr5j6c73fml9dg) |
+| Deploystatus | `Deploy succeeded | Live`, Commit `d1c671c` |
+| PHP im Container | `8.4.27` laut Startprotokoll |
+| Effektiver PostgreSQL-TLS-Modus | `database-tls effective-mode=verify-full` |
+| Installierter CA-Paketstand | `database-tls ca-package=20250419~deb12u2` |
+| SHA-256 des verwendeten CA-Bundles | `e9c7b63ee2623386e9b0a3ee32f499d01a8ea23dc83b8383ddff9f8e749543b7` |
+| Positive Datenbankkontrolle | `database-tls control=connected` (`SELECT 1`) |
+| Falscher TLS-Hostname | `database-tls hostname=rejected` |
+| Nicht vertrauenswürdige CA | `database-tls untrusted-ca=rejected` |
+| Gesamtergebnis der Datenbank-TLS-Diagnose | `database-tls result=PASS` |
+
+Die Startprotokolle des aktiven Containers `[s6244]` zeigen die TLS-Prüfung
+am 24. Oktober 2026 von 15:11:56 bis 15:12:00 Uhr Europe/Berlin (CEST).
+`deploy/check-database-tls.php` prüft die tatsächlich aufgelöste
+Laravel-Verbindung mit dem System-CA-Bundle
+`/etc/ssl/certs/ca-certificates.crt`. Die negativen TLS-Proben verwenden
+Dummy-Zugangsdaten; echte Zugangsdaten werden dabei nicht gesendet.
+
+## Öffentliche Erreichbarkeit
+
+| HTTPS-Anfrage | Ergebnis |
+| --- | --- |
+| `https://atm.tiny-bits.org/up` | HTTP 200 |
+| `https://atm.tiny-bits.org/` | HTTP 200 nach gegebenenfalls erfolgter Weiterleitung |
+| `https://atm.tiny-bits.org/atm/cards` | HTTP 200; Seitentitel `LERN-Bank Mein Geldautomat`, Inertia-Anwendungsdaten vorhanden |
+
+Die HTTPS-Anfragen erfolgten mit aktivierter Zertifikatsprüfung. Es wurden
+keine Buchungen, Datenänderungen oder Demo-Resets ausgelöst. Diese
+Momentaufnahme bestätigt Datenbank-TLS und öffentliche Erreichbarkeit;
+sie ersetzt weder einen vollständigen fachlichen Browserablauf noch einen
+Lasttest oder eine kontinuierliche Überwachung.
+
+Die zugehörige [CI für `d1c671c`](https://github.com/WolfgangSiegert/laravel-atm-showcase/actions/runs/40096743520)
+war erfolgreich, einschließlich des frischen Docker-Builds und des
+Produktionscontainer-Tests gegen eine isolierte PostgreSQL-Instanz mit TLS.
+Der Release-PR für Version 1.7.1 ist ein separater Veröffentlichungsschritt;
+sein offener Status bedeutet nicht, dass dieser Anwendungscommit noch
+nicht auf Render läuft.
+
+---
+
 # Prüfprotokoll — v1.5
 
 Geprüft am 24. September 2026 mit PHP 8.4.25, Node 24.20.0 und Google Chrome.
