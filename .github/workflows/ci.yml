@@ -81,9 +81,25 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: docker build --pull --no-cache --tag atm-showcase:ci .
+      - name: Enable verified TLS on isolated PostgreSQL
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          mkdir -p /tmp/atm-test-tls
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -subj '/CN=ATM CI database' -addext 'subjectAltName=IP:127.0.0.1' \
+            -keyout /tmp/atm-test-tls/server.key -out /tmp/atm-test-tls/server.crt
+          docker cp /tmp/atm-test-tls/server.key "$POSTGRES_CONTAINER:/tmp/server.key"
+          docker cp /tmp/atm-test-tls/server.crt "$POSTGRES_CONTAINER:/tmp/server.crt"
+          docker exec --user root "$POSTGRES_CONTAINER" sh -c 'chown postgres:postgres /tmp/server.key /tmp/server.crt && chmod 600 /tmp/server.key'
+          docker exec "$POSTGRES_CONTAINER" psql -U atm -d atm_container_test -c "ALTER SYSTEM SET ssl_cert_file = '/tmp/server.crt'"
+          docker exec "$POSTGRES_CONTAINER" psql -U atm -d atm_container_test -c "ALTER SYSTEM SET ssl_key_file = '/tmp/server.key'"
+          docker exec "$POSTGRES_CONTAINER" psql -U atm -d atm_container_test -c "ALTER SYSTEM SET ssl = 'on'"
+          docker exec "$POSTGRES_CONTAINER" psql -U atm -d atm_container_test -c 'SELECT pg_reload_conf()'
       - name: Start production container against isolated PostgreSQL
         run: |
           docker run --detach --name atm --network host \
+            --mount type=bind,src=/tmp/atm-test-tls/server.crt,dst=/usr/local/share/ca-certificates/atm-ci.crt,readonly \
             -e APP_ENV=production -e APP_DEBUG=false \
             -e APP_KEY="base64:$(openssl rand -base64 32)" \
             -e APP_URL=https://showcase.example.test \
@@ -92,7 +108,8 @@ jobs:
             -e DB_URL=postgresql://atm:testing-only@127.0.0.1:5432/atm_container_test \
             -e SESSION_DRIVER=database -e CACHE_STORE=database \
             -e SESSION_SECURE_COOKIE=true -e PUBLIC_DEMO_ENABLED=true \
-            -e TRUSTED_PROXIES=127.0.0.1 atm-showcase:ci
+            -e TRUSTED_PROXIES=127.0.0.1 atm-showcase:ci \
+            sh -c 'update-ca-certificates && exec sh deploy/start.sh'
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:10000/up; then break; fi
             sleep 2
