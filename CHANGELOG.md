@@ -7,6 +7,15 @@ Dieses Changelog dokumentiert die für Nutzer und Betreiber relevanten Änderung
 - Deutsche und englische Oberfläche mit sprachabhängigen Texten.
 - Lokalisierungstests von bereits gebauten Frontend-Assets entkoppelt.
 
+## [1.7.1](https://github.com/WolfgangSiegert/laravel-atm-showcase/compare/v1.7.0...v1.7.1) (2026-10-24)
+
+
+### Fehlerbehebungen
+
+* enforce and verify Neon database TLS in production ([#8](https://github.com/WolfgangSiegert/laravel-atm-showcase/issues/8)) ([d1c671c](https://github.com/WolfgangSiegert/laravel-atm-showcase/commit/d1c671c7a0b1bdea502579aab96a8e88f437f001))
+* patch PHP and Node runtimes and refresh CA certificates ([#4](https://github.com/WolfgangSiegert/laravel-atm-showcase/issues/4)) ([128ac4a](https://github.com/WolfgangSiegert/laravel-atm-showcase/commit/128ac4a5a005f1da29b03692cca07ca0d85ec1f7))
+* read TLS failure codes from Guzzle transfer statistics ([#6](https://github.com/WolfgangSiegert/laravel-atm-showcase/issues/6)) ([bce8a05](https://github.com/WolfgangSiegert/laravel-atm-showcase/commit/bce8a056f36c49f52622c2501d919418aff3c589))
+
 ## [1.7.0](https://github.com/WolfgangSiegert/laravel-atm-showcase/compare/v1.6.0...v1.7.0) (2026-10-05)
 
 
