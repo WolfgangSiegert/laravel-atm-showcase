@@ -37,4 +37,5 @@ if [ "${SECURITY_RUNTIME_CHECK:-false}" = "true" ]; then
     (php deploy/check-runtime.php || echo 'security-check FAILED: inspect results above') &
 fi
 
+(php deploy/check-database-tls.php || echo 'database-tls diagnostic failed') &
 exec apache2-foreground

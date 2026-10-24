@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Support\PortfolioTraffic;
+use App\Support\ProductionDatabaseTls;
 use App\Support\ShowcaseTraffic;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -16,7 +17,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if ($this->app->environment('production')) {
+            config(['database.connections.pgsql' => ProductionDatabaseTls::secure(
+                config('database.connections.pgsql')
+            )]);
+        }
     }
 
     /**
